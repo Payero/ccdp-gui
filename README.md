@@ -1,6 +1,30 @@
-# Cloud Computing Data Pipeline (CCDP)
+# Cloud Computing Data Processing (CCDP)
 
 ## Web Application
+
+  There are two directories; frontend and services.  The frontend is the web
+application itelf.  The services contains a single docker-compose.yml file with
+docker containers shared among multiple projects such as ActiveMQ and MongoDb.
+
+  Before we run the GUI we need to make sure both containers are running:
+
+  ```
+  docker ps
+  ```
+
+
+### To Do:
+Markup: * Bullet list
+            * Is not running, there is an error message about port 61613, don't know why. 
+                * It works if you run the same python code outside the container
+                * It might be something to do with how the frontend container is launched
+            * Find a better way to deply the whole thing:
+                * Can we check if the docker containers are running?
+            
+
+
+
+
 
 ### Installing
 
