@@ -1,0 +1,25 @@
+version: "3"
+services:
+  mongo:
+    image: mongo:3.2
+    hostname: "mongo"
+    container_name: "mongo"
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data/mongodb/data:/data/db
+      - /data/mongodb/out:/out
+
+  amq:
+    image: webcenter/activemq:5.14.3
+    hostname: amq
+    container_name: amq
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+      - "61613:61613"
+    environment:
+      - ACTIVEMQ_NAME=amqp-srv1
+      - ACTIVEMQ_MIN_MEMORY=1024
+      - ACTIVEMQ_MAX_MEMORY=4096
+      - ACTIVEMQ_ENABLED_SCHEDULER=true

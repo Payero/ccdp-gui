@@ -1,0 +1,42 @@
+[
+  {
+    "module_id": "csv_reader",
+    "name": "Csv File Reader",
+    "short_description": "Reads a CSV file as input",
+    "class_name": "tasks.csv_demo.CsvReader",
+    "ccdp_type": "ec2",
+    "max_instances": 1,
+    "min_instances": 1,
+    "configuration": {
+        "filename": "",
+        "sleep-time": ""
+    },
+    "module_type": "Reader"
+  }, {
+    "module_id": "json_translator",
+    "name": "JSON Translator",
+    "short_description": "Translates CSV input to JSON",
+    "class_name": "tasks.csv_demo.JsonTranslator",
+    "ccdp_type": "ec2",
+    "max_instances": 1,
+    "min_instances": 1,
+    "configuration": {
+        "output-file": "",
+        "sleep-time": ""
+    },
+    "module_type": "Processor"
+  }, {
+    "module_id": "json_reader",
+    "name": "JSON File Reader",
+    "class_name": "tasks.csv_demo.JsonReader",
+    "short_description": "Reads a JSON file as input",
+    "ccdp_type": "ec2",
+    "max_instances": 1,
+    "min_instances": 1,
+    "configuration": {
+        "input-file": "",
+        "sleep-time": ""
+    },
+    "module_type": "Reader"
+  }
+]

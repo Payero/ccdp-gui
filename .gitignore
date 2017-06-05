@@ -1,0 +1,7 @@
+*~
+\#*\#
+*.sw[po]
+*.py[oc]
+
+frontend/server/logs
+

@@ -1,0 +1,394 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    overflow: hidden;
+}
+
+img {
+    max-width: 100%;
+}
+
+svg {
+    height: 100vh;
+    width: 100%;
+}
+
+.addTask {
+    background: #F6FBFF;
+    border: 1px #000 solid;
+    margin: 1%;
+    border-radius: 5px;
+    padding: 5px;
+    position: relative;
+    text-align: center;
+    font-size: 0.8vw;
+    cursor: pointer;
+}
+
+.addThread {
+    background: #F6FBFF;
+    border: 1px #000 solid;
+    margin: 1%;
+    border-radius: 5px;
+    padding: 5px;
+    position: relative;
+    text-align: center;
+    font-size: 0.8vw;
+    cursor: pointer;
+}
+
+.addProject {
+    background: #F6FBFF;
+    border: 1px #000 solid;
+    margin: 1%;
+    border-radius: 5px;
+    padding: 5px;
+    position: relative;
+    text-align: center;
+    font-size: 1.25em;
+    cursor: pointer;
+}
+
+.conceptG text{
+    pointer-events: none;
+    font-size: 0.75em;
+}
+
+marker {
+    fill: #333;
+}
+
+g.conceptG circle{
+    fill: #F6FBFF;
+    stroke: #333;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+
+g.conceptG.running circle{
+    fill: #ffff66;
+    stroke: #333;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+
+g.conceptG.paused circle{
+    fill: #ff944d;
+    stroke: #333;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+
+g.conceptG.success circle{
+    fill: #85e085;
+    stroke: #333;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+
+g.conceptG.failed circle{
+    fill: #ff8080;
+    stroke: #333;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+
+g.conceptG:hover circle{
+    fill: rgb(200, 238, 241);
+}
+
+g.conceptG.running:hover circle{
+    fill: #ffff00;
+}
+
+g.conceptG.paused:hover circle{
+    fill: #ff751a;
+}
+
+g.conceptG.success:hover circle{
+    fill: #33cc33;
+}
+
+g.conceptG.failed:hover circle{
+    fill: #ff0000;
+}
+
+g.selected circle{
+    fill: rgb(200, 238, 241);
+    stroke-width: 3px;
+}
+
+g.selected.running circle{
+    fill: #ffff00;
+    stroke-width: 3px;
+}
+
+g.selected.paused circle{
+    fill: #ff751a;
+    stroke-width: 3px;
+}
+
+g.selected.success circle{
+    fill: #33cc33;
+    stroke-width: 3px;
+}
+
+g.selected.failed circle{
+    fill: #ff0000;
+    stroke-width: 3px;
+}
+
+g.conceptG:active circle {
+    cursor: move;
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+
+path.link {
+    fill: none;
+    stroke: #333;
+    stroke-width: 6px;
+    cursor: default;
+}
+
+path.link:hover{
+    stroke: rgb(94, 196, 204);
+}
+
+g.connect-node circle{
+    fill: #BEFFFF;
+}
+
+path.link.hidden{
+    stroke-width: 0;
+}
+
+path.link.selected {
+    stroke: rgb(94, 196, 204);
+}
+
+path.link.breakpoint {
+    stroke: #FF0000;
+}
+
+path.link.breakpoint:hover {
+    stroke: rgb(229, 172, 247);
+}
+
+path.link.breakpoint.selected {
+    stroke: rgb(229, 172, 247);
+}
+
+input[type=text] {
+    width: 100%;
+}
+
+input[type=text], textarea {
+    outline: none;
+    padding: 3px 0px 3px 3px;
+    border: 1px solid black;
+}
+
+input[type=text]:focus, textarea:focus {
+    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    padding: 3px 0px 3px 3px;
+    border: 1px solid rgba(81, 203, 238, 1);
+}
+
+input[type=search] {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+input[type=search], textarea {
+    outline: none;
+    padding: 3px 0px 3px 3px;
+    border: 1px solid black;
+}
+ 
+input[type=search]:focus, textarea:focus {
+    box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+    padding: 3px 0px 3px 3px;
+    border: 1px solid rgba(81, 203, 238, 1);
+}
+
+.ZoomControls {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.ZoomIcon {
+    font-size:0.9em;
+    color: gray;
+    width: 2em;
+    height: 2em;
+    border: 0px solid transparent;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    margin: 0;
+}
+
+.ZoomIcon:hover {
+    color: black;
+}
+
+.GraphControls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.GraphIcon {
+    font-size:0.9em;
+    color: gray;
+    width: 2em;
+    height: 2em;
+    border: 0px solid transparent;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    margin: 1em;
+}
+
+.GraphIcon:hover {
+    color: black;
+}
+
+.DetailPanel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 65vw;
+    height: 45vh;
+    border: 1px solid black;
+    margin: 1em;
+    margin-right: 12em;
+    margin-left: 9em;
+    background: #fff;
+    z-index: 1;
+    border-radius: 5px;
+}
+
+.DetailIcon {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    font-size:0.9em;
+    color: gray;
+    width: 2em;
+    height: 2em;
+    border: 0px solid transparent;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.DetailIcon:hover {
+    color: black;
+}
+
+.NodeProperties .btn-primary {
+    margin-right: 20%;
+    margin-left: 20%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    height: 60%;
+    width: 60%;
+}
+
+.EdgeProperties .btn-primary {
+    margin-right: 20%;
+    margin-left: 20%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    height: 60%;
+    width: 60%;
+}
+
+.PropertiesView {
+    display: inline-block;
+    padding: 5px;
+    height: 85%;
+    width: 100%;
+}
+
+.LoggingView {
+    display: inline-block;
+    padding: 5px;
+    height: 85%;
+    width: 100%;
+}
+
+.ResultsView {
+    display: inline-block;
+    padding: 5px;
+    height: 85%;
+    width: 100%;
+}
+
+.ThreadsView {
+    display: inline-block;
+    padding: 5px;
+    height: 85%;
+    width: 100%;
+}
+
+.react-context-menu {
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 16px;
+    color: #373a3c;
+    text-align: left;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: .25rem;
+    outline: none;
+}
+
+.react-context-menu-link {
+    display: inline-block;
+    width: 100%;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #373a3c;
+    text-align: inherit;
+    white-space: nowrap;
+    background: 0 0;
+    border: 0;
+}
+
+.react-context-menu-link.active,
+.react-context-menu-link:hover {
+    color: #fff;
+    background-color: #0275d8;
+    border-color: #0275d8;
+    text-decoration: none;
+}
+.react-context-menu-item.submenu > a {
+    padding-right: 27px;
+}
+
+.react-context-menu-item.submenu > a:after {
+    content: "▶";
+    display: inline-block;
+    position: absolute;
+    right: 7px;
+}

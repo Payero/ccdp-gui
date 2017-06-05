@@ -1,0 +1,15 @@
+version: '3'
+services:
+  app:
+    build: frontend
+    environment:
+      - DB_PORT_27017_TCP_ADDR=db
+      - AMQ_PORT_61616_TCP_ADDR=amq
+    hostname: "app"
+    container_name: ccdp-gui
+    volumes:
+      - /data/mongodb/out:/out    
+    ports:
+      - "5000:5000"
+    entrypoint: python ./server/src/server.py --ip=0.0.0.0 --port=5000 --db=ccdp --collection=modules --logfile=/out/ccdp.log --amq-ip=172.31.20.84 --amq-port=61616 --seed-db=./server/data/modules-mongo.json --db-ip=172.31.20.84 --db-port=27017
+
