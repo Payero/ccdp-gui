@@ -33,6 +33,7 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 - Find a better way to deply the whole thing:
     - Can we check if the docker containers are running?
 - This file is not truly what needs to be executed in order to run the GUI so we need to finish it
+- Add a way to upload modules as zip files into a S3 bucket
 
 
 
