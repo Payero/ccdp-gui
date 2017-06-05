@@ -11,15 +11,19 @@ docker containers shared among multiple projects such as ActiveMQ and MongoDb.
   ```
   docker ps
   ```
+  You should see something similar to this:
+
+CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
+8f57fac375bd        activemq:5.14.3   "/app/run.sh"            Up       amq
+5285307c71f9        mongo:3.2         "docker-entrypoint..."   Up       mongo
 
 
 ### To Do:
-    - Is not running, there is an error message about port 61613, don't know why. 
-        - It works if you run the same python code outside the container
-        - It might be something to do with how the frontend container is launched
-    - Find a better way to deply the whole thing:
-        - Can we check if the docker containers are running?
-
+- Is not running, there is an error message about port 61613, don't know why. 
+    - It works if you run the same python code outside the container
+    - It might be something to do with how the frontend container is launched
+- Find a better way to deply the whole thing:
+    - Can we check if the docker containers are running?
 
 
 
