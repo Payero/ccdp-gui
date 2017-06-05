@@ -14,13 +14,12 @@ docker containers shared among multiple projects such as ActiveMQ and MongoDb.
 
 
 ### To Do:
-Markup: * Bullet list
-            * Is not running, there is an error message about port 61613, don't know why. 
-                * It works if you run the same python code outside the container
-                * It might be something to do with how the frontend container is launched
-            * Find a better way to deply the whole thing:
-                * Can we check if the docker containers are running?
-            
+    - Is not running, there is an error message about port 61613, don't know why. 
+        - It works if you run the same python code outside the container
+        - It might be something to do with how the frontend container is launched
+    - Find a better way to deply the whole thing:
+        - Can we check if the docker containers are running?
+
 
 
 
