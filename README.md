@@ -19,6 +19,13 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 5285307c71f9        mongo:3.2         "docker-entrypoint..."   Up       mongo
 ```
 
+  If you want to see a working version do the following (thanks Kevin Kelly):
+- Clone the gui-angular project
+- Get the feat-react-temp
+- docker-compose build && docker-compose up
+- http://&lt;hostname&gt;:20223 shows the angular version that we n longer use
+- http://&lt;hostname&gt;:20223/react shows the React version we are incorporating
+
 ### To Do:
 - Is not running, there is an error message about port 61613, don't know why. 
     - It works if you run the same python code outside the container
