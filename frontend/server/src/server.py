@@ -22,7 +22,8 @@ import ccdp_utils.AmqClient as AmqClient
 from flask_socketio import SocketIO, emit
 import eventlet
 
-app = Flask(__name__, template_folder='../../client/templates/')
+#app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
+app = Flask(__name__, root_path='/home/oeg/dev/oeg/ccdp-gui/frontend/client')
 socketio = SocketIO(app, async_mode="eventlet")
 
 #####################################################################
