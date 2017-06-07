@@ -39,6 +39,9 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
     - Create forms to send specific messages where you can just modify the values and the json is generated
     - The response is displayed in the same test page
     - We can also add the rolling log file and display it at the bottom of the page
+- Do we really need docker-compose? That used to be the case because we had more than one container which is no longer the case
+    - We can keep in case we add more containers later and keep it consistent with other projects?
+    - We ditch it and use docker directly?  
 
 
 
