@@ -23,7 +23,7 @@ from flask_socketio import SocketIO, emit
 import eventlet
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
-app = Flask(__name__, root_path='/home/oeg/dev/oeg/ccdp-gui/frontend/client')
+app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
 socketio = SocketIO(app, async_mode="eventlet")
 
 #####################################################################
@@ -108,7 +108,7 @@ def delete_thread(version, thread_id):
     return str(_delete_thread(g.db, thread_id).deleted_count)
 
 @app.route("/<version>/projects")
-def get_threads(version):
+def get_projects(version):
     """Retrieves the available projects from the database"""
     return jsonify(_get_available_projects(g.db))
 
