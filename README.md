@@ -34,17 +34,26 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
     - Can we check if the docker containers are running?
 - This file is not truly what needs to be executed in order to run the GUI so we need to finish it
 - Add a way to upload modules as zip files into a S3 bucket
-
-
+- Add a test page so we can send messages to the engine for either canned json files or generated
+    - Add a new json and provide name and json file (upload the file or paste)
+    - Create forms to send specific messages where you can just modify the values and the json is generated
+    - The response is displayed in the same test page
+    - We can also add the rolling log file and display it at the bottom of the page
+- Do we really need docker-compose? That used to be the case because we had more than one container which is no longer the case
+    - We can keep in case we add more containers later and keep it consistent with other projects?
+    - We ditch it and use docker directly?  
 
 
 
 ### Installing
 
 - Ensure you have [Docker]() and [Docker-Compose]() installed.
+- ``` - Need to provide actual installation steps if required ```
+
 
 ### Running
 
+- ``` - Need to verify the steps below are true and edit it as necessary ```
 - First, build the docker images. Thankfully, `docker-compose` provides a way to orchestrate multiple Docker containers.
 
     ```
@@ -73,9 +82,11 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
     ```
 
 - Now, by navigating to localhost:20223 (if you are running this on another server, try running <IP_OF_SERVER>:20223), you should be able to see the webapp with several modules listed.
+- ``` - Let's change this port for something more normal ```
 
 ## Engine
+- ``` - Need to provide some information about how interact with the engine ```
 
-### Installing
+### Resources
 
-### Running
+### Any Other Information you Want

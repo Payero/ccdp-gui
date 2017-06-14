@@ -23,7 +23,7 @@ from flask_socketio import SocketIO, emit
 import eventlet
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
-app = Flask(__name__, root_path='/home/oeg/dev/oeg/ccdp-gui/frontend/client')
+app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
 socketio = SocketIO(app, async_mode="eventlet")
 
 #####################################################################
@@ -107,6 +107,22 @@ def delete_thread(version, thread_id):
     """Deletes thread from database"""
     return str(_delete_thread(g.db, thread_id).deleted_count)
 
+@app.route("/<version>/projects")
+def get_projects(version):
+    """Retrieves the available projects from the database"""
+    return jsonify(_get_available_projects(g.db))
+
+@app.route("/<version>/projects/save", methods=["POST"])
+def save_project(version):
+    """Saves project to database"""
+    project = request.json
+    return str(_save_project(g.db, project)["n"])
+
+@app.route("/<version>/projects/delete/<project_id>", methods=["DELETE"])
+def delete_project(version, project_id):
+    """Deletes project from database"""
+    return str(_delete_thread(g.db, project_id).deleted_count)
+
 @app.before_request
 def before_request():
     g.db = get_db()
@@ -141,6 +157,22 @@ def _save_thread(db, thread):
 
 def _delete_thread(db, thread_id):
     result =  db["threads"].delete_one({"name": thread_id})
+    return result
+
+def _get_available_projects(db):
+    return list(db["projects"].find({}, {'_id': False}))
+
+def _get_project_properties(db, project_name):
+    return db["projects"].find({"project_name": project_name}, {'_id': False})
+
+def _save_project(db, project):
+    project_name = project["name"]
+    project_query = {"name": project_name}
+    result = db["projects"].update(project_query, project, upsert=True)
+    return result
+
+def _delete_project(db, project_id):
+    result =  db["projects"].delete_one({"name": project_id})
     return result
 
 def connect_to_database():
