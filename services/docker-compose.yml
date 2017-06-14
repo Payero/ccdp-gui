@@ -2,6 +2,7 @@ version: "3"
 services:
   mongo:
     image: mongo:3.2
+    restart: unless-stopped
     hostname: "mongo"
     container_name: "mongo"
     ports:
@@ -9,9 +10,10 @@ services:
     volumes:
       - /data/mongodb/data:/data/db
       - /data/mongodb/out:/out
-
+    
   amq:
     image: webcenter/activemq:5.14.3
+    restart: unless-stopped
     hostname: amq
     container_name: amq
     ports:
@@ -23,3 +25,4 @@ services:
       - ACTIVEMQ_MIN_MEMORY=1024
       - ACTIVEMQ_MAX_MEMORY=4096
       - ACTIVEMQ_ENABLED_SCHEDULER=true
+    
