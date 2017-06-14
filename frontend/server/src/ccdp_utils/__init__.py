@@ -15,6 +15,15 @@ __DEF_CFG_FILE = "${CCDP_GUI}/config/logging.json"
 #
 ###############################################################################
 
+MESSAGES = ["UNDEFINED", 
+            "THREAD_REQUEST", 
+            "RUN_TASK", 
+            "KILL_TASK", 
+            "TASK_UPDATE", 
+            "RESOURCE_UPDATE",
+            "ASSIGN_SESSION", 
+            "START_SESSION", 
+            "END_SESSION"]
 
 ENG_QUEUE    = 'CCDP-Engine'
 WEB_QUEUE    = 'CCDP-WebServer'

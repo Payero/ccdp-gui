@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-import os, sys
+import os, sys, time
 from pprint import pprint, pformat
+from random import randint
 
 # Attempting to use centralized logging for python and AmqClient
 try:
   if os.environ.has_key("CCDP_GUI"):
-    path = os.environ["CCDP_GUI"]
+    print "Found CCDP_GUI"
+    path = "%s/src" % os.environ["CCDP_GUI"]
     sys.path.append(path)
     import ccdp_utils
     import ccdp_utils.AmqClient as AmqClient
@@ -26,7 +28,8 @@ try:
       print "ERROR: Could not find ccdp_utils, exiting"
       sys.exit(-1)
 
-except:
+except Exception, e:
+  print e
   print "Could not import ccdp_utils"
   sys.exit(-1)
 
@@ -46,12 +49,56 @@ class TestEngine():
                         on_error=self.__on_error)
     self.__logger.info("Connectiong to %s:%d" % (amq_ip, amq_port))
     self.__amq.connect('172.31.20.84')
+ 
 
   def __on_message(self, msg):
-    self.__logger.info("Got a message: %s" % msg)
+    """
+    Gets a message from the GUI and prints it out to the log file.  If the 
+    message is a request message it randomly waits and sends a response back to
+    the sender
+    """
+    self.__logger.debug("Got a message: %s" % msg)
+    json_msg = ccdp_utils.json_loads(msg)
+    self.__logger.info("Got a message: %s" % pformat(json_msg))
+
+    if json_msg.has_key['msg-type']:
+      msg_type = ccdp_utils.MESSAGES[json_msg['msg-type']]
+      if msg_type == "THREAD_REQUEST":
+        self.__logger.debug("Got a Thread Request")
+        if json_msg.has_key('request'):
+          req = json_msg['request']
+          req_dest = req['reply-to']
+          if req.has_key('tasks'):
+            tasks = req['tasks']
+            self.__logger.debug("Got %d tasks" % len(tasks) )
+            for task in tasks:
+              tid = task['task-id']
+              reply_to = task['reply-to']
+              if reply_to == None:
+                reply_to = req_dest
+
+              if reply_to != None:
+                task['state'] = 'RUNNING'
+                update_msg = {}
+                update_msg['msg-type'] = 4
+                update_msg['ccdp-task'] = task
+
+                self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
+                self.__amq.send_message(reply_to, json.dumps(update_msg))
+                wait = randint(0,5)
+                self.__logger.debug("Waiting for %d for task %s" % (wait, tid))
+                time.sleep(wait)
+                update_msg['ccdp-task']['state'] = "SUCCESSFUL"
+                self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
+                self.__amq.send_message(reply_to, json.dumps(update_msg))
+
+              
+
+
 
   def __on_error(self, msg):
     self.__logger.error("Got an error message: %s" % msg)
+
 
   def stop(self):
     self.__logger.info("Stopping Engine")
@@ -62,15 +109,15 @@ class TestEngine():
 if __name__ == '__main__':
   import argparse, signal
 
-  engine = None
-  def signal_handler(signal, frame):
-    print "Got a signal %s" % signal
-    if engine is not None:
-      engine.stop()
+  # engine = None
+  # def signal_handler(signal, frame):
+  #   print "Got a signal %s" % signal
+  #   if engine is not None:
+  #     engine.stop()
 
-    sys.exit(-1)
+  #   sys.exit(-1)
 
-  signal.signal(signal.SIGINT, signal_handler)
+  # signal.signal(signal.SIGINT, signal_handler)
 
   parser = argparse.ArgumentParser()
   parser.add_argument("--amq-ip", default="localhost", 
