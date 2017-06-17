@@ -112,9 +112,11 @@ The webpage with the log file can be seen at http://localhost:9001
 
 ## Building the React GUI
 The frontend code has been moved to webapp/frontend/client/static/js
+
 First do an ```npm install``` in the webapp/frontend/ directory. This will install the dependencies to a webapp/frontend/node_modules/ directory.
 
 Then, run the following from this directory to build a new bundle.js:
+
 ```browserify client/static/js/main.js -o client/static/js/bundle.js -t [ babelify --presets [ es2015 react ] ]```
 
 ### Resources
