@@ -112,7 +112,7 @@ class AmqClient(stomp.ConnectionListener):
 
   def send_message(self, dest, body):
     self.__logger.info("Sending Message %s to %s" % (body, dest))
-    self.__connection.send(body=body, destination=dest)
+    self.__connection.send(body=json.dumps(body), destination=dest)
 
 
 
