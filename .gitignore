@@ -4,4 +4,4 @@
 *.py[oc]
 
 frontend/server/logs
-
+frontend/node_modules

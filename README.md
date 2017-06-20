@@ -42,6 +42,7 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 - Do we really need docker-compose? That used to be the case because we had more than one container which is no longer the case
     - We can keep in case we add more containers later and keep it consistent with other projects?
     - We ditch it and use docker directly?  
+- Can we add a test page where frontail (see Testing) is loaded?  This way we would not need multiple pages
 
 
 
@@ -84,8 +85,39 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 - Now, by navigating to localhost:20223 (if you are running this on another server, try running <IP_OF_SERVER>:20223), you should be able to see the webapp with several modules listed.
 - ``` - Let's change this port for something more normal ```
 
+## Testing
+There is a TestEngine available for development and testing. It does the following: 
+- Launches a Node application (frontail) that tails the log file and loads it into a web page
+- Receives a JMS Thread Request messages from the GUI 
+- Prints the contents of the incoming message into the log file so it can be shown
+- Once the message is received, it sends a RUNNING task update for each task
+- Waits for a random time between 0 and 5 seconds
+- Sends a SUCCESSFUL task update message
+- Every message sent is also sent to the log file to be displayed
+
+``` - Does anyone see the need to add a random "failure"? ```
+
+Running the test engine requires the ActiveMQ to be up and running.  The process
+that tails the log file is called "frontail" and it requires NPM.
+
+To run the test engine, do the following:
+```
+${CCDP_GUI}/bin/run_eng.sh start
+```
+The webpage with the log file can be seen at http://localhost:9001
+
+
 ## Engine
 - ``` - Need to provide some information about how interact with the engine ```
+
+## Building the React GUI
+The frontend code has been moved to webapp/frontend/client/static/js
+
+First do an ```npm install``` in the webapp/frontend/ directory. This will install the dependencies to a webapp/frontend/node_modules/ directory.
+
+Then, run the following from this directory to build a new bundle.js:
+
+```browserify client/static/js/main.js -o client/static/js/bundle.js -t [ babelify --presets [ es2015 react ] ]```
 
 ### Resources
 
