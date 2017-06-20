@@ -23,7 +23,10 @@ MESSAGES = ["UNDEFINED",
             "RESOURCE_UPDATE",
             "ASSIGN_SESSION", 
             "START_SESSION", 
-            "END_SESSION"]
+            "END_SESSION",
+            "START_THREAD",
+            "PAUSE_THREAD",
+            "STOP_THREAD"]
 
 ENG_QUEUE    = 'CCDP-Engine'
 WEB_QUEUE    = 'CCDP-WebServer'
@@ -73,7 +76,6 @@ def setup_logging( name="root",
   
   """
   filename = None
-  print "Default File %s" % default_cfg_file
 
   # is the configuration file not provided
   if cfg_file == None:

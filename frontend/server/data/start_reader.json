@@ -1,0 +1,24 @@
+{"msg-type": "START",
+  "data":
+  {
+    "name" : "Csv Reader",
+    "description" : "Reads entries from a CSV file",
+    "state" : "PENDING",
+    "retries" : 3,
+    "command" : ["python", "${CCDP_GUI}/src/modules/csv_reader.py", "-q", "csv-reader-1"],
+    "configuration" : {"send-header":  "true", "number-entries": 1 },
+    "task-id" : "csv-reader-1",
+    "class-name" : "modules.CsvReader",
+    "node-type" : "EC2",
+    "reply-to" : "CcdpWebServer",
+    "host-id" : null,
+    "submitted" : false,
+    "cpu" : 0.0,
+    "mem" : 0.0,
+    "input-ports" : [ ],
+    "output-ports" : [ {
+      "port-id" : "selector",
+      "to-port" : [ "selector-1" ]
+    } ]
+  }
+}
