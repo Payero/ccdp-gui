@@ -2,7 +2,8 @@
 
 import os, sys, time, traceback
 from pprint import pprint, pformat
-import inspect
+import inspect, json
+from __builtin__ import isinstance
 
 # Attempting to use centralized logging for python and AmqClient
 try:
@@ -65,9 +66,9 @@ class CcdpModule(object):
   
               
   def __init__(self, args):
-    self._logger = ccdp_utils.setup_logging('CcdpModule')
-    self.__amq_ip = args.amq_ip
-    self.__amq_port = int(args.amq_port)
+    self._logger = ccdp_utils.setup_logging(self.__class__.__name__)
+    self.__broker = args.broker_host
+    self.__port = int(args.broker_port)
     self._task_id = args.task_id
     
     self.__amq = AmqClient.AmqClient()
@@ -75,8 +76,8 @@ class CcdpModule(object):
 #     self.__amq.register("/queue/%s" % self._task_id, 
 #                         on_message=self.__on_message, 
 #                         on_error=self._on_error)
-    self._logger.info("Connecting to %s:%d" % (self.__amq_ip, self.__amq_port))
-    self.__amq.connect(self.__amq_ip, dest="/queue/%s" % self._task_id, 
+    self._logger.info("Connecting to %s:%d" % (self.__broker, self.__port))
+    self.__amq.connect(self.__broker, dest="/queue/%s" % self._task_id, 
                         on_msg=self.__on_message, 
                         on_error=self._on_error)
 
@@ -97,13 +98,16 @@ class CcdpModule(object):
   } ],
     '''
     self._logger.info("Sending results %s" % result)
-    for port in self._task['out-ports']:
+    for port in self._task['output-ports']:
       pid = port['port-id']
+      self._logger.info("Found the port configuration")
       if src == pid:
         to_ports = port['to-port']
         for tgt in to_ports:
           self._logger.debug("Sending message to %s" % tgt)
-          self.__amp.send_message(tgt, result)
+          if not isinstance(result, str):
+            result = json.dumps(result)
+          self.__amq.send_message(tgt, result)
   
   
   def __on_message(self, msg):
@@ -111,7 +115,7 @@ class CcdpModule(object):
     try:
       json_msg = ccdp_utils.json_loads(msg)
       self._logger.info("Got a message: %s" % pformat(json_msg))
-      if json_msg.has_key['msg-type']:
+      if json_msg.has_key('msg-type'):
         try:
           msg_type = int(json_msg['msg-type'])
           self._logger.info("Got a message from the engine")
@@ -122,15 +126,17 @@ class CcdpModule(object):
         
         
         if self.__MSGS.has_key(msg_type):
-          method = self.__MSGS[name]
-          num_args = len( inspect.getargspec(method))
-          if num_args == 1 and msg.has_key('data'):
-            method(msg['data'])
+          method = self.__MSGS[msg_type]
+          args = inspect.getargspec(method)[0]
+          num_args = len( args)
+          if num_args == 2 and json_msg.has_key('data'):
+            method(json_msg['data'])
           else:
             method()
       
     except Exception, e:
       self._logger.error("Got an exception: %s" % str(e))
+      traceback.print_exc()
     
     
   def _on_error(self, error):
@@ -154,42 +160,34 @@ class CcdpModule(object):
     
     
   def _send_message(self, dest, msg):
+    if not isinstance(msg, str):
+      msg = json.dumps(msg)
     self.__amq.send_message(dest, msg)
 
 
 
   def _on_message(self, result):
-    raise NotImplementedError("This method needs to be implemented ")
+    raise NotImplementedError("The _on_message method needs to be implemented ")
   
   def _start_module(self, task):
-    raise NotImplementedError("This method needs to be implemented ")
+    raise NotImplementedError("The _start_module method needs to be implemented ")
 
   def _pause_module(self):
-    raise NotImplementedError("This method needs to be implemented ")
+    raise NotImplementedError("The _pause_module method needs to be implemented ")
     
   def _stop_module(self):
-    raise NotImplementedError("This method needs to be implemented ")
+    raise NotImplementedError("The _stop_module method needs to be implemented ")
 
 
 if __name__ == '__main__':
   import argparse
 
-  # engine = None
-  # def signal_handler(signal, frame):
-  #   print "Got a signal %s" % signal
-  #   if engine is not None:
-  #     engine.stop()
-
-  #   sys.exit(-1)
-
-  # signal.signal(signal.SIGINT, signal_handler)
-
   parser = argparse.ArgumentParser()
-  parser.add_argument()
-  parser.add_argument('-i', "--amq-ip", default="localhost", 
-    help="IP address of the AMQ server")
-  parser.add_argument('-p', "--amq-port", default="61616", 
-    help="Port number of the AMQ server")
+  
+  parser.add_argument('-b', "--broker-host", default="localhost", 
+    help="IP address of the messaging broker if required")
+  parser.add_argument('-p', "--broker-port", default="61616", 
+    help="Port number of the messaging broker if necessary")
 
   parser.add_argument('-t', "--task-id", default=None, 
     help="The name of the queue to receive data from other modules")

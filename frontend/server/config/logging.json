@@ -66,6 +66,11 @@
             "level": "DEBUG",
             "handlers": ["console", "info_file_handler"],
             "propagate": "no"
+        },
+        "CsvReader": {
+            "level": "DEBUG",
+            "handlers": ["console", "info_file_handler"],
+            "propagate": "no"
         }
     }
     

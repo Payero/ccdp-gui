@@ -1,21 +1,14 @@
 #!/usr/bin/env python
 import os, sys
 from pprint import pprint, pformat
+import ccdp_utils, logging
 
-def test():
-  print "Running Test"
-  import __main__
-
-  fname = __main__.__file__
-  path, name = os.path.split(fname)
-  utils = "%s/../webapp/app" % path
-  print "Appending %s" % utils
-  sys.path.append(utils)
-  import ccdp_utils
-  logger = ccdp_utils.setup_logging('test')
-  logger.info("Made it this far")
+class Test():
+  def __init__(self):
+    print "This is a test: %s" % self.__class__.__name__ 
+    self.__logger = ccdp_utils.setup_logging('root')
+    self.__logger.info("Made it: %s" % pformat(dir(logging)))
   
 
-
 if __name__ == '__main__':
-  test()
+  Test()

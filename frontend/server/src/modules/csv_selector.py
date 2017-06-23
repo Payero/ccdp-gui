@@ -4,8 +4,9 @@ Created on Jun 19, 2017
 @author: oeg
 '''
 from modules.CcdpModule import CcdpModule
+import ccdp_utils
 
-class CsvReader(CcdpModule):
+class CsvSelector(CcdpModule):
   '''
   classdocs
   '''
@@ -18,21 +19,16 @@ class CsvReader(CcdpModule):
     self._logger.info("Starting the new class")
   
   def _on_message(self, msg):
-    self._logger.info("Got some message")
+    self._logger.info("Got some message: %s" % msg)
+    entries = ccdp_utils.json_loads(msg)
+    for entry in entries:
+      self.__logger.debug("Processing entry: %s" % entry)
+      for cfg in self.__config:
     
   def _start_module(self, task):
     self._logger.info("Starting module")
-    config = task['configuration']
-    self._logger.debug("Config " + str(config))
-    with open(config['filename']) as infile:
-      lines = infile.readlines()
-      if config['send-header']:
-        self._logger.info("Asking to send Header")
-        self._send_results('selector', lines[0])
-      
-      entries = lines[1: 1 + config['number-entries']]
-      self._logger.info("Asking to send: %s" % str(entries))
-      self._send_results('selector', entries)
+    self.__config = task['configuration']
+    #RequestorSeniority,FiledAgainst,TicketType,Severity,Priority,daysOpen,Satisfaction
       
       
       
@@ -58,6 +54,6 @@ if __name__ == '__main__':
     help="The name of the queue to receive data from other modules")
    
   args = parser.parse_args()
-  CsvReader(args)
+  CsvSelector(args)
    
   
