@@ -28,11 +28,12 @@ class CsvReader(CcdpModule):
       lines = infile.readlines()
       if config['send-header']:
         self._logger.info("Asking to send Header")
-        self._send_results('selector', lines[0])
+        data = {'is-header': True, 'data': lines[0]}
+        self._send_results('selector', data)
       
       entries = lines[1: 1 + config['number-entries']]
       self._logger.info("Asking to send: %s" % str(entries))
-      self._send_results('selector', entries)
+      self._send_results('selector', {'data': entries} )
       
       
       
