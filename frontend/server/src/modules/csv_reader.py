@@ -46,19 +46,45 @@ class CsvReader(CcdpModule):
 
     
 if __name__ == '__main__':
-  import argparse
-   
-  parser = argparse.ArgumentParser()
-   
-  parser.add_argument('-b', "--broker-host", default="localhost", 
-    help="IP address of the messaging broker if required")
-  parser.add_argument('-p', "--broker-port", default="61616", 
-    help="Port number of the messaging broker if necessary")
+  from optparse import OptionParser
+
+  desc = "Cloud Computing Data Processing module.  This a module used \n"
+  desc += "to perform a specific task and send and receive results to/from \n"
+  desc += "other modules.  It uses the broker host/port to communicate "
+  desc += "with other modules"
+
+  parser = OptionParser(usage="usage: %prog [options] args",
+            version="%prog 1.0",
+            description=desc)
+  
+  parser.add_option('-v', '--verbosity-level',
+            type='choice',
+            action='store',
+            dest='verb_level',
+            choices=['debug', 'info', 'warning','error',],
+            default='debug',
+            help='The verbosity level of the logging',)
+  
+  parser.add_option('-b', '--broker-host',
+            dest='broker_host',
+            default='localhost',
+            help='IP address of the messaging broker if required',)
+
+  parser.add_option('-p', '--broker-port',
+            dest='broker_port',
+            default=61616,
+            help='Port number of the messaging broker if necessary',)
+
+  parser.add_option('-t', '--task-id',
+            dest='task_id',
+            default=None,
+            help='The unique task-id which is also used as the channel to receive messages',)
+
  
-  parser.add_argument('-t', "--task-id", default=None, 
-    help="The name of the queue to receive data from other modules")
    
-  args = parser.parse_args()
-  CsvReader(args)
+  (options, args) = parser.parse_args()
+  # it expects a dictionary 
+  opts = vars(options)
+  CsvReader(opts)
    
   

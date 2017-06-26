@@ -1,0 +1,74 @@
+{
+  "name" : "CSV Test Thread",
+  "description" : "CSV Reading and filtering demo",
+  "tasks" : [ {
+    "name" : "csv-reader",
+    "description" : "Opens a single csv file and process line by line",
+    "retries" : 3,
+    "command" : ["/data/ccdp-engine/python/CcdpoduleLauncher", 
+                 "-f", "${CCDP_GUI}/src/modules/csv_reader.py", "
+                 -c", "CsvReader", 
+                 "-a", "{'broker_host':'localhost', 'task_id':'csv-reader', 'broker_port':61616}" ],
+    "configuration" : { "filename": "${CCDP_GUI}/data/it_help_desk.csv", 
+                        "send-header": "True", 
+                        "number-entries": 1},
+    "task-id" : "csv-reader",
+    "node-type" : "DEFAULT",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ {
+      "port-id" : "csv-reader",
+      "from-port" : [ ],
+      "to-port" : [ "csv-selector" ]
+    } ],
+    "session-id" : "oeg-test",
+  },
+  {
+    "name" : "csv-slector",
+    "description" : "Selects all entries matching a simple criteria",
+    "retries" : 3,
+    "command" : ["/data/ccdp-engine/python/CcdpoduleLauncher", 
+                 "-f", "${CCDP_GUI}/src/modules/csv_selector.py", "
+                 -c", "CsvSelector", 
+                 "-a", "{'broker_host':'localhost', 'task_id':'csv-selector', 'broker_port':61616}" ],
+    "configuration" : { "field": "daysOpen", 
+                        "operator": "GT", 
+                        "value": 1},
+    "task-id" : "csv-selector",
+    "node-type" : "DEFAULT",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ {
+      "port-id" : "csv-selector",
+      "from-port" : [ ],
+      "to-port" : [ "csv-display" ]
+    }],
+    "output-ports" : [ ],
+    "session-id" : "oeg-test",
+  },
+  {
+    "name" : "csv-display",
+    "description" : "Displays all the values that made it here",
+    "retries" : 3,
+    "command" : ["/data/ccdp-engine/python/CcdpoduleLauncher", 
+                 "-f", "${CCDP_GUI}/src/modules/csv_display.py", "
+                 -c", "CsvDisplay", 
+                 "-a", "{'broker_host':'localhost', 'task_id':'csv-display', 'broker_port':61616}" ],
+    "configuration" : { },
+    "task-id" : "csv-display",
+    "node-type" : "DEFAULT",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ {
+      "port-id" : "csv-display",
+      "from-port" : [ ],
+      "to-port" : [ ]
+    } ],
+    "output-ports" : [ ],
+    "session-id" : "oeg-test",
+  }
+   ],  
+  "thread-id" : "csv-reader-thread-1",
+  "session-id" : "oeg-test",
+  "reply-to" : "CCDP-WebServer",
+  "node-type" : "DEFAULT",
+  "tasks-running-mode" : "PARALLEL"
+}

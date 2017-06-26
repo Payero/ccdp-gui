@@ -4,6 +4,7 @@ import os, sys, time, traceback
 from pprint import pprint, pformat
 import inspect, json
 from __builtin__ import isinstance
+import Queue
 
 # Attempting to use centralized logging for python and AmqClient
 try:
@@ -13,6 +14,7 @@ try:
     sys.path.append(path)
     import ccdp_utils
     import ccdp_utils.AmqClient as AmqClient
+    from ccdp_utils.TimerTask import TimerTask
 
   else:
     print "Could not find CCDP_GUI"
@@ -25,6 +27,7 @@ try:
       sys.path.append(utils)
       import ccdp_utils
       import ccdp_utils.AmqClient as AmqClient
+      from ccdp_utils.TimerTask import TimerTask
 
     else:
       print "ERROR: Could not find ccdp_utils, exiting"
@@ -66,10 +69,13 @@ class CcdpModule(object):
   
               
   def __init__(self, args):
+    pprint(args)
     self._logger = ccdp_utils.setup_logging(self.__class__.__name__)
-    self.__broker = args.broker_host
-    self.__port = int(args.broker_port)
-    self._task_id = args.task_id
+    self.__broker = args['broker_host']
+    self.__port = int(args['broker_port'])
+    self.__queue = Queue.Queue()
+
+    self._task_id = args['task_id']
     
     self.__amq = AmqClient.AmqClient()
     self._logger.info("Registering to receive Messages to %s" % self._task_id)
@@ -78,7 +84,7 @@ class CcdpModule(object):
 #                         on_error=self._on_error)
     self._logger.info("Connecting to %s:%d" % (self.__broker, self.__port))
     self.__amq.connect(self.__broker, dest="/queue/%s" % self._task_id, 
-                        on_msg=self.__on_message, 
+                        on_msg=self.__add_message, 
                         on_error=self._on_error)
 
     self.__MSGS = {'START':   self.start_module,
@@ -88,6 +94,8 @@ class CcdpModule(object):
                    'MESSAGE': self._on_message,
                   }
     
+    self.__timer = TimerTask(start_at=1, interval=1, 
+                             function=self.__check_queue)    
   
   def _send_results(self, src, result):
     '''
@@ -110,6 +118,25 @@ class CcdpModule(object):
           self.__amq.send_message(tgt, result)
   
   
+  def __add_message(self, msg):
+    '''
+    Stores all the incoming messages into a queue so they can be processed as
+    necessary.
+
+    <msg> The incoming message from the server
+    '''
+    self.__queue.put(msg)
+
+  def __check_queue(self):
+    '''
+    Method called by the TimerTask object after each cycle ends.  If the queue 
+    is not empty, it passes the message to the module for processing
+    '''
+    while not self.__queue.empty():
+      msg = self.__queue.get_nowait()
+      self.__on_message(msg)
+
+
   def __on_message(self, msg):
     self._logger.debug("Got a message")
     try:
@@ -179,20 +206,48 @@ class CcdpModule(object):
     raise NotImplementedError("The _stop_module method needs to be implemented ")
 
 
+def main():
+  from optparse import OptionParser
+
+  desc = "Cloud Computing Data Processing module.  This a module used \n"
+  desc += "to perform a specific task and send and receive results to/from \n"
+  desc += "other modules.  It uses the broker host/port to communicate "
+  desc += "with other modules"
+
+  parser = OptionParser(usage="usage: %prog [options] args",
+            version="%prog 1.0",
+            description=desc)
+  
+  parser.add_option('-v', '--verbosity-level',
+            type='choice',
+            action='store',
+            dest='verb_level',
+            choices=['debug', 'info', 'warning','error',],
+            default='debug',
+            help='The verbosity level of the logging',)
+  
+  parser.add_option('-b', '--broker-host',
+            dest='broker_host',
+            default='localhost',
+            help='IP address of the messaging broker if required',)
+
+  parser.add_option('-p', '--broker-port',
+            dest='broker_port',
+            default=61616,
+            action='store',
+            help='Port number of the messaging broker if necessary',)
+
+  parser.add_option('-t', '--task-id',
+            dest='task_id',
+            default=None,
+            help='The unique task-id which is also used as the channel to receive messages',)
+
+ 
+   
+  (options, args) = parser.parse_args()
+  # it expects a dictionary 
+  opts = vars(options)
+  module = CcdpModule(opts)
+  
 if __name__ == '__main__':
-  import argparse
-
-  parser = argparse.ArgumentParser()
-  
-  parser.add_argument('-b', "--broker-host", default="localhost", 
-    help="IP address of the messaging broker if required")
-  parser.add_argument('-p', "--broker-port", default="61616", 
-    help="Port number of the messaging broker if necessary")
-
-  parser.add_argument('-t', "--task-id", default=None, 
-    help="The name of the queue to receive data from other modules")
-  
-  args = parser.parse_args()
-  module = CcdpModule(args)
-  
-  
+  main()  
