@@ -389,7 +389,9 @@ var App = React.createClass({
         "min-instances": task['min_instances'],
         "cpu": task['cpu'],
         "memory": task['memory'],
-        "task-props": task['configuration']
+        "task-props": task['configuration'],
+        "tasks-running-mode": task['tasks-running-mode'],
+        "use-single-node": task['use-single-node']
       }
     };
     var newNodes = nodes.concat([newTask]);
@@ -448,7 +450,9 @@ var App = React.createClass({
         "min-instances": tasks[i]['min-instances'],
         "cpu": tasks[i]['cpu'],
         "memory": tasks[i]['memory'],
-        "task-props": tasks[i]['configuration']
+        "task-props": tasks[i]['configuration'],
+        "tasks-running-mode": tasks[i]['tasks-running-mode'], //MB
+        "use-single-node": tasks[i]['use-single-node'] //MB
       };
       newNodes.push({id: id, x: x, y: y, status: "", task: tasks[i]['module-id'], title: tasks[i]['name'], config: config});
       tasks[i].id = id;
@@ -780,6 +784,9 @@ var App = React.createClass({
         }
         //Insert the ccdp-type into thread object (TODO: is this required to be the same for all tasks in a thread) 
         dictJSON["threads"][i]["request"]["node-type"]=node.config["ccdp-type"];
+        dictJSON["threads"][i]["request"]["use-single-node"]=node.config["use-single-node"];
+        dictJSON["threads"][i]["request"]["tasks-running-mode"]=node.config["tasks-running-mode"]
+
         // Setup input/output ports and keep track of i/o port number for each task in the thread
         var inputPortNums = [];
         var outputPortNums = [];
