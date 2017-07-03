@@ -1,12 +1,12 @@
 '''
-Created on Jun 19, 2017
+Created on $date
 
-@author: oeg
+@author: $user
 '''
 from modules.CcdpModule import CcdpModule
 import ccdp_utils
 
-class CsvDisplay(CcdpModule):
+class $classname(CcdpModule):
   '''
   Class used to execute a task using a JSON representaion of a CcdpTaskRequest.
   It is intented to simplify the module development.  The configuration passed 
@@ -50,8 +50,8 @@ class CsvDisplay(CcdpModule):
     '''
     super(self.__class__, self).__init__(params)
     self._logger.info("Starting the new class")
-    self.__handle = None
     
+
   def _on_message(self, msg):
     '''
     Receives a message from the ThreadController or the ccdp-engine itself.
@@ -81,7 +81,6 @@ class CsvDisplay(CcdpModule):
 
     '''
     self._logger.info("Got some message: %s" % msg)
-    self.__handle.write(",".join(msg))
 
     
   def _start_module(self, task):
@@ -114,11 +113,9 @@ class CsvDisplay(CcdpModule):
     }
     '''
     self._logger.info("Starting module")
-    url = task['configuration']['output-url']
-    if url.startswith('file://'):
-      self.__fname = url[len('file://'):]
-      self._logger.info("Saving results in %s" % self.__fname)
-      self.__handle = file(self.__fname, 'w')  
+    # getting the configuration parameters for this task
+    config = task['configuration'] 
+    
       
   def _pause_module(self):
     '''
@@ -126,6 +123,7 @@ class CsvDisplay(CcdpModule):
     '''
     self._logger.info("Starting module")
   
+
   def _stop_module(self):
     '''
     Stops the execution or processing of the task.  Once this method is invoked
@@ -133,8 +131,6 @@ class CsvDisplay(CcdpModule):
     available.
     '''
     self._logger.info("Starting module")
-    if self.__handle != None:
-      self.__handle.close()
 
 
     
@@ -175,6 +171,4 @@ if __name__ == '__main__':
   (options, args) = parser.parse_args()
   # it expects a dictionary 
   opts = vars(options)
-  CsvDisplay(opts)
-   
-  
+  $classname(opts)

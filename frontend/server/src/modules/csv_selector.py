@@ -12,6 +12,8 @@ class CsvSelector(CcdpModule):
   classdocs
   '''
   __STR_OPS = ['SW', 'EW', 'CN']
+  __OPS = ['LT', 'LE', 'EQ', 'GT', 'GE', 'SW', 'EW', 'CN']
+
   def __init__(self, params):
     '''
     Constructor
@@ -95,6 +97,11 @@ class CsvSelector(CcdpModule):
 
     
 if __name__ == '__main__':
+  '''
+  Runs the module from the command line.  This is not actually necessary as the
+  modules are instantiated by the CcdpModuleLauncher, but is usefull during
+  development.
+  '''
   from optparse import OptionParser
   
   desc = "Cloud Computing Data Processing module.  This a module used \n"
@@ -105,14 +112,6 @@ if __name__ == '__main__':
   parser = OptionParser(usage="usage: %prog [options] args",
             version="%prog 1.0",
             description=desc)
-  
-  parser.add_option('-v', '--verbosity-level',
-            type='choice',
-            action='store',
-            dest='verb_level',
-            choices=['debug', 'info', 'warning','error',],
-            default='debug',
-            help='The verbosity level of the logging',)
   
   parser.add_option('-b', '--broker-host',
             dest='broker_host',
