@@ -58,7 +58,7 @@
             "propagate": "no"
         },
         "AmqClient": {
-            "level": "DEBUG",
+            "level": "INFO",
             "handlers": ["console", "info_file_handler"],
             "propagate": "no"
         },
@@ -69,6 +69,21 @@
         },
         "CsvReader": {
             "level": "DEBUG",
+            "handlers": ["console", "info_file_handler"],
+            "propagate": "no"
+        },
+        "CsvSelector": {
+            "level": "DEBUG",
+            "handlers": ["console", "info_file_handler"],
+            "propagate": "no"
+        },
+        "CsvDisplay": {
+            "level": "DEBUG",
+            "handlers": ["console", "info_file_handler"],
+            "propagate": "no"
+        },
+        "ThreadController": {
+            "level": "INFO",
             "handlers": ["console", "info_file_handler"],
             "propagate": "no"
         }

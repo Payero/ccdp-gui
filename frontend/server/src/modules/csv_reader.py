@@ -1,9 +1,12 @@
+#!/usr/bin/env python
+
 '''
 Created on Jun 19, 2017
 
 @author: oeg
 '''
 from modules.CcdpModule import CcdpModule
+import time
 
 class CsvReader(CcdpModule):
   '''
@@ -16,6 +19,7 @@ class CsvReader(CcdpModule):
     '''
     super(self.__class__, self).__init__(params)
     self._logger.info("Starting the new class")
+
   
   def _on_message(self, msg):
     self._logger.info("Got some message")
@@ -28,12 +32,13 @@ class CsvReader(CcdpModule):
       lines = infile.readlines()
       if config['send-header']:
         self._logger.info("Asking to send Header")
-        data = {'is-header': True, 'data': lines[0]}
-        self._send_results('selector', data)
+        data = {'is-header': True, 'entries': lines[0]}
+        self._send_results('csv-reader', data)
       
       entries = lines[1: 1 + config['number-entries']]
-      self._logger.info("Asking to send: %s" % str(entries))
-      self._send_results('selector', {'data': entries} )
+      data = {'is-header': False, 'entries': entries}
+      self._logger.info("Asking to send: %s" % str(data))
+      self._send_results('csv-reader', data )
       
       
       
@@ -41,7 +46,7 @@ class CsvReader(CcdpModule):
     self._logger.info("Starting module")
   
   def _stop_module(self):
-    self._logger.info("Starting module")
+    self._logger.info("Stopping module")
 
 
     

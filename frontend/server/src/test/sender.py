@@ -1,9 +1,11 @@
+#!/usr/bin/env python
+
 '''
 Created on Jun 19, 2017
 
 @author: oeg
 '''
-from modules.CcdpModule import CcdpModule
+#from modules.CcdpModule import CcdpModule
 from ccdp_utils.AmqClient import AmqClient
 import ccdp_utils as utils
 import sys, os, json, time
@@ -35,8 +37,7 @@ class MsgSender():
       fname = params.filename
       if os.path.isfile(fname):
         handle = open(fname, 'r')
-        body = utils.json_load(handle)
-        amq.send_message(dest, json.dumps(body))
+        amq.send_message( dest, handle.read() )
     
     amq.stop()
 

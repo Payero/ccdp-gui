@@ -74,6 +74,7 @@ class CcdpModule(object):
     self.__broker = args['broker_host']
     self.__port = int(args['broker_port'])
     self.__queue = Queue.Queue()
+    self.__to_send = Queue.Queue()
 
     self._task_id = args['task_id']
     
@@ -95,7 +96,8 @@ class CcdpModule(object):
                   }
     
     self.__timer = TimerTask(start_at=1, interval=1, 
-                             function=self.__check_queue)    
+                             function=self.__check_queue)  
+    self.__timer.run()  
   
   def _send_results(self, src, result):
     '''
@@ -106,16 +108,32 @@ class CcdpModule(object):
   } ],
     '''
     self._logger.info("Sending results %s" % result)
-    for port in self._task['output-ports']:
-      pid = port['port-id']
-      self._logger.info("Found the port configuration")
-      if src == pid:
-        to_ports = port['to-port']
-        for tgt in to_ports:
-          self._logger.debug("Sending message to %s" % tgt)
-          if not isinstance(result, str):
-            result = json.dumps(result)
-          self.__amq.send_message(tgt, result)
+    try:
+      for port in self._task['output-ports']:
+        pid = port['port-id']
+        self._logger.info("Found the port configuration")
+        if src == pid:
+          to_ports = port['to-port']
+          for tgt in to_ports:
+            self._logger.debug("Sending message to %s" % tgt)
+            body = {'msg-type': 'RESULT', 'data': result}
+            self.__amq.send_message(tgt, json.dumps(body))
+    except:
+      tries = 3
+      indx = 0
+      done = False
+      while not done:
+        try:
+          time.sleep(0.2)
+          self._logger.warn("Could not send message to %s, attempt # %d" % (tgt, indx))
+          done = True
+          if indx >= tries:
+            done = True
+          indx += 1
+        except:
+          pass
+
+
   
   
   def __add_message(self, msg):
@@ -125,6 +143,7 @@ class CcdpModule(object):
 
     <msg> The incoming message from the server
     '''
+    msg = ccdp_utils.json_loads(msg)
     self.__queue.put(msg)
 
   def __check_queue(self):
@@ -137,12 +156,13 @@ class CcdpModule(object):
       self.__on_message(msg)
 
 
-  def __on_message(self, msg):
-    self._logger.debug("Got a message")
+  def __on_message(self, json_msg):
     try:
-      json_msg = ccdp_utils.json_loads(msg)
+      # json_msg = ccdp_utils.json_loads(msg)
       self._logger.info("Got a message: %s" % pformat(json_msg))
       if json_msg.has_key('msg-type'):
+        self._logger.info("The message type: %s" % json_msg['msg-type'])
+
         try:
           msg_type = int(json_msg['msg-type'])
           self._logger.info("Got a message from the engine")
@@ -151,16 +171,26 @@ class CcdpModule(object):
           self._logger.info("Got an internal message")
           msg_type = json_msg['msg-type']
         
-        
-        if self.__MSGS.has_key(msg_type):
-          method = self.__MSGS[msg_type]
-          args = inspect.getargspec(method)[0]
-          num_args = len( args)
-          if num_args == 2 and json_msg.has_key('data'):
-            method(json_msg['data'])
-          else:
-            method()
-      
+        if msg_type == 'COMMAND':
+          action = json_msg['data']['action']
+          if self.__MSGS.has_key(action):
+            method = self.__MSGS[action]
+            args = inspect.getargspec(method)[0]
+            num_args = len( args)
+            if num_args == 2 and json_msg.has_key('data'):
+              method(json_msg['data']['task'])
+            else:
+              method()
+        else:
+          if self.__MSGS.has_key(msg_type):
+            method = self.__MSGS[msg_type]
+            args = inspect.getargspec(method)[0]
+            num_args = len( args)
+            if num_args == 2 and json_msg.has_key('data'):
+              method(json_msg['data'])
+            else:
+              method()
+
     except Exception, e:
       self._logger.error("Got an exception: %s" % str(e))
       traceback.print_exc()
@@ -182,9 +212,10 @@ class CcdpModule(object):
     
   def stop_module(self):
     self._logger.info("Stopping module")
-    self.__amq.stop()
     self._stop_module()
-    
+    self.__timer.stopTimer()
+    self.__amq.stop()
+
     
   def _send_message(self, dest, msg):
     if not isinstance(msg, str):

@@ -11,7 +11,7 @@ class CsvSelector(CcdpModule):
   '''
   classdocs
   '''
-  
+  __STR_OPS = ['SW', 'EW', 'CN']
   def __init__(self, params):
     '''
     Constructor
@@ -22,20 +22,21 @@ class CsvSelector(CcdpModule):
     
   def _on_message(self, msg):
     self._logger.info("Got some message: %s" % msg)
-    entries = ccdp_utils.json_loads(msg)
-    if entries.has_key('is-header'):
-      self._logger.info("is header: %s" % pformat(entries) )
-      self.__header = entries
+    # entries = ccdp_utils.json_loads(msg)
+    if msg.has_key('is-header') and msg['is-header']:
+      self._logger.info("is header: %s" % pformat(msg) )
+      self.__header = msg['entries'].split(',')
+      self._send_results('csv-selector', self.__header )
     else:
-      for entry in entries:
-        self.__logger.debug("Processing entry: %s" % entry)
+      for entry in msg['entries']:
         data = self.__filter_data(entry)
         if data:
           self._logger.info("Found a match")
-          self._send_results('display', data )
+          self._send_results('csv-selector', data )
         
 
   def __filter_data(self, entry):
+    self._logger.debug("filtering entry %s" % str(entry))
     name = self.__config['field']
     pos = self.__header.index(name)
     op = self.__config['operator']
@@ -71,7 +72,7 @@ class CsvSelector(CcdpModule):
         found = True
       
     if found:
-      return entry
+      return entry.split(',')
     else:
       return None
     

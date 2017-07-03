@@ -18,28 +18,28 @@ class CsvDisplay(CcdpModule):
     '''
     super(self.__class__, self).__init__(params)
     self._logger.info("Starting the new class")
-    self.__header = []
+    self.__handle = None
     
   def _on_message(self, msg):
     self._logger.info("Got some message: %s" % msg)
-    entries = ccdp_utils.json_loads(msg)
-    
-    for entry in entries:
-      self._logger.info("\t".join(entry) )  
+    self.__handle.write(",".join(msg))
 
     
   def _start_module(self, task):
     self._logger.info("Starting module")
-    self.__config = task['configuration']
-    #RequestorSeniority,FiledAgainst,TicketType,Severity,Priority,daysOpen,Satisfaction
-      
-      
+    url = task['configuration']['output-url']
+    if url.startswith('file://'):
+      self.__fname = url[len('file://'):]
+      self._logger.info("Saving results in %s" % self.__fname)
+      self.__handle = file(self.__fname, 'w')  
       
   def _pause_module(self):
     self._logger.info("Starting module")
   
   def _stop_module(self):
     self._logger.info("Starting module")
+    if self.__handle != None:
+      self.__handle.close()
 
 
     
