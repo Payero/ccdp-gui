@@ -28,7 +28,7 @@ def generate_module(params):
   if os.path.isfile( fname ):
     if not params.has_key('classname') or not params.has_key('module_name'):
       print("ERROR: The classname and the module_name are required")
-      sys.exit()
+      sys.exit() 
 
     filein = open( fname )
     src = Template( filein.read() )
