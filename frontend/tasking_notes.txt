@@ -1,0 +1,21 @@
+
+
+- The GUI forms all the tasks to run for each thread
+- Once the thread is ready sends it to the GUI back-end
+- The back-end sends the Thread to the ccdp-engine
+- Once the GUI clicks start, the back-end sends a StartThread message
+  - The back-end sends a start message to each of the tasks
+  - The back-end sends a configuration message to each task
+  - Each task starts processing 
+  - Either one of the tasks sends a StopThread or is sent by the GUI
+
+
+
+The CcdpModule is the parent class
+  - E
+
+Questions?
+  - Is the reply-to set to the server.py or the "engine"
+  - Start the modules
+  - 
+  - 
