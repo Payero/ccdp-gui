@@ -9,11 +9,11 @@ var NotificationContainer = require('react-notifications').NotificationContainer
 var NotificationManager = require('react-notifications').NotificationManager;
 var ModalPrompt = require('./ModalPrompt.js');
 const uuidv4 = require('uuid/v4')
+var Stomp = require('stompjs');
+
+var NodeProperties = require('./NodeProperties.js')
 
 var sid = uuidv4();
-//var Stomp = require('stomp-client');
-//var http = require('http');
-//var SockJS = require('sockjs');
 
 /**
  * Top level components for React application, manages all computations involving top level state
@@ -39,6 +39,13 @@ var App = React.createClass({
     }
     event.preventDefault();
   },
+  
+
+/*  //MB test stuff
+  testFunctionMB: function(){
+    console.log('this is a test of props function passing')
+  },
+*/
   // Stacks used for undo/redo functionality, separated from state to avoid performance issues
   undoStacks: {
     undo: [],
@@ -108,8 +115,8 @@ var App = React.createClass({
     this.updateThreads();
     this.updateProjects();
     // SockJS functionality, will connect to RabbitMQ directly and consume messages
-    var ws = new SockJS('http://' + location.hostname + ':15674/stomp');
-    var client = Stomp.over(ws);
+    var ws = new SockJS('http://' + location.hostname + ':61613/stomp');
+    var client = Stomp.over(ws); 
     client.heartbeat.outgoing = 0;
     client.heartbeat.incoming = 0;
     var on_connect = function() {
@@ -730,7 +737,7 @@ var App = React.createClass({
             "name": "",
             "node-type": "",//from config ccdp type
             "reply-to": "",//update
-            "session-id": sid,//update - need to get this from the browser
+            "session-id": sid,
             "tasks": [],
             "tasks-running-mode": "PARALLEL",//add this to gui and then set here
             "thread-id": idctThread++,
@@ -762,7 +769,7 @@ var App = React.createClass({
 	    "name": node.title,
 	    "node-type": node.config["ccdp-type"],
 	    "output-ports": [],
-	    "reply-to": "",//can set as different than tread if you want 2 receivers
+	    "reply-to": "",//can set as different than thread if you want 2 receivers
 	    "retries": 3,//default value 3 but can give an option
 	    "session-id": sid, 
             "task-id": node.id
@@ -952,5 +959,8 @@ var App = React.createClass({
     );
   }
 });
-
+/*
+        <NodeProperties
+          handleTaskUpdate={this.handleTaskUpdate} />
+*/
 module.exports = DragDropContext(HTML5Backend)(App);
