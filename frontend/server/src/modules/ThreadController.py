@@ -170,8 +170,11 @@ class ThreadController():
       self.__logger.info("Skipping sending request")
 
     if auto_start:
-      self.start_thread()
-
+      if skip_req:
+        self.__logger.info("Starting all modules automatically")
+        self.__send_msg_to_all_tasks( 'START' )
+      else:
+        self.start_thread()
 
 
   def start_thread(self):
@@ -339,6 +342,7 @@ class ThreadController():
       - action: the action to perform either START, PAUSE, or STOP
     '''
     for task in self.__request['tasks']:
+      self.__logger.info('Sending %s message to %s' % (action, task['task-id']))
       self.__send_msg_to_task(action, task)
   
 

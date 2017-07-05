@@ -82,6 +82,8 @@ class CsvDisplay(CcdpModule):
     '''
     self._logger.info("Got some message: %s" % msg)
     self.__handle.write(",".join(msg))
+    self.__handle.write("\n")
+
 
     
   def _start_module(self, task):

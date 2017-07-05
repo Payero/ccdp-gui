@@ -23,33 +23,36 @@ class CsvSelector(CcdpModule):
     self.__header = []
     
   def _on_message(self, msg):
-    self._logger.info("Got some message: %s" % msg)
+    self._logger.debug("Got some message: %s" % msg)
     # entries = ccdp_utils.json_loads(msg)
     if msg.has_key('is-header') and msg['is-header']:
-      self._logger.info("is header: %s" % pformat(msg) )
+      self._logger.debug("is header: %s" % pformat(msg) )
       self.__header = msg['entries'].split(',')
       self._send_results('csv-selector', self.__header )
     else:
       for entry in msg['entries']:
+        entry = entry.strip()
         data = self.__filter_data(entry)
         if data:
-          self._logger.info("Found a match")
+          self._logger.info("Found a match: %s " % str(data))
           self._send_results('csv-selector', data )
         
 
-  def __filter_data(self, entry):
-    self._logger.debug("filtering entry %s" % str(entry))
+  def __filter_data(self, entry_str):
+    self._logger.debug("filtering entry <--%s-->" % entry_str)
+    entry = entry_str.split(",")
     name = self.__config['field']
     pos = self.__header.index(name)
     op = self.__config['operator']
     value = self.__config['value']
     
-    self._logger.info("Checking for '%s' being '%s' than '%s'" % (name, op, value))
     if len(entry) < pos:
       self._logger.error('ERROR, could not parse the data')
       return None
     
     found = False
+    self._logger.debug("Is %s %s %s" % (entry[pos], op, value))
+
     if op in self.__STR_OPS:
       val = str(entry[pos])
       if op == 'SW' and val.startswith(value):
@@ -60,6 +63,10 @@ class CsvSelector(CcdpModule):
         found = True
     else:
       val = entry[pos]
+      try:
+        val = int(val)
+      except:
+        pass
       if op == 'LT' and val < value:
         found = True
       elif op == 'LE' and val <= value:
@@ -74,7 +81,7 @@ class CsvSelector(CcdpModule):
         found = True
       
     if found:
-      return entry.split(',')
+      return entry
     else:
       return None
     

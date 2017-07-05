@@ -5,6 +5,7 @@ from pprint import pprint, pformat
 import inspect, json
 from __builtin__ import isinstance
 import Queue
+import logging
 
 # Attempting to use centralized logging for python and AmqClient
 try:
@@ -320,6 +321,7 @@ class CcdpModule(object):
     self._logger.info("Pausing module")
     self._pause_module()
     
+
   def stop_module(self):
     '''
     Stops the execution or processing of the task.  Once this method is invoked
@@ -359,8 +361,9 @@ class CcdpModule(object):
 
     This method is invoked every time a new message is received.
     '''
-    raise NotImplementedError("The _on_message method needs to be implemented ")
+    raise NotImplementedError("The _on_message method must be implemented")
   
+
   def _start_module(self, task):
     '''
     Empty method that throws an error if is not implemented by each subclass.
@@ -371,7 +374,8 @@ class CcdpModule(object):
       - task: a CcdpTaskRequest JSON representation containing all the 
               information necessary to execute the process
     '''
-    raise NotImplementedError("The _start_module method needs to be implemented ")
+    raise NotImplementedError("The _start_module method must be implemented")
+
 
   def _pause_module(self):
     '''
@@ -379,8 +383,9 @@ class CcdpModule(object):
 
     This method is invoked when the user requires the data processing to pause.
     '''
-    raise NotImplementedError("The _pause_module method needs to be implemented ")
+    raise NotImplementedError("The _pause_module method must be implemented")
     
+
   def _stop_module(self):
     '''
     Empty method that throws an error if is not implemented by each subclass.
@@ -389,7 +394,7 @@ class CcdpModule(object):
     Once this method is called, the module is no longer usable as all the 
     connections are terminated.
     '''
-    raise NotImplementedError("The _stop_module method needs to be implemented ")
+    raise NotImplementedError("The _stop_module method must be implemented")
 
 
 def main():
