@@ -62,18 +62,18 @@ class AmqClient(stomp.ConnectionListener):
     except:
       self.__logger = get_logger("AmqClient")
        
-    self.__logger.info("Done creating object")
+    self.__logger.debug("Done creating object")
 
 
   def connect(self, broker, port=61616, dest=None, on_msg=None, on_error=None):
     self.__logger.info("Connecting to AMQ: %s:%d" % (broker, port)) 
     self.__connection = stomp.Connection(auto_content_length=False)
-    self.__logger.info("Setting The listener")
+    self.__logger.debug("Setting The listener")
     self.__connection.set_listener('', self)
-    self.__logger.info("Starting the connection")
+    self.__logger.debug("Starting the connection")
     self.__connection.start()
     self.__connection.connect([(broker, port)], wait=False)
-    self.__logger.info("Connection done")
+    self.__logger.debug("Connection done")
 
     if dest != None:
       self.register(dest, on_msg, on_error)
@@ -102,16 +102,18 @@ class AmqClient(stomp.ConnectionListener):
     self.__connection.subscribe(self.__destination)
 
   def __run(self):
-    self.__logger.info("Running main function")
+    self.__logger.debug("Running main function")
     while not self.__event.isSet():
       time.sleep(0.5)
 
 
   def send_message(self, dest, body):
-    self.__logger.info("Sending Message %s to %s" % (body, dest))
-    self.__connection.send(body=body, destination=dest)
-
-
+    self.__logger.debug("Sending Message %s to %s" % (body, dest))
+    if isinstance(body, str):
+      self.__connection.send(body=body, destination=dest)
+    else:
+      self.__connection.send(body=json.dumps(body), destination=dest)
+      
 
   def on_message(self, headers, message):
     if self.__onMessage:
@@ -122,16 +124,16 @@ class AmqClient(stomp.ConnectionListener):
       self.__onError(message)
 
   def stop(self, delay=0.1):
-    self.__logger.info("Stopping Receiver")
+    self.__logger.debug("Stopping Receiver")
     if self.__event is not None:
       self.__event.set()
-    self.__logger.info("Done with set")
+    self.__logger.debug("Done with set")
     if self.__connection is not None:
-      self.__logger.info("Disconnecting")
+      self.__logger.debug("Disconnecting")
       time.sleep(delay)
       self.__connection.disconnect()
     
-    self.__logger.info("Done Stopping Client")
+    self.__logger.debug("Done Stopping Client")
 
 if __name__ == '__main__':
   print "Running from main"

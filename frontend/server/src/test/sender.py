@@ -28,10 +28,12 @@ class MsgSender():
       sys.exit(-1)
     else:
       dest = params.destination
+      
+    if params.message != None:
+      amq.send_message(dest, params.message)
+    
     
     try:  
-	    if params.message != None:
-	      amq.send_message(dest, params.message)
 	    
 	    if params.filename != None:
 	      fname = params.filename

@@ -5,13 +5,61 @@ from __future__ import print_function
 import boto3, botocore
 import json
 
-from optparse import OptionParser
+from optparse import OptionParser, Option, OptionValueError
+from copy import copy
+
 import logging
 from pprint import pformat, pprint
 import os, sys, traceback
 import tarfile
 from subprocess import call
 import shutil, ast
+
+
+def check_ccdp_args(option, opt, value):
+  '''
+  Generates a type of argument passed to the module launcher.  It returns a 
+  value as follow:
+    - If the arguments is not a comma delimited list, it returns the value
+    - if the list contains the same number of '=' as the number of items, it
+      returns a dictionary using the key=val items
+    - If none of the items have an '=', it returns a list
+    - else it throws an error
+  '''
+  try:
+    
+    vals = value.split(',')
+    # if is a single value, return it
+    if len(vals) == 1:
+      return value
+    else:
+      # do we have the same number of = as the number of entries? (dict a=b)
+      if len(vals) == value.count('='):
+        my_dict = {}
+        for val in vals:
+          k, v = val.split('=')
+          my_dict[k] = v
+        return my_dict
+      else:
+        if value.count('=') == 0:
+          return vals
+        else:
+          msg = "option %s: invalid ccd-argument: %r." % (opt, value)
+          msg += " cannot have list with '=' (reserved for dict)"
+          raise OptionValueError(msg)
+
+  except ValueError:
+    raise OptionValueError(
+          "option %s: invalid ccd-argument: %r" % (opt, value))
+
+class CcdpArgOption (Option):
+  '''
+  Simple class used to define my own argument type for the optparse
+  '''
+  TYPES = Option.TYPES + ("ccdp_args",)
+  TYPE_CHECKER = copy(Option.TYPE_CHECKER)
+  TYPE_CHECKER["ccdp_args"] = check_ccdp_args
+
 
 class ModuleRunner:
   """
@@ -82,8 +130,8 @@ class ModuleRunner:
       specifications.
 
       """
-      self.__logger.debug("Performing Download using %s" % pformat(params))
-      
+      self.__logger.debug("Running from file using %s" % pformat(params) )
+
       file_name = os.path.expandvars(params['file_name'])
       class_name = params['class_name']
 
@@ -109,18 +157,13 @@ class ModuleRunner:
       if params.has_key('arguments'):
         args = params['arguments']
 
+      self.__logger.info("Arguments: %s" % str(args))
+
       clazz = self.__get_class(name, class_name)
       #self.__logger.debug("The Arguments ", ast.literal_eval(args) )
 
       if args != None:
-        #eval("%s(%s)" % ( class_name, ast.literal_eval(args) ) )
-        try:
-          # if is not a string, turn it into what it needs to be
-          clazz(ast.literal_eval(args))
-        except ValueError:
-          # is a string so just pass it
-          clazz(args)
-
+        clazz(args)
       else:
         #eval("%s()" % class_name )
         clazz()
@@ -292,7 +335,8 @@ if __name__ == '__main__':
   desc += "that module is one of the required arguments."
   parser = OptionParser(usage="usage: %prog [options] args",
             version="%prog 1.0",
-            description=desc)
+            description=desc,
+            option_class=CcdpArgOption)
   
   parser.add_option('-v', '--verbosity-level',
             type='choice',
@@ -322,11 +366,11 @@ if __name__ == '__main__':
             dest="class_name",
             help="The name of the class to run")
 
-  
   parser.add_option("-a", "--arguments",
-            dest="arguments", 
+            dest="arguments",
+            type="ccdp_args", 
             default=None,
-            help="The arguments to provide to the runModule method")
+            help="The arguments to provide to the runModule method ")
 
   (options, args) = parser.parse_args()
   # it expects a dictionary 
