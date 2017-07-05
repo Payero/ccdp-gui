@@ -1,9 +1,10 @@
+#!/usr/bin/env python
+
 '''
 Created on Jun 19, 2017
 
 @author: oeg
 '''
-from modules.CcdpModule import CcdpModule
 from ccdp_utils.AmqClient import AmqClient
 import ccdp_utils as utils
 import sys, os, json, time
@@ -27,17 +28,20 @@ class MsgSender():
       sys.exit(-1)
     else:
       dest = params.destination
-      
-    if params.message != None:
-      amq.send_message(dest, params.message)
     
-    if params.filename != None:
-      fname = params.filename
-      if os.path.isfile(fname):
-        handle = open(fname, 'r')
-        body = utils.json_load(handle)
-        amq.send_message(dest, json.dumps(body))
-    
+    try:  
+	    if params.message != None:
+	      amq.send_message(dest, params.message)
+	    
+	    if params.filename != None:
+	      fname = params.filename
+	      if os.path.isfile(fname):
+	        handle = open(fname, 'r')
+	        body = utils.json_load(handle)
+	        amq.send_message(dest, json.dumps(body))
+    except:
+    	print "There was an error sending the message"
+    	
     amq.stop()
 
     
