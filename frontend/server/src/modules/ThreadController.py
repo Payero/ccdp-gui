@@ -170,8 +170,11 @@ class ThreadController():
       self.__logger.info("Skipping sending request")
 
     if auto_start:
-      self.start_thread()
-
+      if skip_req:
+        self.__logger.info("Starting all modules automatically")
+        self.__send_msg_to_all_tasks( 'START' )
+      else:
+        self.start_thread()
 
 
   def start_thread(self):
@@ -221,45 +224,6 @@ class ThreadController():
     self.__logger.debug("Done!!")
 
     
-
-  def _send_results(self, src, result):
-    '''
-    It looks through all the output ports in order to find all the ports that
-    is expecting the results.  If the one of the port-id in the list matches the
-    one given as a source then it sends the results to all the queues listed in
-    the to-port list.
-
-    Inputs:
-      - src:    the id or name of the port-id to locate all the queues
-      - result: the data to send to all the queues listed in the to-port field
-
-    JSON Example: 
-      if the src is set to port-id-123 then it will send the results to queues
-      out1 and out2
-
-      {"output-ports":
-        [ {
-          "port-id" : "port-id-123",
-          "from-port" : [ ],
-          "to-port" : [ "out1", "out2" ]
-        } ]
-      }
-    '''
-    self.__logger.debug("Sending results %s" % result)
-    msg = {'msg-type': 'RESULT', 'data': result}
-    # finding the ports to send data to
-    for port in self.__task['output-ports']:
-      pid = port['port-id']
-      if src == pid:
-        to_ports = port['to-port']
-        for tgt in to_ports:
-          self.__logger.debug("Sending message to %s" % tgt)
-          # can send only string messages, but cannot do it twice!!
-          if isinstance(result, str):
-            self.__amp.send_message(tgt, msg)
-          else:
-            self.__amp.send_message(tgt,  json.dumps(msg) )
-  
 
   def __on_message(self, msg):
     '''
@@ -378,6 +342,7 @@ class ThreadController():
       - action: the action to perform either START, PAUSE, or STOP
     '''
     for task in self.__request['tasks']:
+      self.__logger.info('Sending %s message to %s' % (action, task['task-id']))
       self.__send_msg_to_task(action, task)
   
 

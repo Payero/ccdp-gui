@@ -12,6 +12,8 @@ class CsvSelector(CcdpModule):
   classdocs
   '''
   __STR_OPS = ['SW', 'EW', 'CN']
+  __OPS = ['LT', 'LE', 'EQ', 'GT', 'GE', 'SW', 'EW', 'CN']
+
   def __init__(self, params):
     '''
     Constructor
@@ -21,33 +23,36 @@ class CsvSelector(CcdpModule):
     self.__header = []
     
   def _on_message(self, msg):
-    self._logger.info("Got some message: %s" % msg)
+    self._logger.debug("Got some message: %s" % msg)
     # entries = ccdp_utils.json_loads(msg)
     if msg.has_key('is-header') and msg['is-header']:
-      self._logger.info("is header: %s" % pformat(msg) )
+      self._logger.debug("is header: %s" % pformat(msg) )
       self.__header = msg['entries'].split(',')
       self._send_results('csv-selector', self.__header )
     else:
       for entry in msg['entries']:
+        entry = entry.strip()
         data = self.__filter_data(entry)
         if data:
-          self._logger.info("Found a match")
+          self._logger.info("Found a match: %s " % str(data))
           self._send_results('csv-selector', data )
         
 
-  def __filter_data(self, entry):
-    self._logger.debug("filtering entry %s" % str(entry))
+  def __filter_data(self, entry_str):
+    self._logger.debug("filtering entry <--%s-->" % entry_str)
+    entry = entry_str.split(",")
     name = self.__config['field']
     pos = self.__header.index(name)
     op = self.__config['operator']
     value = self.__config['value']
     
-    self._logger.info("Checking for '%s' being '%s' than '%s'" % (name, op, value))
     if len(entry) < pos:
       self._logger.error('ERROR, could not parse the data')
       return None
     
     found = False
+    self._logger.debug("Is %s %s %s" % (entry[pos], op, value))
+
     if op in self.__STR_OPS:
       val = str(entry[pos])
       if op == 'SW' and val.startswith(value):
@@ -58,6 +63,10 @@ class CsvSelector(CcdpModule):
         found = True
     else:
       val = entry[pos]
+      try:
+        val = int(val)
+      except:
+        pass
       if op == 'LT' and val < value:
         found = True
       elif op == 'LE' and val <= value:
@@ -72,7 +81,7 @@ class CsvSelector(CcdpModule):
         found = True
       
     if found:
-      return entry.split(',')
+      return entry
     else:
       return None
     
@@ -95,6 +104,11 @@ class CsvSelector(CcdpModule):
 
     
 if __name__ == '__main__':
+  '''
+  Runs the module from the command line.  This is not actually necessary as the
+  modules are instantiated by the CcdpModuleLauncher, but is usefull during
+  development.
+  '''
   from optparse import OptionParser
   
   desc = "Cloud Computing Data Processing module.  This a module used \n"
@@ -105,14 +119,6 @@ if __name__ == '__main__':
   parser = OptionParser(usage="usage: %prog [options] args",
             version="%prog 1.0",
             description=desc)
-  
-  parser.add_option('-v', '--verbosity-level',
-            type='choice',
-            action='store',
-            dest='verb_level',
-            choices=['debug', 'info', 'warning','error',],
-            default='debug',
-            help='The verbosity level of the logging',)
   
   parser.add_option('-b', '--broker-host',
             dest='broker_host',

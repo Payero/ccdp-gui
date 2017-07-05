@@ -43,6 +43,15 @@
             "maxBytes": 10485760,
             "backupCount": 20,
             "encoding": "utf8"
+        },
+        "test_mod_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "DEBUG",
+            "formatter": "simple",
+            "filename": "/home/oeg/dev/oeg/ccdp-gui/frontend/server/logs/test_mods.log",
+            "maxBytes": 10485760,
+            "backupCount": 20,
+            "encoding": "utf8"
         }
     },
 
@@ -67,19 +76,24 @@
             "handlers": ["console", "info_file_handler"],
             "propagate": "no"
         },
+        "CcdpModule": {
+            "level": "DEBUG",
+            "handlers": ["console", "info_file_handler", "test_mod_handler"],
+            "propagate": "no"
+        },
         "CsvReader": {
             "level": "DEBUG",
-            "handlers": ["console", "info_file_handler"],
+            "handlers": ["console", "info_file_handler", "test_mod_handler"],
             "propagate": "no"
         },
         "CsvSelector": {
             "level": "DEBUG",
-            "handlers": ["console", "info_file_handler"],
+            "handlers": ["console", "info_file_handler", "test_mod_handler"],
             "propagate": "no"
         },
         "CsvDisplay": {
             "level": "DEBUG",
-            "handlers": ["console", "info_file_handler"],
+            "handlers": ["console", "info_file_handler", "test_mod_handler"],
             "propagate": "no"
         },
         "ThreadController": {

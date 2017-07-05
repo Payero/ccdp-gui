@@ -30,17 +30,30 @@ class CsvReader(CcdpModule):
     self._logger.debug("Config " + str(config))
     with open(config['filename']) as infile:
       lines = infile.readlines()
-      if config['send-header']:
-        self._logger.info("Asking to send Header")
-        data = {'is-header': True, 'entries': lines[0]}
-        self._send_results('csv-reader', data)
       
-      entries = lines[1: 1 + config['number-entries']]
-      data = {'is-header': False, 'entries': entries}
-      self._logger.info("Asking to send: %s" % str(data))
-      self._send_results('csv-reader', data )
+      self._logger.info("Sending Header")
+      data = {'is-header': True, 'entries': lines[0]}
+      self._send_results('csv-reader', data)
       
-      
+      # now sending all the lines in pack of 'increment' size
+      total_lines = len(lines) - 1
+      start = 1
+      inc = config['number-entries']
+      end = start + inc
+      while start < total_lines:
+        
+        self._logger.debug("Loading %d lines from %d to %d" % (end, start, end ))
+        entries = lines[start: end]
+        data = {'is-header': False, 'entries': entries}
+        self._send_results('csv-reader', data )
+
+        start = end
+
+        if end + inc <= total_lines:
+          end += inc
+        else:
+          end = total_lines
+
       
   def _pause_module(self):
     self._logger.info("Starting module")
@@ -51,6 +64,11 @@ class CsvReader(CcdpModule):
 
     
 if __name__ == '__main__':
+  '''
+  Runs the module from the command line.  This is not actually necessary as the
+  modules are instantiated by the CcdpModuleLauncher, but is usefull during
+  development.
+  '''
   from optparse import OptionParser
 
   desc = "Cloud Computing Data Processing module.  This a module used \n"
@@ -61,14 +79,6 @@ if __name__ == '__main__':
   parser = OptionParser(usage="usage: %prog [options] args",
             version="%prog 1.0",
             description=desc)
-  
-  parser.add_option('-v', '--verbosity-level',
-            type='choice',
-            action='store',
-            dest='verb_level',
-            choices=['debug', 'info', 'warning','error',],
-            default='debug',
-            help='The verbosity level of the logging',)
   
   parser.add_option('-b', '--broker-host',
             dest='broker_host',
