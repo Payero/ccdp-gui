@@ -11,5 +11,5 @@ services:
       - /data/mongodb/out:/out    
     ports:
       - "5000:5000"
-    entrypoint: python ./server/src/server.py --ip=0.0.0.0 --port=5000 --db=ccdp --collection=modules --logfile=/out/ccdp.log --amq-ip=192.168.2.79 --amq-port=61616 --seed-db=./server/data/modules-mongo.json --db-ip=192.168.2.79 --db-port=27017
+    entrypoint: python ./server/src/server.py --ip=0.0.0.0 --port=5000 --db=ccdp --collection=modules --logfile=/out/ccdp.log --amq-ip=10.215.34.29 --amq-port=61616 --seed-db=./server/data/modules-mongo.json --db-ip=10.215.34.29 --db-port=27017
 
