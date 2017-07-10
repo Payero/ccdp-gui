@@ -67,7 +67,7 @@ class AmqClient(stomp.ConnectionListener):
 
   def connect(self, broker, port=61616):
     self.__logger.info("Connecting to AMQ: %s:%d" % (broker, port)) 
-    self.__connection = stomp.Connection(auto_content_length=False)
+    self.__connection = stomp.Connection(host_and_ports=[(broker, port)], auto_content_length=False)
     self.__logger.info("Setting The listener")
     self.__connection.set_listener('', self)
     self.__logger.info("Starting the connection")
@@ -154,7 +154,7 @@ if __name__ == '__main__':
 
   msgr =  AmqClient()
   msgr.register("/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
-  msgr.connect('172.31.20.84')
+  msgr.connect('localhost')
   msgr.send_message('/queue/CcdpTaskingActivity', "This is a test message")
   time.sleep(2)
   msgr.stop()

@@ -7,4 +7,4 @@ RUN easy_install stomp.py-4.1.17-py2.7.egg
 RUN pip install --upgrade pip
 RUN pip install --upgrade flask
 
-ENV CCDP_GUI /usr/app/src/app/
+ENV CCDP_GUI /usr/src/app/server
