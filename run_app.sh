@@ -4,6 +4,8 @@
 #a docker container. The amq and mongo services in the docker-compose project webapp/services
 #must be running.
 
+export AMQ_PORT_61616_TCP_ADDR=amq
+export DB_PORT_27017_TCP_ADDR=db
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export CCDP_GUI=$DIR/frontend/server
 
