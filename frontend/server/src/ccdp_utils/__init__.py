@@ -112,6 +112,7 @@ def json_load(file_handle):
   <file_handle>  The handle to the file containing the Python dictionary string
   """
   return __byteify(
+      
       json.load(file_handle, object_hook=__byteify),
       ignore_dicts=True
   )

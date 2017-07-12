@@ -17,4 +17,5 @@
     "output-ports" : [ {
         "port-id" : "selector",
         "to-port" : [ "selector-1" ]
+        } ]
     }
