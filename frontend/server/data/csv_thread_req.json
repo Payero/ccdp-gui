@@ -15,6 +15,7 @@
     "task-id" : "csv-reader",
     "session-id" : "oeg-test",
     "node-type" : "DEFAULT",
+    "state": "PENDING",
     "reply-to" : "CCDP-WebServer",
     "input-ports" : [ ],
     "output-ports" : [ {
@@ -37,6 +38,7 @@
     "task-id" : "csv-selector",
     "session-id" : "oeg-test",
     "node-type" : "DEFAULT",
+    "state": "PENDING",
     "reply-to" : "CCDP-WebServer",
     "input-ports" : [ ],
     "output-ports" : [ {
@@ -57,6 +59,7 @@
     "task-id" : "csv-display",
     "session-id" : "oeg-test",
     "node-type" : "DEFAULT",
+    "state": "PENDING",
     "reply-to" : "CCDP-WebServer",
     "input-ports" : [ ],
     "output-ports" : [ ]

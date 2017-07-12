@@ -53,10 +53,14 @@ class CsvReader(CcdpModule):
           end += inc
         else:
           end = total_lines
+    
+    self._logger.info("%s done Processing " % self._task['name'])
+    self._send_done_processing()
 
       
   def _pause_module(self):
     self._logger.info("Starting module")
+  
   
   def _stop_module(self):
     self._logger.info("Stopping module")

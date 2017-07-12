@@ -24,6 +24,8 @@ class CsvSelector(CcdpModule):
     
   def _on_message(self, msg):
     self._logger.debug("Got some message: %s" % msg)
+    self._done_processing = False
+    
     # entries = ccdp_utils.json_loads(msg)
     if msg.has_key('is-header') and msg['is-header']:
       self._logger.debug("is header: %s" % pformat(msg) )
@@ -36,7 +38,12 @@ class CsvSelector(CcdpModule):
         if data:
           self._logger.info("Found a match: %s " % str(data))
           self._send_results('csv-selector', data )
-        
+    
+    self._done_processing = True
+    # If there are no more incoming messages, then we are done so notify 
+    if self._predecesor_done:
+      self._send_done_processing()
+  
 
   def __filter_data(self, entry_str):
     self._logger.debug("filtering entry <--%s-->" % entry_str)

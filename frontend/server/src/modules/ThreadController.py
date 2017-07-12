@@ -4,6 +4,7 @@ import os, sys, time, traceback, json
 from pprint import pprint, pformat
 from optparse import OptionParser
 import traceback
+from threading import Event
 
 # Attempting to use centralized logging for python and AmqClient
 try:
@@ -113,6 +114,9 @@ class ThreadController():
 }
   
   '''
+  
+  __TASK_DONE = ['FAILED', 'SUCCESSFUL', 'KILLED']
+  
   def __init__(self, queue_name, engine_queue, thread_req, 
                broker_host='localhost', broker_port=61616, 
                auto_start=False, callback_fn=None, skip_req=False):
@@ -137,6 +141,7 @@ class ThreadController():
     self.__amq_port = int(broker_port)
     self.__amq = AmqClient.AmqClient()
     self.__to_engine = engine_queue
+    self.__evt = Event()
     
     # is set, it is used to update the caller
     if callable(callback_fn):
@@ -211,6 +216,31 @@ class ThreadController():
       txt += "status update from the ccdp-engine"
       self.__logger.warn(txt)
 
+    self.__run_main()
+  
+  def __check_tasks_status(self):
+    self.__logger.info("Checking Tasks Status")
+    done = True
+    for task in self.__tasks:
+      if task.has_key('state'):
+        self.__logger.info("%s: State = %s" % (task['task-id'], task['state']))
+        if task['state'] not in self.__TASK_DONE:
+          done = False
+          break
+      else:
+        self.__logger.info("Task %s does not have state" % task['task-id'] )
+        done = False
+    
+    if done:
+      self.stop_thread()
+      
+       
+  def __run_main(self):
+    self.__logger.info("Running main section")
+    while self.__evt.isSet():
+      time.sleep(0.5)
+    
+    self.__logger.info("Ending main")
   
   
   def stop_thread(self):
@@ -219,7 +249,11 @@ class ThreadController():
     closes all the connections.
     '''
     self.__logger.info("Stopping Thread")
-    self.__send_msg_to_all_tasks( 'STOP' )
+    self.__evt.set()
+#     self.__send_msg_to_all_tasks( 'STOP' )
+    for task in self.__tasks:
+      if task.has_key('state') and task['state'] not in self.__TASK_DONE:
+        self.__send_msg_to_task('STOP', task)
     self.__amq.stop()
     self.__logger.debug("Done!!")
 
@@ -232,7 +266,7 @@ class ThreadController():
     Inputs
       - msg: the update message received from the ccdp-engine
     '''
-    self.__logger.info("Got results: %s" % msg)
+    self.__logger.info("Got a message: %s" % msg)
     try:
       json_msg = ccdp_utils.json_loads(msg)
       self.__logger.info("Got a message: %s" % pformat(json_msg))
@@ -248,9 +282,18 @@ class ThreadController():
         # if is an update, send it to the GUI and check running mode
         if msg_type == 'TASK_UPDATE':
           self.__logger.debug("Got a task update message")
+          task = json_msg['data']['task']
           if self.__callback_fn is not None:
-            body = {'msg-type': msg_type, 'data':{'task':json_msg['task']}}
+            body = {'msg-type': msg_type, 'data':{'task':task}}
             self.__callback_fn(body)
+          
+          # need to update the tasks
+          for t in self.__tasks:
+            if t['task-id'] == task['task-id']:
+              t['state'] = task['state']
+              break
+          
+          self.__check_tasks_status()
 
           # if we are running sequentially, then the next 'RUNNING' status 
           # update should be the one we want
@@ -266,7 +309,20 @@ class ThreadController():
               self.__logger.warn("Task %s failed" % upd_task['task-id'])
             elif upd_task['state'] == 'KILLED':
               self.__logger.warn("Task %s was killed " % upd_task['task-id'])
-
+        
+        # if did one of the 
+        elif msg_type == 'DONE_PROCESSING':
+          task = json_msg['data']['task']
+          self.__logger.info("%s Module ended processing" % task['task-id'])
+          self.__logger.info("Sending END_PROCESSING msg to %d tasks" % len(task['output-ports']))
+          for port in task['output-ports']:
+            self.__logger.info("Found the port configuration")
+            to_ports = port['to-port']
+            for tgt in to_ports:
+              self.__logger.info("Sending message to %s" % tgt)
+              body = {'msg-type': 'DONE_PROCESSING'}
+              self.__amq.send_message(tgt, json.dumps(body) )
+          
 
     except Exception, e:
       self.__logger.error("Got an exception: %s" % str(e))
