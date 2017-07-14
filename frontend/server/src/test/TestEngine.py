@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import os, sys, time
+
+import os, sys, time, traceback
 from pprint import pprint, pformat
 from random import randint
 
@@ -48,7 +49,7 @@ class TestEngine():
                         on_message=self.__on_message, 
                         on_error=self.__on_error)
     self.__logger.info("Connectiong to %s:%d" % (amq_ip, amq_port))
-    self.__amq.connect('172.31.20.84')
+    self.__amq.connect(amq_ip)
  
 
   def __on_message(self, msg):
@@ -60,7 +61,6 @@ class TestEngine():
     self.__logger.debug("Got a message: %s" % msg)
     json_msg = ccdp_utils.json_loads(msg)
     self.__logger.info("Got a message: %s" % pformat(json_msg))
-
     try:
       if json_msg.has_key['msg-type']:
         msg_type = ccdp_utils.MESSAGES[json_msg['msg-type']]
@@ -77,13 +77,11 @@ class TestEngine():
                 reply_to = task['reply-to']
                 if reply_to == None:
                   reply_to = req_dest
-
                 if reply_to != None:
                   task['state'] = 'RUNNING'
                   update_msg = {}
                   update_msg['msg-type'] = 4
                   update_msg['ccdp-task'] = task
-
                   self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
                   self.__amq.send_message(reply_to, json.dumps(update_msg))
                   wait = randint(0,5)
@@ -92,8 +90,10 @@ class TestEngine():
                   update_msg['ccdp-task']['state'] = "SUCCESSFUL"
                   self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
                   self.__amq.send_message(reply_to, json.dumps(update_msg))
-    except:
-      print('Error incorrect message type received')          
+
+    except Exception, e:
+      self.__logger.error("Got an error while processing a message: %s" % e)
+      traceback.print_exc()              
 
 
 

@@ -10,6 +10,7 @@ from flask import (
         render_template,
         jsonify
 )
+from flask_sse import sse  
 import pymongo
 import logging
 from logging.handlers import RotatingFileHandler
@@ -21,6 +22,8 @@ from pprint import pprint, pformat
 import ccdp_utils.AmqClient as AmqClient
 from flask_socketio import SocketIO, emit
 import eventlet
+from modules.ThreadController import ThreadController
+
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
@@ -64,9 +67,15 @@ def get_status(version):
 @app.route("/<version>/run", methods=["POST"])
 def start_processing(version):
     """Sends a stop processing request to the engine"""
-    run_json = request.json
-    # send to engine
-    g.amq.send_message(app.config["FROM_SERVER_QUEUE_NAME"], run_json)
+    run_json = json.dumps(request.json['body']['request'])
+    
+    tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
+                          engine_queue=ccdp_utils.ENG_QUEUE,  # required
+                          thread_req=run_json,                # required
+                          callback_fn=update_task,            # optional
+                          auto_start=True,                    # optional
+                          skip_req=True)                      # optional
+
     return str(200)
 
 @app.route("/<version>/pause", methods=["POST"])
@@ -175,12 +184,19 @@ def _delete_project(db, project_id):
     result =  db["projects"].delete_one({"name": project_id})
     return result
 
+def update_task(data): #MB callback function for task updates TODO: change the namespace to something appropriate
+    print('**********************************')
+    print('Inside the callback manager')
+    print('**********************************')
+    #socketio.emit('message', {'message': "Testing if the message receiver works!"}, namespace='/test')
+    socketio.emit('message', data, namespace='/test')
+ 
 def connect_to_database():
     return pymongo.MongoClient(app.config["DB_IP"], app.config["DB_PORT"])
 
 def message_received(msg):
     app.logger.info(msg)
-    socketio.emit('msg', { "message": msg }, namespace='/engine')
+    socketio.emit('msg', { "message": msg }, namespace='/test')
 
 def onMessage(msg):
     app.logger.info("Got a message: %s" % msg)
@@ -207,11 +223,27 @@ def get_amq():
         broker = g.amq = connect_to_amq()
     return broker
 
-@socketio.on("connect", namespace='/engine')
+#MB socketio connect and disconnect
+@socketio.on("connect", namespace='/test')
 def connected():
     app.logger.info("USER CONNECTED")
-    g.amq = connect_to_amq()
-    emit('msg', {'message': "Hello!"}, namespace='/engine')
+    #print('*****************************')
+    #print('inside the socket connect function')
+    #print('*****************************')
+    #socketio.emit('msg', {'message': "Hello! testing if the connection receiver works"}, namespace='/test')
+
+
+#@socketio.on("msg", namespace='/test')
+#def sendmsg():
+#    print('**********************')
+#    print('inside the send message function')
+#    print('**********************')
+#    socketio.emit('msg', {'message': "Hello! testing if the message receive works"}, namespace='test')
+
+@socketio.on('disconnect', namespace='/test')
+def test_disconnect():
+    print('Client disconnected')
+
 
 if __name__ == '__main__':
     import argparse
@@ -266,5 +298,5 @@ if __name__ == '__main__':
             mongo_db = connect_to_database()[args.db]
             mongo_db.drop_collection(args.collection)
             mongo_db[args.collection].insert_many(parsed_seed_file)
-
+     
     socketio.run(app, host=args.ip, port=int(args.port), debug=True)
