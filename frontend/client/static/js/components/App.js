@@ -9,11 +9,8 @@ var NotificationContainer = require('react-notifications').NotificationContainer
 var NotificationManager = require('react-notifications').NotificationManager;
 var ModalPrompt = require('./ModalPrompt.js');
 const uuidv4 = require('uuid/v4')
-var Stomp = require('stompjs');
-
-var NodeProperties = require('./NodeProperties.js')
-
 var sid = uuidv4();
+
 
 /**
  * Top level components for React application, manages all computations involving top level state
@@ -41,11 +38,6 @@ var App = React.createClass({
   },
   
 
-/*  //MB test stuff
-  testFunctionMB: function(){
-    console.log('this is a test of props function passing')
-  },
-*/
   // Stacks used for undo/redo functionality, separated from state to avoid performance issues
   undoStacks: {
     undo: [],
@@ -114,11 +106,56 @@ var App = React.createClass({
     this.updateTasks();
     this.updateThreads();
     this.updateProjects();
+    
+    //var socket = io.connect('http://' + location.hostname + ':5000/test', { resource : 'node_modules/socket.io' });
+    var socket = io.connect('http://' + location.hostname + ':5000/test');
+    socket.on('connect', function() {
+        //console.log(msg);
+        console.log('Connection has been established  - MB');
+    });
+    
+    socket.on('message', function(data) {
+        console.log('Message has been received');
+        console.log(data);
+        
+        //update task state here
+        var logs = this.state.logs.concat([]);
+        var nodes = this.state.nodes.concat([]);
+        var currentThreadIds = this.state.currentThreadIds.concat([]);
+        logs.push(data['body']);
+        //var msg = data;
+        var msg = JSON.parse(data['body']);
+        if (msg['source'] === 'THREAD' && msg['state'] === 'STOPPED') {
+          currentThreadIds.splice(currentThreadIds.indexOf(msg['thread-id']), 1);
+        }
+        if (currentThreadIds.length === 0) {
+          this.setState({ isRunning: false });
+        }
+        // Set task status
+        if (msg.hasOwnProperty('task-id')) {
+          var node = nodes.filter(function(node) { return node.id === msg['task-id']; })[0];
+          // TODO: Typo in engine with status 'SUCCES' needs to be fixed
+          if (msg["status"] === "SUCCESS" || msg["status"] === "SUCCES"){
+            if (msg["state"] === "RUNNING") {
+              node.status = "RUNNING";
+            }
+            else if (msg["state"] === "FINISHED") {
+              node.status = "SUCCESS";
+            }
+          }
+          else if (msg["status"] === "FAILED") {
+            node.status = "FAILED";
+          }
+        }
+        this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
+    }.bind(this)); //not sure if need this bind or not?
+    
+    /*
     // SockJS functionality, will connect to RabbitMQ directly and consume messages
-    var ws = new SockJS('http://' + location.hostname + ':61613/stomp');
+    var ws = new SockJS('http://' + location.hostname + ':5000/test');
     var client = Stomp.over(ws); 
-    client.heartbeat.outgoing = 0;
-    client.heartbeat.incoming = 0;
+    //client.heartbeat.outgoing = 0;
+    //client.heartbeat.incoming = 0;
     var on_connect = function() {
       console.log('Connected');
       client.subscribe('/queue/CCDP-WebServer', function(data) {
@@ -156,7 +193,9 @@ var App = React.createClass({
       console.log('Error');
     };
     client.connect('guest', 'guest', on_connect, on_error, '/');
+  */  
   },
+  
   // Updates array of tasks to be rendered in Sidebar.js as draggable divs
   updateTasks: function() {
     var tasks = [];
@@ -458,8 +497,8 @@ var App = React.createClass({
         "cpu": tasks[i]['cpu'],
         "memory": tasks[i]['memory'],
         "task-props": tasks[i]['configuration'],
-        "tasks-running-mode": tasks[i]['tasks-running-mode'], //MB
-        "use-single-node": tasks[i]['use-single-node'] //MB
+        "tasks-running-mode": tasks[i]['tasks-running-mode'],
+        "use-single-node": tasks[i]['use-single-node']
       };
       newNodes.push({id: id, x: x, y: y, status: "", task: tasks[i]['module-id'], title: tasks[i]['name'], config: config});
       tasks[i].id = id;
@@ -964,3 +1003,4 @@ var App = React.createClass({
           handleTaskUpdate={this.handleTaskUpdate} />
 */
 module.exports = DragDropContext(HTML5Backend)(App);
+

@@ -49,11 +49,11 @@ class ThreadController():
     "name" : "csv-reader",
     "description" : "Opens a single csv file and process line by line",
     "retries" : 3,
-    "command" : ["/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/CcdpModuleLauncher.py", 
-                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_reader.py",
+    "command" : ["/nishome/frontend/server/src/CcdpModuleLauncher.py", 
+                 "-f", "/nishome/mcbowman/Documents/project/ccdp/webapp/ccdp-gui/frontend/server/src/modules/csv_reader.py",
                  "-c", "CsvReader", 
                  "-a", "broker_host=localhost,task_id=csv-reader,broker_port=61616" ],
-    "configuration" : { "filename": "/home/oeg/dev/oeg/ccdp-gui/frontend/server/data/it_help_desk.csv", 
+    "configuration" : { "filename": "/nishome/mcbowman/Documents/project/ccdp/webapp/frontend/server/data/it_help_desk.csv", 
                         "send-header": "True", 
                         "number-entries": 1},
     "task-id" : "csv-reader",
@@ -71,8 +71,8 @@ class ThreadController():
     "name" : "csv-selector",
     "description" : "Selects all entries matching a simple criteria",
     "retries" : 3,
-    "command" : ["/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/CcdpModuleLauncher.py", 
-                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_selector.py",
+    "command" : ["/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/CcdpModuleLauncher.py", 
+                 "-f", "/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/modules/csv_selector.py",
                  "-c", "CsvSelector", 
                  "-a", "broker_host=localhost,task_id=csv-selector,broker_port=61616" ],
     "configuration" : { "field": "daysOpen", 
@@ -93,8 +93,8 @@ class ThreadController():
     "name" : "csv-display",
     "description" : "Displays filtered entries",
     "retries" : 3,
-    "command" : ["/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/CcdpModuleLauncher.py", 
-                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_display.py",
+    "command" : ["/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/CcdpModuleLauncher.py", 
+                 "-f", "/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/modules/csv_display.py",
                  "-c", "CsvDisplay", 
                  "-a", "broker_host=localhost,task_id=csv-display,broker_port=61616" ],
     "configuration" : { "output-url": "file:///tmp/results.csv"},
@@ -143,6 +143,10 @@ class ThreadController():
       self.__callback_fn = callback_fn
     else:
       self.__callback_fn = None
+   
+
+    #Test the callback function MB
+    #self.__callback_fn()
 
     # if is a file or string get the json object
     if os.path.isfile(thread_req):
@@ -402,7 +406,4 @@ if __name__ == '__main__':
 
   time.sleep(15)
   print("Stopping all threads")
-  tc.stop_thread()
-
-  
-  
+  tc.stop_thread() 

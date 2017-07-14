@@ -1,6 +1,6 @@
 [
   {
-    "module_id": "csv_reader",
+    "module_id": "csv-reader",
     "name": "Csv File Reader",
     "short_description": "Reads a CSV file as input",
     "class_name": "tasks.csv_demo.CsvReader",
@@ -13,10 +13,10 @@
     },
     "module_type": "Reader"
   }, {
-    "module_id": "json_translator",
-    "name": "JSON Translator",
-    "short_description": "Translates CSV input to JSON",
-    "class_name": "tasks.csv_demo.JsonTranslator",
+    "module_id": "csv-selector",
+    "name": "Csv Selector",
+    "short_description": "Selects all entries matching a simple criteria",
+    "class_name": "tasks.csv_demo.CsvSelector",
     "ccdp_type": "ec2",
     "max_instances": 1,
     "min_instances": 1,
@@ -26,10 +26,10 @@
     },
     "module_type": "Processor"
   }, {
-    "module_id": "json_reader",
-    "name": "JSON File Reader",
-    "class_name": "tasks.csv_demo.JsonReader",
-    "short_description": "Reads a JSON file as input",
+    "module_id": "csv-display",
+    "name": "Csv Display",
+    "class_name": "tasks.csv_demo.CsvDisplay",
+    "short_description": "Displays filtered entries",
     "ccdp_type": "ec2",
     "max_instances": 1,
     "min_instances": 1,
@@ -37,6 +37,6 @@
         "input-file": "",
         "sleep-time": ""
     },
-    "module_type": "Reader"
+    "module_type": "Writer"
   }
 ]
