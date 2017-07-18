@@ -59,9 +59,9 @@ class TestEngine():
     the sender
     """
     self.__logger.debug("Got a message: %s" % msg)
-    json_msg = ccdp_utils.json_loads(msg)
-    self.__logger.info("Got a message: %s" % pformat(json_msg))
     try:
+      json_msg = ccdp_utils.json_loads(msg)
+      self.__logger.info("Got a message: %s" % pformat(json_msg))
       if json_msg.has_key['msg-type']:
         msg_type = ccdp_utils.MESSAGES[json_msg['msg-type']]
         if msg_type == "THREAD_REQUEST":
