@@ -77,7 +77,7 @@ class AmqClient(stomp.ConnectionListener):
 
     if dest != None:
       self.register(dest, on_msg, on_error)
-      self.__connection.subscribe(destination=dest, id=1, ack='auto')
+    self.__connection.subscribe(destination=self.__destination, id=1, ack='auto')
 
     self.__logger.info("Connected!!")
     self.__thread = Thread(target=self.__run)
@@ -156,8 +156,8 @@ if __name__ == '__main__':
   signal.signal(signal.SIGINT, signal_handler)
 
   msgr =  AmqClient()
-  msgr.register("/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
-  msgr.connect('172.31.20.84')
-  msgr.send_message('/queue/CcdpTaskingActivity', "This is a test message")
+  msgr.register("/queue/CCDP-Engine", on_message=onMessage, on_error=onError)
+  msgr.connect('localhost')
+  msgr.send_message('/queue/CCDP-Engine', "This is a test message")
   time.sleep(2)
   msgr.stop()

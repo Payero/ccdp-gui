@@ -67,6 +67,11 @@ def get_status(version):
 @app.route("/<version>/run", methods=["POST"])
 def start_processing(version):
     """Sends a stop processing request to the engine"""
+    run_json = request.json
+    # send to engine
+    #g.amq.send_message(app.config["FROM_SERVER_QUEUE_NAME"], run_json)
+
+    
     run_json = json.dumps(request.json['body']['request'])
     
     tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
@@ -75,7 +80,7 @@ def start_processing(version):
                           callback_fn=update_task,            # optional
                           auto_start=True,                    # optional
                           skip_req=True)                      # optional
-
+      
     return str(200)
 
 @app.route("/<version>/pause", methods=["POST"])

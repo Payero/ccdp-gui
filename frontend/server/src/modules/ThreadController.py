@@ -145,9 +145,6 @@ class ThreadController():
       self.__callback_fn = None
    
 
-    #Test the callback function MB
-    #self.__callback_fn()
-
     # if is a file or string get the json object
     if os.path.isfile(thread_req):
       with open(thread_req, 'r') as infile:
@@ -158,6 +155,8 @@ class ThreadController():
 
     self.__tasks = self.__request['tasks']
 
+    #Test the callback function MB
+    #self.__callback_fn('test data')
         
     # registering to receive messages    
     self.__amq.connect(self.__amq_ip, 
@@ -180,6 +179,21 @@ class ThreadController():
       else:
         self.start_thread()
 
+    #Can test just sending a reply in the thread controller if I can't get a response from the test engine MB
+    '''
+    update_msg = {}
+    update_msg['msg-type'] = 4
+    update_msg['ccdp-task'] = task
+    #self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
+    #self.__amq.send_message(reply_to, json.dumps(update_msg))
+    self.__on_message(reply_to, json.dumps(update_msg))  
+    wait = randint(0,5)
+    self.__logger.debug("Waiting for %d for task %s" % (wait, tid))
+    time.sleep(wait)
+    update_msg['ccdp-task']['state'] = "SUCCESSFUL"
+    self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
+    self.__amq.send_message(reply_to, json.dumps(update_msg))
+    ''' 
 
   def start_thread(self):
     '''
@@ -334,8 +348,9 @@ class ThreadController():
 
     '''
     body = {'msg-type': 'COMMAND', 'data':{'action': action, 'task': task}}
-    self.__amq.send_message(task['task-id'],  json.dumps(body) )
-
+    #Commented command sends the message to a queue labeled with the task-id, don't think this is correct MB
+    #self.__amq.send_message(task['task-id'],  json.dumps(body) )
+    self.__amq.send_message(self.__to_engine,  json.dumps(body) )
 
   def __send_msg_to_all_tasks(self, action):
     '''
