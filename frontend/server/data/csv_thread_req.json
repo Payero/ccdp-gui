@@ -1,4 +1,4 @@
-{
+{"request":{
   "name" : "CSV Test Thread",
   "description" : "CSV Reading and filtering demo",
   "tasks" : [ {
@@ -69,4 +69,8 @@
   "reply-to" : "CCDP-WebServer",
   "node-type" : "DEFAULT",
   "tasks-running-mode" : "PARALLEL"
+},
+  "configuration":{},
+  "reply-to": "CCDP-WebServer",
+  "msg-type":1
 }

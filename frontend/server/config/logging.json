@@ -48,7 +48,7 @@
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "simple",
-            "filename": "/home/oeg/dev/oeg/ccdp-gui/frontend/server/logs/test_mods.log",
+            "filename": "${CCDP_GUI}/logs/test_mods.log",
             "maxBytes": 10485760,
             "backupCount": 20,
             "encoding": "utf8"

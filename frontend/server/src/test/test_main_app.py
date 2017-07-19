@@ -51,7 +51,7 @@ if __name__ == '__main__':
                         thread_req=thread_req,              # required
                         callback_fn=callback_fn,            # optional
                         auto_start=True,                    # optional
-                        skip_req=True)                     # optional
+                        skip_req=False)                     # optional
 
   # because we set the auto_start to True, then we do not ned to invoke
   # tc.start_thread()

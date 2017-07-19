@@ -157,7 +157,7 @@ class ThreadController():
       self.__request = ccdp_utils.json_loads(thread_req)
 
 
-    self.__tasks = self.__request['tasks']
+    self.__tasks = self.__request['request']['tasks']
 
         
     # registering to receive messages    
@@ -193,7 +193,7 @@ class ThreadController():
     self.__logger.info("Starting Thread")
 
     # the thread can run in parallel or sequentially
-    if self.__request["tasks-running-mode"] == "PARALLEL":
+    if self.__request['request']["tasks-running-mode"] == "PARALLEL":
       all_running = True
       for task in self.__tasks:
         if task.has_key('state') and task['state'] != 'RUNNING':
@@ -297,7 +297,7 @@ class ThreadController():
 
           # if we are running sequentially, then the next 'RUNNING' status 
           # update should be the one we want
-          if self.__request["tasks-running-mode"] == "SEQUENTIAL":
+          if self.__request['request']["tasks-running-mode"] == "SEQUENTIAL":
             upd_task = msg['task']
             self.__logger.debug("Looking for task: %s" % upd_task['task-id'])
             if upd_task['state'] == 'RUNNING':
@@ -397,7 +397,7 @@ class ThreadController():
     Inputs:
       - action: the action to perform either START, PAUSE, or STOP
     '''
-    for task in self.__request['tasks']:
+    for task in self.__tasks:
       self.__logger.info('Sending %s message to %s' % (action, task['task-id']))
       self.__send_msg_to_task(action, task)
   
