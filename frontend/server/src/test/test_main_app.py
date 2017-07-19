@@ -89,7 +89,7 @@ if __name__ == '__main__':
   # if is set to false, we need to invoke it to start processing data
 
   # sleeping enough time to let the modules finish
-  time.sleep(10)                    
-  print("Done waiting, stopping the modules")
-  tc.stop_thread()
+  #time.sleep(10)                    
+  #print("Done waiting, stopping the modules")
+  #tc.stop_thread()
 
