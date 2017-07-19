@@ -21,8 +21,7 @@ services:
       - "61616:61616"
       - "61613:61613"
     environment:
-      - ACTIVEMQ_NAME=amqp-srv1
+      - ACTIVEMQ_NAME=ActiveMQ-Srvr1
       - ACTIVEMQ_MIN_MEMORY=1024
       - ACTIVEMQ_MAX_MEMORY=4096
       - ACTIVEMQ_ENABLED_SCHEDULER=true
-    
