@@ -288,7 +288,7 @@ class ThreadController():
         # if is an update, send it to the GUI and check running mode
         if msg_type == 'TASK_UPDATE':
           self.__logger.debug("Got a task update message")
-          task = json_msg['data']['task']
+          task = json_msg['task']
           if self.__callback_fn is not None:
             body = {'msg-type': msg_type, 'data':{'task':task}}
             self.__callback_fn(body)
