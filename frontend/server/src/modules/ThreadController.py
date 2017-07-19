@@ -157,7 +157,7 @@ class ThreadController():
       self.__request = ccdp_utils.json_loads(thread_req)
 
 
-    self.__tasks = self.__request['request']['tasks']
+    self.__tasks = self.__request['tasks']
 
         
     # registering to receive messages    
@@ -169,8 +169,14 @@ class ThreadController():
     self.__logger.debug("Done setting up, sending request to %s" % 
                         self.__to_engine)
     
+    req_msg = {"request": self.__request, 
+               "msg-type": 1, 
+               "configuration": {},
+               "reply-to": ccdp_utils.WEB_QUEUE 
+               }
+
     if not skip_req:
-      self.__amq.send_message(self.__to_engine,  self.__request )
+      self.__amq.send_message(self.__to_engine,  req_msg )
     else:
       self.__logger.info("Skipping sending request")
 
@@ -193,7 +199,7 @@ class ThreadController():
     self.__logger.info("Starting Thread")
 
     # the thread can run in parallel or sequentially
-    if self.__request['request']["tasks-running-mode"] == "PARALLEL":
+    if self.__request["tasks-running-mode"] == "PARALLEL":
       all_running = True
       for task in self.__tasks:
         if task.has_key('state') and task['state'] != 'RUNNING':
@@ -297,7 +303,7 @@ class ThreadController():
 
           # if we are running sequentially, then the next 'RUNNING' status 
           # update should be the one we want
-          if self.__request['request']["tasks-running-mode"] == "SEQUENTIAL":
+          if self.__request["tasks-running-mode"] == "SEQUENTIAL":
             upd_task = msg['task']
             self.__logger.debug("Looking for task: %s" % upd_task['task-id'])
             if upd_task['state'] == 'RUNNING':

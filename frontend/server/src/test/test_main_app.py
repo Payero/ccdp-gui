@@ -1,7 +1,38 @@
 #!/usr/bin/env python
-from modules.ThreadController import ThreadController
-import ccdp_utils
+
 import os, sys, time
+# Attempting to use centralized logging for python and AmqClient
+try:
+  if os.environ.has_key("CCDP_GUI"):
+    print "Found CCDP_GUI"
+    path = "%s/src" % os.environ["CCDP_GUI"]
+    sys.path.append(path)
+    import ccdp_utils
+    import ccdp_utils.AmqClient as AmqClient
+
+  else:
+    print "Could not find CCDP_GUI"
+    import __main__
+    fname = __main__.__file__
+    path, name = os.path.split(fname)
+    utils = "%s/../webapp/app" % path
+    if os.path.isdir(utils):
+      print "Appending %s" % utils
+      sys.path.append(utils)
+      import ccdp_utils
+      import ccdp_utils.AmqClient as AmqClient
+
+    else:
+      print "ERROR: Could not find ccdp_utils, exiting"
+      sys.exit(-1)
+
+except Exception, e:
+  print e
+  print "Could not import ccdp_utils"
+  sys.exit(-1)
+
+from modules.ThreadController import ThreadController
+
 
 def generate_module(params):
   '''
@@ -58,7 +89,7 @@ if __name__ == '__main__':
   # if is set to false, we need to invoke it to start processing data
 
   # sleeping enough time to let the modules finish
-#   time.sleep(30)                    
-#   print("Done waiting, stopping the modules")
-#   tc.stop_thread()
+  time.sleep(10)                    
+  print("Done waiting, stopping the modules")
+  tc.stop_thread()
 
