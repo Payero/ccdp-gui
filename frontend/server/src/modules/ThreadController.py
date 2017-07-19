@@ -145,9 +145,6 @@ class ThreadController():
       self.__callback_fn = None
    
 
-    #Test the callback function MB
-    #self.__callback_fn()
-
     # if is a file or string get the json object
     if os.path.isfile(thread_req):
       with open(thread_req, 'r') as infile:
@@ -158,7 +155,10 @@ class ThreadController():
 
     self.__tasks = self.__request['tasks']
 
-        
+    #Test the callback function MB
+    #self.__callback_fn('test data')
+    #self.__callback_fn('{"data": {"task": {"msg-type": 4, "ccdp-task": {"node-type": "ec2", "retries": 3, "output-ports": [{"to": "54_input-1", "port-id": "53_output-1"}], "description": "", "launched-time": 0, "task-id": 53, "host-id": "", "state": "RUNNING", "session-id": "26a2f71a-cd79-4110-aaf0-3db3d7dc5df6", "command": ["~/Documents/project/ccdp/engine/data/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=10,max=30"], "class-name": "tasks.csv_demo.CsvReader", "reply-to": "26a2f71a-cd79-4110-aaf0-3db3d7dc5df6", "configuration": {"sleep-time": "", "filename": ""}, "input-ports": [], "name": "Csv File Reader"}}}, "msg-type": "TASK_UPDATE"}')
+    
     # registering to receive messages    
     self.__amq.connect(self.__amq_ip, 
                        dest="/queue/%s" % queue_name, 
@@ -180,6 +180,21 @@ class ThreadController():
       else:
         self.start_thread()
 
+    #Can test just sending a reply in the thread controller if I can't get a response from the test engine MB
+    '''
+    update_msg = {}
+    update_msg['msg-type'] = 4
+    update_msg['ccdp-task'] = task
+    #self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
+    #self.__amq.send_message(reply_to, json.dumps(update_msg))
+    self.__on_message(reply_to, json.dumps(update_msg))  
+    wait = randint(0,5)
+    self.__logger.debug("Waiting for %d for task %s" % (wait, tid))
+    time.sleep(wait)
+    update_msg['ccdp-task']['state'] = "SUCCESSFUL"
+    self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
+    self.__amq.send_message(reply_to, json.dumps(update_msg))
+    ''' 
 
   def start_thread(self):
     '''
@@ -253,9 +268,18 @@ class ThreadController():
         if msg_type == 'TASK_UPDATE':
           self.__logger.debug("Got a task update message")
           if self.__callback_fn is not None:
-            body = {'msg-type': msg_type, 'data':{'task':json_msg['task']}}
+            #print('*********************')
+            #print(type(json_msg))
+            #print(json_msg)
+            #print('*********************')
+            body = {'msg-type': msg_type, 'data':{'task':json_msg}}
+            #body = {'msg-type': msg_type, 'data':{'task':json_msg['task']}}
             self.__callback_fn(body)
-
+          
+          #TODO reply message should be wider scope so that it has the sequential field in it
+          #Actually may to specially include this as update messages are per task and the running mode is per
+          #thread MB
+          '''
           # if we are running sequentially, then the next 'RUNNING' status 
           # update should be the one we want
           if self.__request["tasks-running-mode"] == "SEQUENTIAL":
@@ -270,7 +294,7 @@ class ThreadController():
               self.__logger.warn("Task %s failed" % upd_task['task-id'])
             elif upd_task['state'] == 'KILLED':
               self.__logger.warn("Task %s was killed " % upd_task['task-id'])
-
+           '''
 
     except Exception, e:
       self.__logger.error("Got an exception: %s" % str(e))
@@ -334,8 +358,7 @@ class ThreadController():
 
     '''
     body = {'msg-type': 'COMMAND', 'data':{'action': action, 'task': task}}
-    self.__amq.send_message(task['task-id'],  json.dumps(body) )
-
+    self.__amq.send_message(self.__to_engine,  json.dumps(body) )
 
   def __send_msg_to_all_tasks(self, action):
     '''

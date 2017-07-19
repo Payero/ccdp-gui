@@ -770,12 +770,12 @@ var App = React.createClass({
         dictJSON["threads"].push({
           "configuration":{}, 
           "msg-type": 1,
-          "reply-to": "",
+          "reply-to": sid, 
           "request":{
             "description": "", //tool tip when you hover over the module, blank for now  
             "name": "",
             "node-type": "",//from config ccdp type
-            "reply-to": "",//update
+            "reply-to": sid, //reply to a queue named by the session id
             "session-id": sid,
             "tasks": [],
             "tasks-running-mode": "PARALLEL",//add this to gui and then set here
@@ -808,7 +808,7 @@ var App = React.createClass({
 	    "name": node.title,
 	    "node-type": node.config["ccdp-type"],
 	    "output-ports": [],
-	    "reply-to": "",//can set as different than thread if you want 2 receivers
+	    "reply-to": sid,//can set as different than thread if you want 2 receivers
 	    "retries": 3,//default value 3 but can give an option
 	    "session-id": sid, 
             "task-id": node.id

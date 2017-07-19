@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import os, sys, time, traceback
 from pprint import pprint, pformat
 from random import randint
@@ -59,37 +60,33 @@ class TestEngine():
     the sender
     """
     self.__logger.debug("Got a message: %s" % msg)
-    json_msg = ccdp_utils.json_loads(msg)
-    self.__logger.info("Got a message: %s" % pformat(json_msg))
     try:
-      if json_msg.has_key['msg-type']:
-        msg_type = ccdp_utils.MESSAGES[json_msg['msg-type']]
-        if msg_type == "THREAD_REQUEST":
-          self.__logger.debug("Got a Thread Request")
-          if json_msg.has_key('request'):
-            req = json_msg['request']
-            req_dest = req['reply-to']
-            if req.has_key('tasks'):
-              tasks = req['tasks']
-              self.__logger.debug("Got %d tasks" % len(tasks) )
-              for task in tasks:
-                tid = task['task-id']
-                reply_to = task['reply-to']
-                if reply_to == None:
-                  reply_to = req_dest
-                if reply_to != None:
-                  task['state'] = 'RUNNING'
-                  update_msg = {}
-                  update_msg['msg-type'] = 4
-                  update_msg['ccdp-task'] = task
-                  self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
-                  self.__amq.send_message(reply_to, json.dumps(update_msg))
-                  wait = randint(0,5)
-                  self.__logger.debug("Waiting for %d for task %s" % (wait, tid))
-                  time.sleep(wait)
-                  update_msg['ccdp-task']['state'] = "SUCCESSFUL"
-                  self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
-                  self.__amq.send_message(reply_to, json.dumps(update_msg))
+      json_msg = ccdp_utils.json_loads(msg)
+      self.__logger.info("Got a message: %s" % pformat(json_msg))
+      if 'msg-type' in json_msg:
+        #msg_type = ccdp_utils.MESSAGES[json_msg['msg-type']] #Use this format to pass the msg-type as a number
+        msg_type = json_msg['msg-type']
+        if msg_type == "COMMAND":
+          self.__logger.debug("Got a COMMAND")
+          task = json_msg['data']['task']
+          tid = task['task-id']
+          reply_to = task['reply-to']
+          #if reply_to == None:
+            #reply_to = req_dest
+          if reply_to != None:
+            self.__logger.info("Sending a reply message!") #MB - checking if a reply message is being sent
+            task['state'] = 'RUNNING'
+            update_msg = {}
+            update_msg['msg-type'] = 4
+            update_msg['ccdp-task'] = task
+            self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
+            self.__amq.send_message(reply_to, json.dumps(update_msg))
+            wait = randint(0,5)
+            self.__logger.debug("Waiting for %d for task %s" % (wait, tid))
+            time.sleep(wait)
+            update_msg['ccdp-task']['state'] = "SUCCESSFUL"
+            self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
+            self.__amq.send_message(reply_to, json.dumps(update_msg))
 
     except Exception, e:
       self.__logger.error("Got an error while processing a message: %s" % e)
