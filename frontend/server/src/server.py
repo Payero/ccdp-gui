@@ -67,14 +67,16 @@ def get_status(version):
 @app.route("/<version>/run", methods=["POST"])
 def start_processing(version):
     """Sends a stop processing request to the engine"""
-    run_json = request.json
+    #run_json = request.json
     # send to engine
     #g.amq.send_message(app.config["FROM_SERVER_QUEUE_NAME"], run_json)
 
-    
+    reply_queue = request.json['body']['request']['reply-to'] 
     run_json = json.dumps(request.json['body']['request'])
-    
-    tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
+    #print json.dumps(request.json['body']['request'], indent=4, sort_keys=True)
+
+    #tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
+    tc = ThreadController(queue_name=reply_queue,             # required 
                           engine_queue=ccdp_utils.ENG_QUEUE,  # required
                           thread_req=run_json,                # required
                           callback_fn=update_task,            # optional
@@ -194,6 +196,7 @@ def update_task(data): #MB callback function for task updates TODO: change the n
     print('Inside the callback manager')
     print('**********************************')
     #socketio.emit('message', {'message': "Testing if the message receiver works!"}, namespace='/test')
+    print('sending the message: ' + json.dumps(data)) 
     socketio.emit('message', data, namespace='/test')
  
 def connect_to_database():
