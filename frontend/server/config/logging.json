@@ -19,7 +19,7 @@
             "class": "ccdp_utils.EnvVarRotatingFileHandler",
             "level": "DEBUG",
             "formatter": "simple",
-            "filename": "/nishome/oegante/workspace/ccdp-gui/frontend/server/logs/test_engine.log",
+            "filename": "${CCDP_GUI}/logs/test_engine.log",
             "maxBytes": 10485760,
             "backupCount": 20,
             "encoding": "utf8"
@@ -29,7 +29,7 @@
             "class": "ccdp_utils.EnvVarRotatingFileHandler",
             "level": "DEBUG",
             "formatter": "simple",
-            "filename": "/nishome/oegante/workspace/ccdp-gui/frontend/server/logs/info.log",
+            "filename": "${CCDP_GUI}/logs/info.log",
             "maxBytes": 10485760,
             "backupCount": 20,
             "encoding": "utf8"
@@ -39,7 +39,7 @@
             "class": "ccdp_utils.EnvVarRotatingFileHandler",
             "level": "ERROR",
             "formatter": "simple",
-            "filename": "/nishome/oegante/workspace/ccdp-gui/frontend/server/logs/errors.log",
+            "filename": "${CCDP_GUI}/logs/errors.log",
             "maxBytes": 10485760,
             "backupCount": 20,
             "encoding": "utf8"
@@ -48,7 +48,7 @@
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "simple",
-            "filename": "/nishome/oegante/workspace/ccdp-gui/frontend/server/logs/test_mods.log",
+            "filename": "${CCDP_GUI}/logs/test_mods.log",
             "maxBytes": 10485760,
             "backupCount": 20,
             "encoding": "utf8"

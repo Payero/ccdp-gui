@@ -1,4 +1,4 @@
-{
+{"request":{
   "name" : "CSV Test Thread",
   "description" : "CSV Reading and filtering demo",
   "tasks" : [ {
@@ -15,6 +15,7 @@
     "task-id" : "csv-reader",
     "session-id" : "oeg-test",
     "node-type" : "DEFAULT",
+    "state": "PENDING",
     "reply-to" : "CCDP-WebServer",
     "input-ports" : [ ],
     "output-ports" : [ {
@@ -37,6 +38,7 @@
     "task-id" : "csv-selector",
     "session-id" : "oeg-test",
     "node-type" : "DEFAULT",
+    "state": "PENDING",
     "reply-to" : "CCDP-WebServer",
     "input-ports" : [ ],
     "output-ports" : [ {
@@ -57,6 +59,7 @@
     "task-id" : "csv-display",
     "session-id" : "oeg-test",
     "node-type" : "DEFAULT",
+    "state": "PENDING",
     "reply-to" : "CCDP-WebServer",
     "input-ports" : [ ],
     "output-ports" : [ ]
@@ -66,4 +69,8 @@
   "reply-to" : "CCDP-WebServer",
   "node-type" : "DEFAULT",
   "tasks-running-mode" : "PARALLEL"
+},
+  "configuration":{},
+  "reply-to": "CCDP-WebServer",
+  "msg-type":1
 }

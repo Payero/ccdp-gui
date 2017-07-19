@@ -19,7 +19,6 @@ class CsvReader(CcdpModule):
     '''
     super(self.__class__, self).__init__(params)
     self._logger.info("Starting the new class")
-    
 
   
   def _on_message(self, msg):
