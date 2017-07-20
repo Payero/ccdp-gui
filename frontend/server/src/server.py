@@ -10,7 +10,6 @@ from flask import (
         render_template,
         jsonify
 )
-from flask_sse import sse  
 import pymongo
 import logging
 from logging.handlers import RotatingFileHandler
