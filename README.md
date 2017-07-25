@@ -6,8 +6,43 @@
 application itelf.  The services contains a single docker-compose.yml file with
 docker containers shared among multiple projects such as ActiveMQ and MongoDb.
 
-  Before we run the GUI we need to make sure both containers are running:
+  If you want to see a working version do the following (thanks Kevin Kelly):
+- Clone the gui-angular project
+- Get the feat-react-temp
+- docker-compose build && docker-compose up
+- http://&lt;hostname&gt;:20223 shows the angular version that we n longer use
+- http://&lt;hostname&gt;:20223/react shows the React version we are incorporating
 
+### Before Installing
+- Ensure you have [Docker]() and [Docker-Compose]() installed.  Installation instructions can be found at https://docs.docker.com/
+- If running the client locally (i.e. not in a container) you will need to install some python components.  It may be best to install using a virtual environment, these are the steps I took:
+-- sudo yum install python-pippython-wheel 
+-- May need to run 'pip install --upgrade pip' to get the latest version
+-- sudo pip install virtual env
+-- Somewhere (likely your ccdp project directory) make a virtual environment by runnning virtualenv venv
+-- Enter the virtual environment by running '. /venv/bin/activate'
+-- Then install the necessary libraries
+---  Flask
+--- flask-sse
+--- pymongo
+--- stomp.py
+--- flask_socketio
+--- eventlet
+
+## Setup AMQ and MongoDB services
+  Before we run the GUI we need to make sure the ActiveMQ and MongoDB containers are running:
+
+  cd to the /webapp/services and run
+  ```
+  docker-compose up &
+  ```
+
+  This will launch the amq and mongo services. You should now see an 'amq' and a 'mongo' repository when you type 
+  ```
+  docker images
+  ```
+
+  Once the 'up' command finishes running, type
   ```
   docker ps
   ```
@@ -19,48 +54,15 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 5285307c71f9        mongo:3.2         "docker-entrypoint..."   Up       mongo
 ```
 
-  If you want to see a working version do the following (thanks Kevin Kelly):
-- Clone the gui-angular project
-- Get the feat-react-temp
-- docker-compose build && docker-compose up
-- http://&lt;hostname&gt;:20223 shows the angular version that we n longer use
-- http://&lt;hostname&gt;:20223/react shows the React version we are incorporating
-
-### To Do:
-- Is not running, there is an error message about port 61613, don't know why. 
-    - It works if you run the same python code outside the container
-    - It might be something to do with how the frontend container is launched
-- Find a better way to deply the whole thing:
-    - Can we check if the docker containers are running?
-- This file is not truly what needs to be executed in order to run the GUI so we need to finish it
-- Add a way to upload modules as zip files into a S3 bucket
-- Add a test page so we can send messages to the engine for either canned json files or generated
-    - Add a new json and provide name and json file (upload the file or paste)
-    - Create forms to send specific messages where you can just modify the values and the json is generated
-    - The response is displayed in the same test page
-    - We can also add the rolling log file and display it at the bottom of the page
-- Do we really need docker-compose? That used to be the case because we had more than one container which is no longer the case
-    - We can keep in case we add more containers later and keep it consistent with other projects?
-    - We ditch it and use docker directly?  
-- Can we add a test page where frontail (see Testing) is loaded?  This way we would not need multiple pages
-
-
-
-### Installing
-
-- Ensure you have [Docker]() and [Docker-Compose]() installed.
-- ``` - Need to provide actual installation steps if required ```
-
-
-### Running
+### Running the client
 
 - ``` - Need to verify the steps below are true and edit it as necessary ```
 - First, build the docker images. Thankfully, `docker-compose` provides a way to orchestrate multiple Docker containers.
-
+- Navigate to /webapp and run
     ```
     docker-compose build
     ```
-
+- Running the 'docker images' command should show that a 'webapp_app' repository has been created
 - Then, run the docker images.
 
     ```
@@ -70,13 +72,20 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 - At this point, mongo may be empty, so we provide `modules-mongo.json` for seeding. To seed the database, copy `modules-mongo.json` to `ccdp/webapp/data/`. Then, enter the docker container running mongo and import the data. Below illustrates each step.
 
     ```
-    ~/ccdp $ mkdir -p webapp/data # you may need to make a data/ subdir under webapp/
-    ~/ccdp $ cp modules-mongo.json webapp/data/. # copy json seed file to data dir (data dir is mounted as volume to mongo docker container)
+    # docker compose mounted your systems /data/mongodb/data to /data in the mongodb docker container
+    # So all we need to do is copy json seed from /webapp/frontend/server/data/modules-mongo.json to /data/mongodb/data/
+    ~/ccdp $ cp modules-mongo.json webapp/data/. 
+
+    # View the currently running docker containers
     ~/ccdp $ docker ps # view the currently running docker containers
     CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES
     9d80e64e2621        webapp_app          "python server.py --i"   11 minutes ago      Up 10 minutes       0.0.0.0:20223->5000/tcp   webapp_app_1
     8ca20944891b        mongo:3.2           "/entrypoint.sh mongo"   28 minutes ago      Up 10 minutes       27017/tcp                 webapp_db_1
-    ~/ccdp $ docker exec -it 8ca20944891b bash -l # enter the container with ID=8ca20944891b and execute `bash -l` (giving you an interactive shell)
+
+    # enter the correct container (in this case 8ca20944891b) and execute 'bash -l' to obtain an interactive shell
+    ~/ccdp $ docker exec -it 8ca20944891b bash -l 
+
+    # seed the database
     root@mongo:/# mongoimport --db ccdp --collection modules --jsonArray /data/db/modules-mongo.json
     2016-07-12T18:28:41.963+0000	connected to: localhost
     2016-07-12T18:28:41.969+0000	imported 3 documents
@@ -122,3 +131,21 @@ Then, run the following from this directory to build a new bundle.js:
 ### Resources
 
 ### Any Other Information you Want
+
+### To Do:
+- Is not running, there is an error message about port 61613, don't know why. 
+    - It works if you run the same python code outside the container
+    - It might be something to do with how the frontend container is launched
+- Find a better way to deply the whole thing:
+    - Can we check if the docker containers are running?
+- This file is not truly what needs to be executed in order to run the GUI so we need to finish it
+- Add a way to upload modules as zip files into a S3 bucket
+- Add a test page so we can send messages to the engine for either canned json files or generated
+    - Add a new json and provide name and json file (upload the file or paste)
+    - Create forms to send specific messages where you can just modify the values and the json is generated
+    - The response is displayed in the same test page
+    - We can also add the rolling log file and display it at the bottom of the page
+- Do we really need docker-compose? That used to be the case because we had more than one container which is no longer the case
+    - We can keep in case we add more containers later and keep it consistent with other projects?
+    - We ditch it and use docker directly?  
+- Can we add a test page where frontail (see Testing) is loaded?  This way we would not need multiple pages
