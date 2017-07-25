@@ -365,7 +365,7 @@ class CcdpModule(object):
     '''
     self._logger.info("Stopping module")
     
-    body = {'msg-type': 'TASK_UPDATE', 'data':{'task':self._task}}
+    body = {'msg-type': 4, 'task':self._task}
     self._stop_module()
     dest = self._task['reply-to']
     self._send_message(dest, json.dumps(body) )
