@@ -1,0 +1,11 @@
+ticket,requestor,RequestorSeniority,ITOwner,FiledAgainst,TicketType,Severity,Priority,daysOpen,Satisfaction
+1,1929,1 - Junior,50,Systems,Issue,2 - Normal,0 - Unassigned,3,1 - Unsatisfied
+2,1587,2 - Regular,15,Software,Request,1 - Minor,1 - Low,5,1 - Unsatisfied
+3,925,2 - Regular,15,Access/Login,Request,2 - Normal,0 - Unassigned,0,0 - Unknown
+4,413,4 - Management,22,Systems,Request,2 - Normal,0 - Unassigned,20,0 - Unknown
+5,318,1 - Junior,22,Access/Login,Request,2 - Normal,1 - Low,1,1 - Unsatisfied
+6,858,4 - Management,38,Access/Login,Request,2 - Normal,3 - High,0,0 - Unknown
+7,1978,3 - Senior,10,Systems,Request,2 - Normal,3 - High,9,0 - Unknown
+8,1209,4 - Management,1,Software,Request,2 - Normal,0 - Unassigned,15,0 - Unknown
+9,887,2 - Regular,14,Software,Request,2 - Normal,2 - Medium,6,1 - Unsatisfied
+10,1780,3 - Senior,46,Access/Login,Request,2 - Normal,1 - Low,1,1 - Unsatisfied
