@@ -6,7 +6,11 @@ Created on Jun 19, 2017
 @author: oeg
 '''
 from modules.CcdpModule import CcdpModule
+from ccdp_utils.thread_pool import ThreadPool
 import time
+import boto3, botocore
+from pprint import pprint, pformat
+import urllib, ast
 
 class CsvReader(CcdpModule):
   '''
@@ -24,28 +28,39 @@ class CsvReader(CcdpModule):
   def _on_message(self, msg):
     self._logger.info("Got some message")
     
+
   def _start_module(self, task):
     self._logger.info("Starting module")
-    config = task['configuration']
-    self._logger.debug("Config " + str(config))
-    with open(config['filename']) as infile:
+    self.__config = task['configuration']
+    self.__thread_pool = ThreadPool(10)
+    self.__gateway = boto3.client('apigateway')
+    self.__header = None
+
+    self._logger.debug("Config " + str(self.__config))
+    with open(self.__config['filename']) as infile:
       lines = infile.readlines()
       
-      self._logger.info("Sending Header")
-      data = {'is-header': True, 'entries': lines[0]}
+      self.__header = lines[0].split(',')
+      self._logger.info("Sending Header: %s" % self.__header)
+      name = self.__config['field']
+      self.__config['column-number'] = self.__header.index(name) 
+
+
+      data = {'is-header': True, 'entries': self.__header}
       self._send_results('csv-reader', data)
       
       # now sending all the lines in pack of 'increment' size
       total_lines = len(lines) - 1
       start = 1
-      inc = config['number-entries']
+      inc = self.__config['number-entries']
       end = start + inc
       while start < total_lines:
         
         self._logger.debug("Loading %d lines from %d to %d" % (end, start, end ))
         entries = lines[start: end]
-        data = {'is-header': False, 'entries': entries}
-        self._send_results('csv-reader', data )
+        
+        self.__thread_pool.add_task(self.__send_request, entries)
+        print ("Done with that")
 
         start = end
 
@@ -54,10 +69,52 @@ class CsvReader(CcdpModule):
         else:
           end = total_lines
     
+      self.__thread_pool.wait_completion()
+
     self._logger.info("%s done Processing " % self._task['name'])
     self._send_done_processing()
 
-      
+
+  def __send_request(self, data, callback=None):
+    print ("In the Send Request: %s" % pformat(data) )
+    self._logger.debug("Sending Request: %s" % pformat(data) )
+
+
+    args = {"column-number":  self.__config['column-number'], 
+            "operator":       self.__config['operator'], 
+            "value":          self.__config['value'], 
+            "entries":        data
+          }
+    req = {'arguments':   args, 
+           'bkt_name':    'ccdp-tasks', 
+           'keep_files':  False, 
+           'mod_name':    'csv_selector_lambda', 
+           'verb_level':  'debug', 
+           'zip_file':    'csv_selector_lambda.py'
+          }
+
+    body = urllib.base64.standard_b64encode( str(req) )
+    
+    response = self.__gateway.test_invoke_method(
+          restApiId='cx62aa0x70',
+          resourceId='3jpl8x',
+          httpMethod='POST',
+          pathWithQueryString='string',
+          body="\"%s\"" % str(body),
+        )
+  
+    result = ast.literal_eval(response['body'])
+    self._logger.info("Status: %d ==> Result: %s" % (response['status'], pformat(result)))
+
+    if result != 'None':
+      self._logger.debug("Got results: %s" % pformat(result) )
+      data = {'is-header': False, 'entries': result}
+      self._send_results('csv-reader', data)
+
+    else:
+      self._logger.debug("Got None, skipping" )
+
+
   def _pause_module(self):
     self._logger.info("Starting module")
   
@@ -104,6 +161,5 @@ if __name__ == '__main__':
   (options, args) = parser.parse_args()
   # it expects a dictionary 
   opts = vars(options)
-  CsvReader(opts)
-   
+  cr = CsvReader(opts)
   

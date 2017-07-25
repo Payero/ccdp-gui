@@ -1,0 +1,52 @@
+{
+  "name" : "CSV Test Thread",
+  "description" : "CSV Reading and filtering demo",
+  "tasks" : [ {
+    "name" : "csv-reader",
+    "description" : "Opens a single csv file and process line by line",
+    "retries" : 3,
+    "command" : ["/home/oeg/dev/oeg/ccdp-engine/python/CcdpModuleLauncher.py", 
+                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_reader_lambda.py",
+                 "-c", "CsvReader", 
+                 "-a", "broker_host=localhost,task_id=csv-reader,broker_port=61616" ],
+    "configuration" : { "filename": "/home/oeg/dev/oeg/ccdp-gui/frontend/server/data/it_help_desk_less.csv", 
+                        "send-header": "True", 
+                        "number-entries": 1,
+                        "field": "daysOpen", 
+                        "operator": "GE", 
+                        "value": 5},
+    "task-id" : "csv-reader",
+    "session-id" : "oeg-test",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ {
+      "port-id" : "csv-reader",
+      "from-port" : [ ],
+      "to-port" : [ "csv-display" ]
+    } ]
+  },
+  {
+    "name" : "csv-display",
+    "description" : "Displays filtered entries",
+    "retries" : 3,
+    "command" : ["/home/oeg/dev/oeg/ccdp-engine/python/CcdpModuleLauncher.py", 
+                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_display.py",
+                 "-c", "CsvDisplay", 
+                 "-a", "broker_host=localhost,task_id=csv-display,broker_port=61616" ],
+    "configuration" : { "output-url": "file:///tmp/results.csv"},
+    "task-id" : "csv-display",
+    "session-id" : "oeg-test",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ ]
+  } ],  
+  "thread-id" : "csv-reader-thread-1",
+  "session-id" : "oeg-test",
+  "reply-to" : "CCDP-WebServer",
+  "node-type" : "DEFAULT",
+  "tasks-running-mode" : "PARALLEL"
+}

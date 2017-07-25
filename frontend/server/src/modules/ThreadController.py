@@ -287,8 +287,8 @@ class ThreadController():
         
         # if is an update, send it to the GUI and check running mode
         if msg_type == 'TASK_UPDATE':
-          self.__logger.debug("Got a task update message")
-          task = json_msg['task']
+          self.__logger.debug("Got a task update message: %s" % pformat(json_msg))
+          task = json_msg['data']['task']
           if self.__callback_fn is not None:
             body = {'msg-type': msg_type, 'data':{'task':task}}
             self.__callback_fn(body)
@@ -304,7 +304,7 @@ class ThreadController():
           # if we are running sequentially, then the next 'RUNNING' status 
           # update should be the one we want
           if self.__request["tasks-running-mode"] == "SEQUENTIAL":
-            upd_task = msg['task']
+            upd_task = json_msg['data']['task']
             self.__logger.debug("Looking for task: %s" % upd_task['task-id'])
             if upd_task['state'] == 'RUNNING':
               for task in self.__tasks:

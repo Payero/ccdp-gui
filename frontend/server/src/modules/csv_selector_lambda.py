@@ -9,51 +9,52 @@ __OPS = ['LT', 'LE', 'EQ', 'GT', 'GE', 'SW', 'EW', 'CN']
 def runTask(data):
   print "Selecting Data from %s" % pformat(data)
 
-  entry = data['record'].split(",")
-  pos = int(data['column-number'])
-  op = data['operator']
-  value = data['value']
-  
-  print "Cheking that %s is %s than %s" % (entry[pos], op, value)
-
-  if len(entry) < pos:
-    print('ERROR, could not parse the data')
-    return None
-  
-  found = False
-  print("Is %s %s %s" % (entry[pos], op, value))
-
-  if op in __STR_OPS:
-    val = str(entry[pos])
-    if op == 'SW' and val.startswith(value):
-      found = True
-    elif op == 'EW' and val.endswith(value):
-      found = True
-    elif op == 'CN' and val.find(value) >= 0:
-      found = True
-  else:
-    val = entry[pos]
-    try:
-      val = int(val)
-    except:
-      pass
-    if op == 'LT' and val < value:
-      found = True
-    elif op == 'LE' and val <= value:
-      found = True
-    elif op == 'EQ' and val == value:
-      found = True
-    elif op == 'GT' and val > value:
-      found = True
-    elif op == 'GE' and val >= value:
-      found = True
-    elif op not in __OPS:
-      found = True
+  for entry in data['entries']:
+    entry = entry.split(",")
+    pos = int(data['column-number'])
+    op = data['operator']
+    value = data['value']
     
-  if found:
-    return entry
-  else:
-    return None
+    print "Cheking that %s is %s than %s" % (entry[pos], op, value)
+
+    if len(entry) < pos:
+      print('ERROR, could not parse the data')
+      return None
+    
+    found = False
+    print("Is %s %s %s" % (entry[pos], op, value))
+
+    if op in __STR_OPS:
+      val = str(entry[pos])
+      if op == 'SW' and val.startswith(value):
+        found = True
+      elif op == 'EW' and val.endswith(value):
+        found = True
+      elif op == 'CN' and val.find(value) >= 0:
+        found = True
+    else:
+      val = entry[pos]
+      try:
+        val = int(val)
+      except:
+        pass
+      if op == 'LT' and val < value:
+        found = True
+      elif op == 'LE' and val <= value:
+        found = True
+      elif op == 'EQ' and val == value:
+        found = True
+      elif op == 'GT' and val > value:
+        found = True
+      elif op == 'GE' and val >= value:
+        found = True
+      elif op not in __OPS:
+        found = True
+      
+    if found:
+      return entry
+    else:
+      return None
 
 
 if __name__ == '__main__':
