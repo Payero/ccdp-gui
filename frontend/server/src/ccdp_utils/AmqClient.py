@@ -67,7 +67,9 @@ class AmqClient(stomp.ConnectionListener):
 
   def connect(self, broker, port=61616, dest=None, on_msg=None, on_error=None):
     self.__logger.info("Connecting to AMQ: %s:%d" % (broker, port)) 
-    self.__connection = stomp.Connection(host_and_ports=[(broker, port)], auto_content_length=False)
+    # TODO MB Getting Internal Server Error when this is run but cannot run it in a docker container without this
+    #self.__connection = stomp.Connection(host_and_ports=[(broker, port)], auto_content_length=False)
+    self.__connection = stomp.Connection(auto_content_length=False)
     self.__logger.info("Setting The listener")
     self.__connection.set_listener('', self)
     self.__logger.debug("Starting the connection")
