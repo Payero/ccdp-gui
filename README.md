@@ -16,18 +16,18 @@ docker containers shared among multiple projects such as ActiveMQ and MongoDb.
 ### Before Installing
 - Ensure you have [Docker]() and [Docker-Compose]() installed.  Installation instructions can be found at https://docs.docker.com/
 - If running the client locally (i.e. not in a container) you will need to install some python components.  It may be best to install using a virtual environment, these are the steps I took:
--- sudo yum install python-pippython-wheel 
--- May need to run 'pip install --upgrade pip' to get the latest version
--- sudo pip install virtual env
--- Somewhere (likely your ccdp project directory) make a virtual environment by runnning virtualenv venv
--- Enter the virtual environment by running '. /venv/bin/activate'
--- Then install the necessary libraries
----  Flask
---- flask-sse
---- pymongo
---- stomp.py
---- flask_socketio
---- eventlet
+    - sudo yum install python-pippython-wheel 
+    - May need to run 'pip install --upgrade pip' to get the latest version
+    - sudo pip install virtual env
+    - Somewhere (likely your ccdp project directory) make a virtual environment by runnning virtualenv venv
+    - Enter the virtual environment by running '. /venv/bin/activate'
+    - Then install the necessary libraries
+        -  Flask
+        - flask-sse
+        - pymongo
+        - stomp.py
+        - flask_socketio
+        - eventlet
 
 ## Setup AMQ and MongoDB services
   Before we run the GUI we need to make sure the ActiveMQ and MongoDB containers are running:
@@ -71,28 +71,33 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 
 - At this point, mongo may be empty, so we provide `modules-mongo.json` for seeding. To seed the database, copy `modules-mongo.json` to `ccdp/webapp/data/`. Then, enter the docker container running mongo and import the data. Below illustrates each step.
 
+    Docker compose mounted your systems /data/mongodb/data to /data in the mongodb docker container. So all we need to do is copy 
+    the json seed from /webapp/frontend/server/data/modules-mongo.json to /data/mongodb/data/
     ```
-    # docker compose mounted your systems /data/mongodb/data to /data in the mongodb docker container
-    # So all we need to do is copy json seed from /webapp/frontend/server/data/modules-mongo.json to /data/mongodb/data/
-    ~/ccdp $ cp modules-mongo.json webapp/data/. 
+    $ cp /webapp/data/modules-mongo.json /data/mongodb/data/ 
+    ```
 
-    # View the currently running docker containers
-    ~/ccdp $ docker ps # view the currently running docker containers
+    View the currently running docker containers
+    ```
+    $ docker ps 
     CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES
     9d80e64e2621        webapp_app          "python server.py --i"   11 minutes ago      Up 10 minutes       0.0.0.0:20223->5000/tcp   webapp_app_1
     8ca20944891b        mongo:3.2           "/entrypoint.sh mongo"   28 minutes ago      Up 10 minutes       27017/tcp                 webapp_db_1
+    ```
 
-    # enter the correct container (in this case 8ca20944891b) and execute 'bash -l' to obtain an interactive shell
-    ~/ccdp $ docker exec -it 8ca20944891b bash -l 
+    Enter the correct container (in this case 8ca20944891b) and execute 'bash -l' to obtain an interactive shell
+    ```
+    $ docker exec -it 8ca20944891b bash -l 
+    ```
 
-    # seed the database
+    Seed the database
+    ```
     root@mongo:/# mongoimport --db ccdp --collection modules --jsonArray /data/db/modules-mongo.json
     2016-07-12T18:28:41.963+0000	connected to: localhost
     2016-07-12T18:28:41.969+0000	imported 3 documents
     ```
 
-- Now, by navigating to localhost:20223 (if you are running this on another server, try running <IP_OF_SERVER>:20223), you should be able to see the webapp with several modules listed.
-- ``` - Let's change this port for something more normal ```
+- Now, by navigating to localhost:5000 (if you are running this on another server, try running \<IP_OF_SERVER\>:5000), you should be able to see the webapp with several modules listed.
 
 ## Testing
 There is a TestEngine available for development and testing. It does the following: 
