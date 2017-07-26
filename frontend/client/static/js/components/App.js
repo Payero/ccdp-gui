@@ -33,6 +33,7 @@ var App = React.createClass({
       case 'UNDO': this.handleUndo(); break;
       case 'REDO': this.handleRedo(); break;
       case 'RUN': this.handleRunGraph(); break;
+      case 'STOP': this.handleStopGraph(); break;
     }
     event.preventDefault();
   },
@@ -653,6 +654,13 @@ var App = React.createClass({
       });
     }
   },
+  // Stops state so we don't have to manually refresh
+  handleStopGraph: function() {
+    if (this.state.isRunning) {
+        NotificationManager.success("Just for testing, lets pretend we stopped the thread");
+        this.setState({ isRunning: false });
+    }
+  },
   // Callback for Export Graph button in GraphControls
   handleExportGraph: function() {
     var generatedJSON = this.generateJSONExport();
@@ -982,6 +990,7 @@ var App = React.createClass({
           updateStateCallback={this.updateStateCallback}
           generateCurrentThreads={this.generateCurrentThreads}
           handleRunGraph={this.handleRunGraph}
+          handleStopGraph={this.handleStopGraph}
           handleExportGraph={this.handleExportGraph}
           handleClearGraph={this.handleClearGraph}
           handleSaveProject={this.handleSaveProject}

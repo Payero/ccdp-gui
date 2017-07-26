@@ -74,6 +74,7 @@ var Graph = React.createClass({
       <div className="col-xs-10 col-md-10">
         <GraphControls
           onRunGraph={this.props.handleRunGraph}
+          onStopGraph={this.props.handleStopGraph}
           onExportGraph={this.props.handleExportGraph} 
           onClearGraph={this.props.handleClearGraph}
           onSaveGraph={this.props.handleSaveProject}
