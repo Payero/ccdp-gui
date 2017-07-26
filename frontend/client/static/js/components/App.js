@@ -10,7 +10,7 @@ var NotificationManager = require('react-notifications').NotificationManager;
 var ModalPrompt = require('./ModalPrompt.js');
 const uuidv4 = require('uuid/v4')
 var sid = uuidv4();
-
+var io=require('socket.io-client')
 
 /**
  * Top level components for React application, manages all computations involving top level state
@@ -107,17 +107,22 @@ var App = React.createClass({
     this.updateThreads();
     this.updateProjects();
     
-    //var socket = io.connect('http://' + location.hostname + ':5000/test', { resource : 'node_modules/socket.io' });
-    var socket = io.connect('http://' + location.hostname + ':5000/test');
+    //var socket = io.connect('http://' + location.hostname + ':5000', { resource : 'node_modules/socket.io' });
+    //var socket = io.connect('http://' + location.hostname + ':5000/test');
+    var socket = io.connect();
     socket.on('connect', function() {
         //console.log(msg);
         console.log('Connection has been established  - MB');
     });
     
-    socket.on('message', function(data) {
+    socket.on('message', function(data){ //this.handleReply)
         console.log('Message has been received');
         console.log(data);
-        
+        console.log(socket)
+        console.log(socket.io.readyState)
+        setTimeout(function(){console.log(socket.io.readyState)},5000)
+        }.bind(this));
+        /*
         //update task state here
         var logs = this.state.logs.concat([]);
         var nodes = this.state.nodes.concat([]);
@@ -147,8 +152,8 @@ var App = React.createClass({
             node.status = "FAILED";
           }
         }
-        this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
-    }.bind(this)); //not sure if need this bind or not?
+        this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });*/
+    //}.bind(this)); //not sure if need this bind or not?
     
     /*
     // SockJS functionality, will connect to RabbitMQ directly and consume messages
@@ -196,6 +201,7 @@ var App = React.createClass({
   */  
   },
   
+
   // Updates array of tasks to be rendered in Sidebar.js as draggable divs
   updateTasks: function() {
     var tasks = [];

@@ -156,7 +156,7 @@ class ThreadController():
     self.__tasks = self.__request['tasks']
 
     #Test the callback function MB
-    #self.__callback_fn('test data')
+    self.__callback_fn('test data')
     #self.__callback_fn('{"data": {"task": {"msg-type": 4, "ccdp-task": {"node-type": "ec2", "retries": 3, "output-ports": [{"to": "54_input-1", "port-id": "53_output-1"}], "description": "", "launched-time": 0, "task-id": 53, "host-id": "", "state": "RUNNING", "session-id": "26a2f71a-cd79-4110-aaf0-3db3d7dc5df6", "command": ["~/Documents/project/ccdp/engine/data/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=10,max=30"], "class-name": "tasks.csv_demo.CsvReader", "reply-to": "26a2f71a-cd79-4110-aaf0-3db3d7dc5df6", "configuration": {"sleep-time": "", "filename": ""}, "input-ports": [], "name": "Csv File Reader"}}}, "msg-type": "TASK_UPDATE"}')
     
     # registering to receive messages    
