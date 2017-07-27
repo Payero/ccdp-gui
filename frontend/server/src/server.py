@@ -19,10 +19,10 @@ import json
 import ccdp_utils
 from pprint import pprint, pformat
 import ccdp_utils.AmqClient as AmqClient
-from flask_socketio import SocketIO, emit, send#, SocketIOTestClient
+from flask_socketio import SocketIO, emit, send#, SocketIOTestClient #SocketIO test client is for testing that the messages are sending correctly 
 import eventlet
 from modules.ThreadController import ThreadController
-
+import inspect
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
@@ -196,17 +196,19 @@ def update_task(data): #MB callback function for task updates TODO: change the n
     data = json.dumps(data)
     print('**********************************')
     print('Inside the callback manager')
-    print(socketio)
     print(type(data))
     print(data)
     print('**********************************')
+    #pprint(inspect.getmembers(socketio))
+    #print('**********************************')
     #socketio = SocketIO(app, async_mode="eventlet")
     #socketio.run(app, host=args.ip, port=int(args.port), debug=True)
     #socketio.emit('message', {'message': "Testing if the message receiver works!"}, namespace='/test')
     #print('sending the message: ' + json.dumps(data)) 
     
     #socketio.send('test', data, broadcast=True)
-    socketio.emit('message', data, broadcast=True)
+    socketio.send(data)
+    #socketio.emit('message', data, broadcast=True)
     #print(testclient.get_received())
     #print('**********************************')
  
@@ -216,7 +218,7 @@ def connect_to_database():
 
 def message_received(msg):
     app.logger.info(msg)
-    socketio.emit('msg', { "message": msg }, namespace='/')
+    #app.socketio.emit('msg', { "message": msg }, namespace='/')
 
 def onMessage(msg):
     app.logger.info("Got a message: %s" % msg)
@@ -243,6 +245,7 @@ def get_amq():
         broker = g.amq = connect_to_amq()
     return broker
 
+
 #MB socketio connect and disconnect
 @socketio.on("connect", namespace='/test')
 def connected():
@@ -253,7 +256,7 @@ def connected():
     #socketio.emit('msg', {'message': "Hello! testing if the connection receiver works"}, namespace='/test')
 
 
-#@socketio.on("msg", namespace='/test')
+@socketio.on("msg", namespace='/test')
 #def sendmsg():
 #    print('**********************')
 #    print('inside the send message function')
