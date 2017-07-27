@@ -76,7 +76,7 @@ def start_processing(version):
     #print json.dumps(request.json['body']['request'], indent=4, sort_keys=True)
 
     #tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
-    tc = ThreadController(queue_name=reply_queue,             # required 
+    app.config["tc"] = ThreadController(queue_name=reply_queue,             # required 
                           engine_queue=ccdp_utils.ENG_QUEUE,  # required
                           thread_req=run_json,                # required
                           callback_fn=update_task,            # optional
