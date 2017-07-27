@@ -22,6 +22,7 @@ import ccdp_utils.AmqClient as AmqClient
 from flask_socketio import SocketIO, emit, send#, SocketIOTestClient
 import eventlet
 from modules.ThreadController import ThreadController
+from numpy import broadcast
 
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
@@ -83,6 +84,7 @@ def start_processing(version):
                           auto_start=True,                    # optional
                           skip_req=True)                      # optional
                           #socket = socketio)                  #just for testing purposes
+    
     return str(200)
 
 @app.route("/<version>/pause", methods=["POST"])
@@ -193,13 +195,13 @@ def _delete_project(db, project_id):
 
 #@socketio.on('message')
 def update_task(data): #MB callback function for task updates TODO: change the namespace to something appropriate
-    data = json.dumps(data)
-    print('**********************************')
-    print('Inside the callback manager')
-    print(socketio)
-    print(type(data))
-    print(data)
-    print('**********************************')
+#     data = json.dumps(data)
+    app.logger.info('**********************************')
+    app.logger.info('Inside the callback manager')
+    app.logger.info(socketio)
+    app.logger.info(type(data))
+    app.logger.info(data)
+    app.logger.info('**********************************')
     #socketio = SocketIO(app, async_mode="eventlet")
     #socketio.run(app, host=args.ip, port=int(args.port), debug=True)
     #socketio.emit('message', {'message': "Testing if the message receiver works!"}, namespace='/test')
@@ -207,10 +209,10 @@ def update_task(data): #MB callback function for task updates TODO: change the n
     
     #socketio.send('test', data, broadcast=True)
     socketio.emit('message', data, broadcast=True)
+    socketio.send(data=data, broadcast=True)
     #print(testclient.get_received())
     #print('**********************************')
  
-
 def connect_to_database():
     return pymongo.MongoClient(app.config["DB_IP"], app.config["DB_PORT"])
 
