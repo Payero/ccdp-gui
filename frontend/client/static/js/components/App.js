@@ -663,7 +663,8 @@ var App = React.createClass({
   },
   // Callback for Export Graph button in GraphControls
   handleExportGraph: function() {
-    var generatedJSON = this.generateJSONExport();
+    //Should be able to use the same run function as there is no difference between the code being sent and exported 
+    var generatedJSON = this.generateJSONRun();
     if ($.isEmptyObject(generatedJSON)) {
         NotificationManager.info("No JSON generated - no workflow thread defined");
         return null;
