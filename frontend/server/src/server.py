@@ -22,11 +22,11 @@ import ccdp_utils.AmqClient as AmqClient
 from flask_socketio import SocketIO, emit, send#, SocketIOTestClient #SocketIO test client is for testing that the messages are sending correctly 
 import eventlet
 from modules.ThreadController import ThreadController
-import inspect
+from numpy import broadcast
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
-socketio = SocketIO(app, async_mode="eventlet")
+socketio = SocketIO(app, async_mode="threading")
 #testclient = SocketIOTestClient(app, socketio) #for trying to test socketio stuff MB
 
 #####################################################################
@@ -83,6 +83,7 @@ def start_processing(version):
                           auto_start=True,                    # optional
                           skip_req=True)                      # optional
                           #socket = socketio)                  #just for testing purposes
+    
     return str(200)
 
 @app.route("/<version>/pause", methods=["POST"])
@@ -191,28 +192,24 @@ def _delete_project(db, project_id):
     result =  db["projects"].delete_one({"name": project_id})
     return result
 
-#@socketio.on('message')
+@socketio.on('message')
 def update_task(data): #MB callback function for task updates TODO: change the namespace to something appropriate
-    data = json.dumps(data)
-    print('**********************************')
-    print('Inside the callback manager')
-    print(type(data))
-    print(data)
-    print('**********************************')
-    #pprint(inspect.getmembers(socketio))
-    #print('**********************************')
+#     data = json.dumps(data)
+    app.logger.info('**********************************')
+    app.logger.info('Inside the callback manager')
+    app.logger.info(socketio)
+    app.logger.info(type(data))
+    app.logger.info(data)
+    app.logger.info('**********************************')
     #socketio = SocketIO(app, async_mode="eventlet")
     #socketio.run(app, host=args.ip, port=int(args.port), debug=True)
     #socketio.emit('message', {'message': "Testing if the message receiver works!"}, namespace='/test')
     #print('sending the message: ' + json.dumps(data)) 
     
     #socketio.send('test', data, broadcast=True)
-    socketio.send(data)
-    #socketio.emit('message', data, broadcast=True)
-    #print(testclient.get_received())
+    socketio.emit('message', data, broadcast=True)
     #print('**********************************')
  
-
 def connect_to_database():
     return pymongo.MongoClient(app.config["DB_IP"], app.config["DB_PORT"])
 
@@ -247,7 +244,7 @@ def get_amq():
 
 
 #MB socketio connect and disconnect
-@socketio.on("connect", namespace='/test')
+@socketio.on("connect")
 def connected():
     app.logger.info("USER CONNECTED")
     #print('*****************************')
@@ -255,6 +252,10 @@ def connected():
     #print('*****************************')
     #socketio.emit('msg', {'message': "Hello! testing if the connection receiver works"}, namespace='/test')
 
+@socketio.on("disconnect")
+def disconnected():
+    app.logger.info("USER DISCONNECTED")
+    socketio = None
 
 @socketio.on("msg", namespace='/test')
 #def sendmsg():
