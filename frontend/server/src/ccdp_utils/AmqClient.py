@@ -118,6 +118,9 @@ class AmqClient(stomp.ConnectionListener):
       
 
   def on_message(self, headers, message):
+    self.__logger.debug("*********")
+    self.__logger.debug("In AMQ CLLIENT ON_MESSAGE")
+    self.__logger.debug("*********")
     if self.__onMessage:
       self.__onMessage(message)
 
