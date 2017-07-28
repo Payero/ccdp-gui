@@ -124,18 +124,15 @@ var App = React.createClass({
     socket.on('connect', function () {
       //console.log(msg);
       console.log('Connection has been established  - MB');
+
+      socket.on('message', function (data) {
+        //this.handleReply)
+        console.log('Message has been received');
+        console.log(data);
+        console.log(socket);
+      });
     });
 
-    socket.on('message', function (data) {
-      //this.handleReply)
-      console.log('Message has been received');
-      console.log(data);
-      console.log(socket);
-      console.log(socket.io.readyState);
-      setTimeout(function () {
-        console.log(socket.io.readyState);
-      }, 5000);
-    });
     /*
     //update task state here
     var logs = this.state.logs.concat([]);

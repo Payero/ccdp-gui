@@ -27,7 +27,7 @@ from numpy import broadcast
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
-socketio = SocketIO(app, async_mode="eventlet")
+socketio = SocketIO(app, async_mode="threading")
 #testclient = SocketIOTestClient(app, socketio) #for trying to test socketio stuff MB
 
 #####################################################################
@@ -193,7 +193,7 @@ def _delete_project(db, project_id):
     result =  db["projects"].delete_one({"name": project_id})
     return result
 
-#@socketio.on('message')
+@socketio.on('message')
 def update_task(data): #MB callback function for task updates TODO: change the namespace to something appropriate
 #     data = json.dumps(data)
     app.logger.info('**********************************')
@@ -209,8 +209,6 @@ def update_task(data): #MB callback function for task updates TODO: change the n
     
     #socketio.send('test', data, broadcast=True)
     socketio.emit('message', data, broadcast=True)
-    socketio.send(data=data, broadcast=True)
-    #print(testclient.get_received())
     #print('**********************************')
  
 def connect_to_database():
@@ -246,7 +244,7 @@ def get_amq():
     return broker
 
 #MB socketio connect and disconnect
-@socketio.on("connect", namespace='/test')
+@socketio.on("connect")
 def connected():
     app.logger.info("USER CONNECTED")
     #print('*****************************')
@@ -254,6 +252,10 @@ def connected():
     #print('*****************************')
     #socketio.emit('msg', {'message': "Hello! testing if the connection receiver works"}, namespace='/test')
 
+@socketio.on("disconnect")
+def disconnected():
+    app.logger.info("USER DISCONNECTED")
+    socketio = None
 
 #@socketio.on("msg", namespace='/test')
 #def sendmsg():
