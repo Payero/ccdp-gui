@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 Created on Jun 19, 2017
 
@@ -52,6 +54,7 @@ class CsvDisplay(CcdpModule):
     self._logger.info("Starting the new class")
     self.__handle = None
     
+    
   def _on_message(self, msg):
     '''
     Receives a message from the ThreadController or the ccdp-engine itself.
@@ -80,9 +83,17 @@ class CsvDisplay(CcdpModule):
                   ThreadController
 
     '''
+    self._done_processing = False
     self._logger.info("Got some message: %s" % msg)
     self.__handle.write(",".join(msg))
     self.__handle.write("\n")
+    
+    self._done_processing = True
+    
+    # If there are no more incoming messages, then we are done so notify 
+    if self._predecesor_done:
+      self._send_done_processing()
+      
 
 
     

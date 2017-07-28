@@ -1,10 +1,15 @@
 {
+    "tasks": [
+        {
     "name" : "Csv Reader",
     "description" : "Reads entries from a CSV file",
     "state" : "PENDING",
     "retries" : 3,
-    "command" : ["python", "${CCDP_GUI}/src/modules/csv_reader.py", "-q", "csv-reader-1"],
-    "configuration" : {"send-header":  "true", "number-entries": 1, "filename": "/home/oeg/dev/demo/it_help_desk.csv"},
+     "command" : ["/nishome/oegante/workspace/ccdp-engine/python/CcdpModuleLauncher.py", 
+                 "-f", "/nishome/oegante/workspace/ccdp-gui/frontend/server/src/modules/csv_reader.py",
+                 "-c", "CsvReader", 
+                 "-a", "broker_host=localhost,task_id=csv-reader,broker_port=61616" ],
+    "configuration" : {"send-header":  "true", "number-entries": 1, "filename": "/nishome/oegante/workspace/ccdp-gui/frontend/server/data/it_help_desk.csv"},
     "task-id" : "csv-reader-1",
     "class-name" : "modules.CsvReader",
     "node-type" : "EC2",
@@ -18,4 +23,5 @@
         "port-id" : "selector",
         "to-port" : [ "selector-1" ]
         } ]
-    }
+    } ]
+}

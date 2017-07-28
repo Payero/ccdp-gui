@@ -4,6 +4,7 @@ import os, sys, time, traceback, json
 from pprint import pprint, pformat
 from optparse import OptionParser
 import traceback
+from threading import Event
 
 # Attempting to use centralized logging for python and AmqClient
 try:
@@ -49,11 +50,11 @@ class ThreadController():
     "name" : "csv-reader",
     "description" : "Opens a single csv file and process line by line",
     "retries" : 3,
-    "command" : ["/nishome/frontend/server/src/CcdpModuleLauncher.py", 
-                 "-f", "/nishome/mcbowman/Documents/project/ccdp/webapp/ccdp-gui/frontend/server/src/modules/csv_reader.py",
+    "command" : ["/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/CcdpModuleLauncher.py", 
+                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_reader.py",
                  "-c", "CsvReader", 
                  "-a", "broker_host=localhost,task_id=csv-reader,broker_port=61616" ],
-    "configuration" : { "filename": "/nishome/mcbowman/Documents/project/ccdp/webapp/frontend/server/data/it_help_desk.csv", 
+    "configuration" : { "filename": "/home/oeg/dev/oeg/ccdp-gui/frontend/server/data/it_help_desk.csv", 
                         "send-header": "True", 
                         "number-entries": 1},
     "task-id" : "csv-reader",
@@ -71,8 +72,8 @@ class ThreadController():
     "name" : "csv-selector",
     "description" : "Selects all entries matching a simple criteria",
     "retries" : 3,
-    "command" : ["/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/CcdpModuleLauncher.py", 
-                 "-f", "/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/modules/csv_selector.py",
+    "command" : ["/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/CcdpModuleLauncher.py", 
+                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_selector.py",
                  "-c", "CsvSelector", 
                  "-a", "broker_host=localhost,task_id=csv-selector,broker_port=61616" ],
     "configuration" : { "field": "daysOpen", 
@@ -93,8 +94,8 @@ class ThreadController():
     "name" : "csv-display",
     "description" : "Displays filtered entries",
     "retries" : 3,
-    "command" : ["/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/CcdpModuleLauncher.py", 
-                 "-f", "/nishome/mcbowma/Documents/project/ccdp/webapp/frontend/server/src/modules/csv_display.py",
+    "command" : ["/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/CcdpModuleLauncher.py", 
+                 "-f", "/home/oeg/dev/oeg/ccdp-gui/frontend/server/src/modules/csv_display.py",
                  "-c", "CsvDisplay", 
                  "-a", "broker_host=localhost,task_id=csv-display,broker_port=61616" ],
     "configuration" : { "output-url": "file:///tmp/results.csv"},
@@ -113,6 +114,9 @@ class ThreadController():
 }
   
   '''
+  
+  __TASK_DONE = ['FAILED', 'SUCCESSFUL', 'KILLED']
+  
   def __init__(self, queue_name, engine_queue, thread_req, 
                broker_host='localhost', broker_port=61616, 
                auto_start=False, callback_fn=None, skip_req=False):
@@ -137,13 +141,13 @@ class ThreadController():
     self.__amq_port = int(broker_port)
     self.__amq = AmqClient.AmqClient()
     self.__to_engine = engine_queue
+    self.__evt = Event()
     
     # is set, it is used to update the caller
     if callable(callback_fn):
       self.__callback_fn = callback_fn
     else:
       self.__callback_fn = None
-   
 
     # if is a file or string get the json object
     if os.path.isfile(thread_req):
@@ -155,10 +159,7 @@ class ThreadController():
 
     self.__tasks = self.__request['tasks']
 
-    #Test the callback function MB
-    self.__callback_fn('test data')
-    #self.__callback_fn('{"data": {"task": {"msg-type": 4, "ccdp-task": {"node-type": "ec2", "retries": 3, "output-ports": [{"to": "54_input-1", "port-id": "53_output-1"}], "description": "", "launched-time": 0, "task-id": 53, "host-id": "", "state": "RUNNING", "session-id": "26a2f71a-cd79-4110-aaf0-3db3d7dc5df6", "command": ["~/Documents/project/ccdp/engine/data/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=10,max=30"], "class-name": "tasks.csv_demo.CsvReader", "reply-to": "26a2f71a-cd79-4110-aaf0-3db3d7dc5df6", "configuration": {"sleep-time": "", "filename": ""}, "input-ports": [], "name": "Csv File Reader"}}}, "msg-type": "TASK_UPDATE"}')
-    
+        
     # registering to receive messages    
     self.__amq.connect(self.__amq_ip, 
                        dest="/queue/%s" % queue_name, 
@@ -168,8 +169,14 @@ class ThreadController():
     self.__logger.debug("Done setting up, sending request to %s" % 
                         self.__to_engine)
     
+    req_msg = {"request": self.__request, 
+               "msg-type": 1, 
+               "configuration": {},
+               "reply-to": ccdp_utils.WEB_QUEUE 
+               }
+
     if not skip_req:
-      self.__amq.send_message(self.__to_engine,  self.__request )
+      self.__amq.send_message(self.__to_engine,  req_msg )
     else:
       self.__logger.info("Skipping sending request")
 
@@ -180,21 +187,6 @@ class ThreadController():
       else:
         self.start_thread()
 
-    #Can test just sending a reply in the thread controller if I can't get a response from the test engine MB
-    '''
-    update_msg = {}
-    update_msg['msg-type'] = 4
-    update_msg['ccdp-task'] = task
-    #self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
-    #self.__amq.send_message(reply_to, json.dumps(update_msg))
-    self.__on_message(reply_to, json.dumps(update_msg))  
-    wait = randint(0,5)
-    self.__logger.debug("Waiting for %d for task %s" % (wait, tid))
-    time.sleep(wait)
-    update_msg['ccdp-task']['state'] = "SUCCESSFUL"
-    self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
-    self.__amq.send_message(reply_to, json.dumps(update_msg))
-    ''' 
 
   def start_thread(self):
     '''
@@ -230,6 +222,31 @@ class ThreadController():
       txt += "status update from the ccdp-engine"
       self.__logger.warn(txt)
 
+    self.__run_main()
+  
+  def __check_tasks_status(self):
+    self.__logger.info("Checking Tasks Status")
+    done = True
+    for task in self.__tasks:
+      if task.has_key('state'):
+        self.__logger.info("%s: State = %s" % (task['task-id'], task['state']))
+        if task['state'] not in self.__TASK_DONE:
+          done = False
+          break
+      else:
+        self.__logger.info("Task %s does not have state" % task['task-id'] )
+        done = False
+    
+    if done:
+      self.stop_thread()
+      
+       
+  def __run_main(self):
+    self.__logger.info("Running main section")
+    while self.__evt.isSet():
+      time.sleep(0.5)
+    
+    self.__logger.info("Ending main")
   
   
   def stop_thread(self):
@@ -238,7 +255,11 @@ class ThreadController():
     closes all the connections.
     '''
     self.__logger.info("Stopping Thread")
-    self.__send_msg_to_all_tasks( 'STOP' )
+    self.__evt.set()
+#     self.__send_msg_to_all_tasks( 'STOP' )
+    for task in self.__tasks:
+      if task.has_key('state') and task['state'] not in self.__TASK_DONE:
+        self.__send_msg_to_task('STOP', task)
     self.__amq.stop()
     self.__logger.debug("Done!!")
 
@@ -251,7 +272,7 @@ class ThreadController():
     Inputs
       - msg: the update message received from the ccdp-engine
     '''
-    self.__logger.info("Got results: %s" % msg)
+    self.__logger.info("Got a message: %s" % msg)
     try:
       json_msg = ccdp_utils.json_loads(msg)
       self.__logger.info("Got a message: %s" % pformat(json_msg))
@@ -259,31 +280,31 @@ class ThreadController():
         try:
           msg_type = int(json_msg['msg-type'])
           self.__logger.info("Got a message from the engine")
-          msg_type = ccdp_utils.MESSAGES[json_msg['msg-type']]
+          msg_type = ccdp_utils.MESSAGES[msg_type]
         except:
           self.__logger.info("Got an internal message")
           msg_type = json_msg['msg-type']
         
         # if is an update, send it to the GUI and check running mode
         if msg_type == 'TASK_UPDATE':
-          self.__logger.debug("Got a task update message")
+          self.__logger.debug("Got a task update message: %s" % pformat(json_msg))
+          task = json_msg['task']
           if self.__callback_fn is not None:
-            #print('*********************')
-            #print(type(json_msg))
-            #print(json_msg)
-            #print('*********************')
-            body = {'msg-type': msg_type, 'data':{'task':json_msg}}
-            #body = {'msg-type': msg_type, 'data':{'task':json_msg['task']}}
+            body = {'msg-type': msg_type, 'data':{'task':task}}
             self.__callback_fn(body)
           
-          #TODO reply message should be wider scope so that it has the sequential field in it
-          #Actually may to specially include this as update messages are per task and the running mode is per
-          #thread MB
-          '''
+          # need to update the tasks
+          for t in self.__tasks:
+            if t['task-id'] == task['task-id']:
+              t['state'] = task['state']
+              break
+          
+          self.__check_tasks_status()
+
           # if we are running sequentially, then the next 'RUNNING' status 
           # update should be the one we want
           if self.__request["tasks-running-mode"] == "SEQUENTIAL":
-            upd_task = msg['task']
+            upd_task = json_msg['data']['task']
             self.__logger.debug("Looking for task: %s" % upd_task['task-id'])
             if upd_task['state'] == 'RUNNING':
               for task in self.__tasks:
@@ -294,7 +315,20 @@ class ThreadController():
               self.__logger.warn("Task %s failed" % upd_task['task-id'])
             elif upd_task['state'] == 'KILLED':
               self.__logger.warn("Task %s was killed " % upd_task['task-id'])
-           '''
+        
+        # if did one of the 
+        elif msg_type == 'DONE_PROCESSING':
+          task = json_msg['data']['task']
+          self.__logger.info("%s Module ended processing" % task['task-id'])
+          self.__logger.info("Sending END_PROCESSING msg to %d tasks" % len(task['output-ports']))
+          for port in task['output-ports']:
+            self.__logger.info("Found the port configuration")
+            to_ports = port['to-port']
+            for tgt in to_ports:
+              self.__logger.info("Sending message to %s" % tgt)
+              body = {'msg-type': 'DONE_PROCESSING'}
+              self.__amq.send_message(tgt, json.dumps(body) )
+          
 
     except Exception, e:
       self.__logger.error("Got an exception: %s" % str(e))
@@ -358,7 +392,8 @@ class ThreadController():
 
     '''
     body = {'msg-type': 'COMMAND', 'data':{'action': action, 'task': task}}
-    self.__amq.send_message(self.__to_engine,  json.dumps(body) )
+    self.__amq.send_message(task['task-id'],  json.dumps(body) )
+
 
   def __send_msg_to_all_tasks(self, action):
     '''
@@ -368,7 +403,7 @@ class ThreadController():
     Inputs:
       - action: the action to perform either START, PAUSE, or STOP
     '''
-    for task in self.__request['tasks']:
+    for task in self.__tasks:
       self.__logger.info('Sending %s message to %s' % (action, task['task-id']))
       self.__send_msg_to_task(action, task)
   
@@ -429,4 +464,7 @@ if __name__ == '__main__':
 
   time.sleep(15)
   print("Stopping all threads")
-  tc.stop_thread() 
+  tc.stop_thread()
+
+  
+  

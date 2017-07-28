@@ -87,6 +87,9 @@ class CcdpModule(object):
     self.__broker = args['broker_host']
     self.__port = int(args['broker_port'])
     self.__queue = Queue.Queue()
+    self._predecesor_done = False
+    self._done_processing =  False
+    
 
     self._task_id = args['task_id']
 
@@ -105,6 +108,7 @@ class CcdpModule(object):
                    'STOP':    self.stop_module,
                    'RESULT':  self._on_message,
                    'MESSAGE': self._on_message,
+                   'DONE_PROCESSING': self.__end_processing
                   }
     
     self.__timer = TimerTask(start_at=1, interval=1, 
@@ -202,6 +206,8 @@ class CcdpModule(object):
           {'msg-type': 'COMMAND', 'data':{'action': 'START', 'task': < task >}}
       - TaskUpdate: 
           {'msg-type': 'TASK_UPDATE', 'data':{'task':< task >}}
+      - DoneProcessing:
+          {'msg-type': 'DONE_PROCESSING', 'data':{'task':< task >}}
       - Error: 
           {'msg-type': 'MESSAGE', 'data':{'type':'ERROR', 'message': < error > }}
       - Message:
@@ -235,6 +241,7 @@ class CcdpModule(object):
               method(json_msg['data']['task'])
             else:
               method()
+        
         else:
           if self.__MSGS.has_key(msg_type):
             method = self.__MSGS[msg_type]
@@ -265,7 +272,30 @@ class CcdpModule(object):
       body = {'msg-type': 'MESSAGE', 'data':{'type':'ERROR', 'message': error}}
       self._send_message(reply_to, json.dumps(body) )
 
-
+  def __end_processing(self):
+    """
+    This method is invoked when the module that was sending data to it finished 
+    processing data
+    """
+    self._logger.info("Previous Module ended processing")
+    self._predecesor_done = True
+    if self._done_processing:
+      self._logger.info("Predecessor and this module are done")
+      self._send_done_processing()
+  
+  
+  def _send_done_processing(self):
+    '''
+    Sends a signal back to the ThreadController indicating that this module is 
+    done processing
+    '''
+    body = {'msg-type': 'DONE_PROCESSING', 'data':{'task': self._task}}
+    dest = self._task['reply-to']
+    self._task['state'] = 'SUCCESSFUL'
+    self._send_message(dest, json.dumps(body) )
+    self.stop_module()
+      
+  
   def start_module(self, task):
     '''
     Gets a command message with the action set to 'START'.  The task is a JSON
@@ -334,7 +364,11 @@ class CcdpModule(object):
 
     '''
     self._logger.info("Stopping module")
+    
+    body = {'msg-type': 4, 'task':self._task}
     self._stop_module()
+    dest = self._task['reply-to']
+    self._send_message(dest, json.dumps(body) )
     self.__timer.stopTimer()
     self.__amq.stop()
 

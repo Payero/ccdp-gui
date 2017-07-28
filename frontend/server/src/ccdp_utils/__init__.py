@@ -80,6 +80,8 @@ def setup_logging( name="root",
   # is the configuration file not provided
   if cfg_file == None:
     cfg_filename = os.path.expandvars(default_cfg_file)
+    print "Using file %s" % cfg_filename
+    
     if os.path.exists(cfg_filename):
       filename = cfg_filename
     else:

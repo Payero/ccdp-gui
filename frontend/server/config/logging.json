@@ -45,7 +45,7 @@
             "encoding": "utf8"
         },
         "test_mod_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
+            "class": "ccdp_utils.EnvVarRotatingFileHandler",
             "level": "DEBUG",
             "formatter": "simple",
             "filename": "${CCDP_GUI}/logs/test_mods.log",
@@ -67,7 +67,7 @@
             "propagate": "no"
         },
         "AmqClient": {
-            "level": "INFO",
+            "level": "DEBUG",
             "handlers": ["console", "info_file_handler"],
             "propagate": "no"
         },
@@ -97,7 +97,7 @@
             "propagate": "no"
         },
         "ThreadController": {
-            "level": "INFO",
+            "level": "DEBUG",
             "handlers": ["console", "info_file_handler"],
             "propagate": "no"
         }
