@@ -6,6 +6,8 @@ import inspect, json
 from __builtin__ import isinstance
 import Queue
 import logging
+import ast, urllib
+
 
 # Attempting to use centralized logging for python and AmqClient
 try:
@@ -69,7 +71,7 @@ class CcdpModule(object):
   '''
   
               
-  def __init__(self, args):
+  def __init__(self, enc_args):
     '''
     Instantiates a new ccdp module object configured to start receiving command
     messages from the ThreadController.  The arguments is a dictionary 
@@ -84,6 +86,12 @@ class CcdpModule(object):
 
     '''
     self._logger = ccdp_utils.setup_logging(self.__class__.__name__)
+    try:
+      dec_str = urllib.base64.standard_b64decode( args )
+      args = ast.literal_eval( dec_str )
+    except:
+      args = enc_args
+
     self.__broker = args['broker_host']
     self.__port = int(args['broker_port'])
     self.__queue = Queue.Queue()
