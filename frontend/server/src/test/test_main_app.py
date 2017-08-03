@@ -82,6 +82,8 @@ if __name__ == '__main__':
                         thread_req=thread_req,              # required
                         callback_fn=callback_fn,            # optional
                         auto_start=True,                    # optional
+                        broker_host="ax-ccdp.com",
+                        broker_port=61616,
                         skip_req=False)                     # optional
 
   # because we set the auto_start to True, then we do not ned to invoke

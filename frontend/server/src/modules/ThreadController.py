@@ -118,7 +118,7 @@ class ThreadController():
   __TASK_DONE = ['FAILED', 'SUCCESSFUL', 'KILLED']
   
   def __init__(self, queue_name, engine_queue, thread_req, 
-               broker_host='localhost', broker_port=61616, 
+               broker_host='http://ax-ccdp.com', broker_port=61616, 
                auto_start=False, callback_fn=None, skip_req=False):
     '''
     Instantiates a new ThreadController object that will send and receive 
@@ -159,11 +159,15 @@ class ThreadController():
 
     self.__tasks = self.__request['tasks']
 
-        
+    
+    print('*******************************************')
+    print(self.__amq_ip)
+    print('*******************************************')
+ 
     # registering to receive messages    
     self.__amq.connect(self.__amq_ip, 
                        dest="/queue/%s" % queue_name, 
-                       on_msg=self.__on_message, 
+                       on_message=self.__on_message, 
                        on_error=self.__on_error)
 
     self.__logger.debug("Done setting up, sending request to %s" % 
@@ -202,7 +206,7 @@ class ThreadController():
     if self.__request["tasks-running-mode"] == "PARALLEL":
       all_running = True
       for task in self.__tasks:
-        if task.has_key('state') and task['state'] != 'RUNNING':
+        if task.has_key('state') and ( task['state'] != 'RUNNING' and task['state'] != 'SUCCESSFUL' ):
           self.__logger.info("Task %s is not running, is %s" % (task['task-id'],
                                                                 task['state']))
           all_running = False
