@@ -23,6 +23,7 @@ from flask_socketio import SocketIO, emit, send#, SocketIOTestClient #SocketIO t
 import eventlet
 from modules.ThreadController import ThreadController
 from numpy import broadcast
+import urllib
 
 #app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
@@ -70,19 +71,22 @@ def start_processing(version):
     #run_json = request.json
     # send to engine
     #g.amq.send_message(app.config["FROM_SERVER_QUEUE_NAME"], run_json)
+    #print(type(request))
+    run_json = request.json['body']
+    run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
+    reply_queue = run_json['request']['reply-to'] 
+    
+    #Currently sending just the request field and padding the values on the thread controller end
+    #But this can be changed by using the commented instrction instead and not padding in the tc 
+    #run_json = json.dumps(run_json) 
+    run_json = json.dumps(run_json['request']) 
 
-    reply_queue = request.json['body']['request']['reply-to'] 
-    run_json = json.dumps(request.json['body']['request'])
-    #print json.dumps(request.json['body']['request'], indent=4, sort_keys=True)
-
-    #tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
-    app.config["tc"] = ThreadController(queue_name=reply_queue,             # required 
-                          engine_queue=ccdp_utils.ENG_QUEUE,  # required
-                          thread_req=run_json,                # required
-                          callback_fn=update_task,            # optional
-                          auto_start=True,                    # optional
-                          skip_req=True)                      # optional
-                          #socket = socketio)                  #just for testing purposes
+    app.config["tc"] = ThreadController(queue_name=reply_queue, # required 
+                            engine_queue=ccdp_utils.ENG_QUEUE,  # required
+                            thread_req=run_json,                # required
+                            callback_fn=update_task,            # optional
+                            auto_start=True,                    # optional
+                            skip_req=True)                      # optional
     
     return str(200)
 
@@ -193,22 +197,15 @@ def _delete_project(db, project_id):
     return result
 
 @socketio.on('message')
-def update_task(data): #MB callback function for task updates TODO: change the namespace to something appropriate
-#     data = json.dumps(data)
+def update_task(data): 
+    data = json.dumps(data)
     app.logger.info('**********************************')
     app.logger.info('Inside the callback manager')
-    app.logger.info(socketio)
     app.logger.info(type(data))
     app.logger.info(data)
     app.logger.info('**********************************')
-    #socketio = SocketIO(app, async_mode="eventlet")
-    #socketio.run(app, host=args.ip, port=int(args.port), debug=True)
-    #socketio.emit('message', {'message': "Testing if the message receiver works!"}, namespace='/test')
-    #print('sending the message: ' + json.dumps(data)) 
-    
-    #socketio.send('test', data, broadcast=True)
-    socketio.emit('message', data, broadcast=True)
-    #print('**********************************')
+    #TODO change this from broadcast
+    socketio.emit('message', data, broadcast=True) 
  
 def connect_to_database():
     return pymongo.MongoClient(app.config["DB_IP"], app.config["DB_PORT"])

@@ -76,15 +76,17 @@ class TestEngine():
           if reply_to != None:
             self.__logger.info("Sending a reply message!") #MB - checking if a reply message is being sent
             task['state'] = 'RUNNING'
+            task['status'] = 'SUCCESS'
             update_msg = {}
             update_msg['msg-type'] = 4
-            update_msg['ccdp-task'] = task
+            update_msg['task'] = task
             self.__logger.debug("Sending Running Message: %s " % pformat(update_msg))
             self.__amq.send_message(reply_to, json.dumps(update_msg))
-            wait = randint(0,5)
+            wait = randint(5,10)
             self.__logger.debug("Waiting for %d for task %s" % (wait, tid))
             time.sleep(wait)
-            update_msg['ccdp-task']['state'] = "SUCCESSFUL"
+            update_msg['status'] = 'SUCCESS'
+            update_msg['task']['state'] = "SUCCESSFUL"
             self.__logger.debug("Sending Successful Message: %s " % pformat(update_msg))
             self.__amq.send_message(reply_to, json.dumps(update_msg))
 

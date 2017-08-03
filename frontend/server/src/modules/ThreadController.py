@@ -392,7 +392,9 @@ class ThreadController():
 
     '''
     body = {'msg-type': 'COMMAND', 'data':{'action': action, 'task': task}}
-    self.__amq.send_message(task['task-id'],  json.dumps(body) )
+    #Sends to a queue named by the task number. 
+    #self.__amq.send_message(task['task-id'],  json.dumps(body) )
+    self.__amq.send_message(self.__to_engine,  json.dumps(body) )
 
 
   def __send_msg_to_all_tasks(self, action):

@@ -113,15 +113,60 @@ var App = React.createClass({
     var socket = io.connect();
     socket.on('connect', function() {
         //console.log(msg);
-        console.log('Connection has been established  - MB');
+        console.log('WebSocket connection has been established');
         
-        socket.on('message', function(data){ //this.handleReply)
-            console.log('Message has been received');
-            console.log(data);
-            console.log(socket)
-            });
     });
     
+    socket.on('message', function(data){ 
+        console.log('Message has been received');
+        console.log(typeof(data))
+        console.log(data);
+        //console.log(socket)
+        // Once we receive a message need to check which task it belongs to and 
+        // update the state
+
+        var logs = this.state.logs.concat([]);
+        var nodes = this.state.nodes.concat([]);
+        var currentThreadIds = this.state.currentThreadIds.concat([]);
+        logs.push(data);
+        //var msg = data;
+        //var msg = data['data']['task'];
+        var msg = JSON.parse(data)['data']['task'];
+        //if (msg['source'] === 'THREAD' && msg['state'] === 'STOPPED') {
+        if (msg['state'] === 'STOPPED') {
+          currentThreadIds.splice(currentThreadIds.indexOf(msg['thread-id']), 1);
+        }
+        if (currentThreadIds.length === 0) {
+          this.setState({ isRunning: false });
+        }
+        // Set task status
+        if (msg.hasOwnProperty('task-id')) {
+          var node = nodes.filter(function(node) { return node.id === msg['task-id']; })[0];
+          if (msg["status"] === "SUCCESS"){
+            if (msg["state"] === "RUNNING") {
+              console.log("msg is running")
+              node.status = "RUNNING";
+            }
+            else if (msg["state"] === "SUCCESSFUL") {
+              console.log("msg is finished")
+              node.status = "SUCCESS";
+            }
+          }
+          else if (msg["status"] === "FAILED") {
+            node.status = "FAILED";
+          }
+        }
+        console.log(nodes)
+        console.log('logs')
+        console.log(this.state.logs)
+        console.log(logs)
+        //this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
+        this.setState({ nodes: nodes });
+        //this.setState({ logs: JSON.parse(JSON.stringify(logs)) });
+        //debugger;
+        //this.setState({ logs: logs });
+        this.setState({ currentThreadIds: currentThreadIds });
+    }.bind(this));
     
     
         /*
@@ -846,7 +891,7 @@ var App = React.createClass({
         //Insert the ccdp-type into thread object (TODO: is this required to be the same for all tasks in a thread) 
         dictJSON["threads"][i]["request"]["node-type"]=node.config["ccdp-type"];
         dictJSON["threads"][i]["request"]["use-single-node"]=node.config["use-single-node"];
-        dictJSON["threads"][i]["request"]["tasks-running-mode"]=node.config["tasks-running-mode"]
+        //dictJSON["threads"][i]["request"]["tasks-running-mode"]=node.config["tasks-running-mode"]
 
         // Setup input/output ports and keep track of i/o port number for each task in the thread
         var inputPortNums = [];
