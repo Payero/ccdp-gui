@@ -1,0 +1,63 @@
+{
+  "name" : "CSV Test Thread",
+  "description" : "CSV Reading and filtering demo",
+  "tasks" : [ {
+    "name" : "csv-reader",
+    "description" : "Opens a single csv file and process line by line",
+    "retries" : 3,
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=5,max=10" ],
+    "configuration" : { "filename": "/data/ccdp/webapp/frontend/server/data/it_help_desk.csv", 
+                        "send-header": "True", 
+                        "number-entries": 1},
+    "task-id" : "csv-reader",
+    "session-id" : "DEFAULT",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ {
+      "port-id" : "csv-reader",
+      "from-port" : [ ],
+      "to-port" : [ "csv-selector" ]
+    } ]
+  },
+  {
+    "name" : "csv-selector",
+    "description" : "Selects all entries matching a simple criteria",
+    "retries" : 3,
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=5,max=10" ],
+    "configuration" : { "field": "daysOpen", 
+                        "operator": "GE", 
+                        "value": 5},
+    "task-id" : "csv-selector",
+    "session-id" : "DEFAULT",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ {
+      "port-id" : "csv-selector",
+      "from-port" : [ ],
+      "to-port" : [ "csv-display" ]
+    } ]
+  },
+  {
+    "name" : "csv-display",
+    "description" : "Displays filtered entries",
+    "retries" : 3,
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=5,max=10" ],
+    "configuration" : { "output-url": "file:///tmp/results.csv"},
+    "task-id" : "csv-display",
+    "session-id" : "DEFAULT",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ ]
+  } ],  
+  "thread-id" : "csv-reader-thread-1",
+  "session-id" : "DEFAULT",
+  "reply-to" : "CCDP-WebServer",
+  "node-type" : "DEFAULT",
+  "tasks-running-mode" : "PARALLEL"
+}

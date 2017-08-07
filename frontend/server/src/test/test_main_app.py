@@ -87,13 +87,13 @@ def callback_fn(msg):
 
 if __name__ == '__main__':
   print("Running the main function")
-  thread_req = os.path.expandvars("${CCDP_GUI}/data/csv_reader.json")
+  thread_req = os.path.expandvars("${CCDP_GUI}/data/rand_thread_req.json")
   tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
                         engine_queue=ccdp_utils.ENG_QUEUE,  # required
                         thread_req=thread_req,              # required
                         callback_fn=callback_fn,            # optional
                         auto_start=True,                    # optional
-                        broker_host="ax-ccdp.com",
+                        broker_host="localhost",
                         broker_port=61616,
                         skip_req=False)                     # optional
 
