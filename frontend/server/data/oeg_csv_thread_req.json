@@ -1,0 +1,72 @@
+{
+  "name" : "CSV Test Thread",
+  "description" : "CSV Reading and filtering demo",
+  "tasks" : [ {
+    "name" : "csv-reader",
+    "description" : "Opens a single csv file and process line by line",
+    "retries" : 3,
+    "command" : ["/nishome/oegante/workspace/ccdp-engine/python/CcdpModuleLauncher.py", 
+                 "-f", "/nishome/oegante/workspace/ccdp-gui/frontend/server/src/modules/csv_reader.py",
+                 "-c", "CsvReader", 
+                 "-a", "eyd0YXNrLWlkJzogJ2Nzdi1yZWFkZXInLCAnYnJva2VyLWhvc3QnOiAnbG9jYWxob3N0JywgJ2Jyb2tlci1wb3J0JzogNjE2MTZ9" ],
+    "configuration" : { "filename": "/nishome/oegante/workspace/ccdp-gui/frontend/server/data/it_help_desk.csv", 
+                        "send-header": "True", 
+                        "number-entries": 1},
+    "task-id" : "csv-reader",
+    "session-id" : "DEFAULT",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ {
+      "port-id" : "csv-reader",
+      "from-port" : [ ],
+      "to-port" : [ "csv-selector" ]
+    } ]
+  },
+  {
+    "name" : "csv-selector",
+    "description" : "Selects all entries matching a simple criteria",
+    "retries" : 3,
+    "command" : ["/nishome/oegante/workspace/ccdp-engine/python/CcdpModuleLauncher.py", 
+                 "-f", "/nishome/oegante/workspace/ccdp-gui/frontend/server/src/modules/csv_selector.py",
+                 "-c", "CsvSelector", 
+                 "-a", "eyd0YXNrLWlkJzogJ2Nzdi1zZWxlY3RvcicsICdicm9rZXItaG9zdCc6ICdsb2NhbGhvc3QnLCAnYnJva2VyLXBvcnQnOiA2MTYxNn0=" ],
+    "configuration" : { "field": "daysOpen", 
+                        "operator": "GE", 
+                        "value": 5},
+    "task-id" : "csv-selector",
+    "session-id" : "DEFAULT",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ {
+      "port-id" : "csv-selector",
+      "from-port" : [ ],
+      "to-port" : [ "csv-display" ]
+    } ]
+  },
+  {
+    "name" : "csv-display",
+    "description" : "Displays filtered entries",
+    "retries" : 3,
+    "command" : ["/nishome/oegante/workspace/ccdp-engine/python/CcdpModuleLauncher.py", 
+                 "-f", "/nishome/oegante/workspace/ccdp-gui/frontend/server/src/modules/csv_display.py",
+                 "-c", "CsvDisplay", 
+                 "-a", "eyd0YXNrLWlkJzogJ2Nzdi1kaXNwbGF5JywgJ2Jyb2tlci1ob3N0JzogJ2xvY2FsaG9zdCcsICdicm9rZXItcG9ydCc6IDYxNjE2fQ==" ],
+    "configuration" : { "output-url": "file:///tmp/results.csv"},
+    "task-id" : "csv-display",
+    "session-id" : "DEFAULT",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
+    "input-ports" : [ ],
+    "output-ports" : [ ]
+  } ],  
+  "thread-id" : "csv-reader-thread-1",
+  "session-id" : "DEFAULT",
+  "reply-to" : "CCDP-WebServer",
+  "node-type" : "DEFAULT",
+  "tasks-running-mode" : "PARALLEL"
+}
