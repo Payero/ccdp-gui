@@ -16,7 +16,21 @@ class Test():
     self.__logger = ccdp_utils.setup_logging('root')
     self.__logger.debug("Running Test")
 
-    self.__run_lambda_test()
+    #self.__run_lambda_test()
+    self.decode("eydicm9rZXJfaG9zdCc6ICdheC1jY2RwLmNvbScsICdicm9rZXJfcG9ydCc6IDYxNjE2LCAndGFza19pZCc6ICdjc3YtcmVhZGVyJ30=")
+
+
+
+
+  def decode(self, value):
+    print "Decoding %s" % value
+    dec = urllib.base64.b64decode(value)
+    print dec
+
+  def encode(self, value):
+    print "Encoding %s" % value
+    dec = urllib.base64.b64encode(value)
+    print dec
 
 
   def __run_lambda_test(self):

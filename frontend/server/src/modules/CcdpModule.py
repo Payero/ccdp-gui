@@ -110,6 +110,7 @@ class CcdpModule(object):
                         on_message=self.__add_message, 
                         on_error=self._on_error)
 
+
     # Generates a mapping between message types and functions to invoke
     self.__MSGS = {'START':   self.start_module,
                    'PAUSE':   self.pause_module,
