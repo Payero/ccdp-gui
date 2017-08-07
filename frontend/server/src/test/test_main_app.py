@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import os, sys, time
+import os, sys, time, ast, urllib
+
 # Attempting to use centralized logging for python and AmqClient
 try:
   if os.environ.has_key("CCDP_GUI"):
@@ -68,6 +69,16 @@ def generate_module(params):
     out_file.write( mod_file )
     out_file.close()
 
+def decode(value):
+  print "Decoding %s" % value
+  dec = urllib.base64.b64decode(value)
+  print dec
+
+def encode(value):
+  print "Encoding %s" % value
+  dec = urllib.base64.b64encode(value)
+  print dec
+
 
 def callback_fn(msg):
   print("*********************************************************************")
@@ -76,7 +87,7 @@ def callback_fn(msg):
 
 if __name__ == '__main__':
   print("Running the main function")
-  thread_req = os.path.expandvars("${CCDP_GUI}/data/csv_thread_req.json")
+  thread_req = os.path.expandvars("${CCDP_GUI}/data/csv_reader.json")
   tc = ThreadController(queue_name=ccdp_utils.WEB_QUEUE,    # required 
                         engine_queue=ccdp_utils.ENG_QUEUE,  # required
                         thread_req=thread_req,              # required

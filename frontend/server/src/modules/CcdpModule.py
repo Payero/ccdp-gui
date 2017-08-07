@@ -107,7 +107,7 @@ class CcdpModule(object):
     self._logger.debug("Registering to receive Messages to %s" % self._task_id)
 
     self.__amq.connect(self.__broker, dest="/queue/%s" % self._task_id, 
-                        on_msg=self.__add_message, 
+                        on_message=self.__add_message, 
                         on_error=self._on_error)
 
     # Generates a mapping between message types and functions to invoke

@@ -1,27 +1,31 @@
 {
     "tasks": [
         {
-    "name" : "Csv Reader",
-    "description" : "Reads entries from a CSV file",
-    "state" : "PENDING",
+    "name" : "csv-reader",
+    "description" : "Opens a single csv file and process line by line",
     "retries" : 3,
-     "command" : ["/nishome/oegante/workspace/ccdp-engine/python/CcdpModuleLauncher.py", 
-                 "-f", "/nishome/oegante/workspace/ccdp-gui/frontend/server/src/modules/csv_reader.py",
+    "command" : ["/data/ccdp/ccdp-engine/python/CcdpModuleLauncher.py", 
+                 "-f", "/data/ccdp/webapp/frontend/server/src/modules/csv_reader.py",
                  "-c", "CsvReader", 
-                 "-a", "broker_host=localhost,task_id=csv-reader,broker_port=61616" ],
-    "configuration" : {"send-header":  "true", "number-entries": 1, "filename": "/nishome/oegante/workspace/ccdp-gui/frontend/server/data/it_help_desk.csv"},
-    "task-id" : "csv-reader-1",
-    "class-name" : "modules.CsvReader",
-    "node-type" : "EC2",
-    "reply-to" : "CcdpWebServer",
-    "host-id" : null,
-    "submitted" : false,
-    "cpu" : 0.0,
-    "mem" : 0.0,
+                 "-a", "eeydicm9rZXJfaG9zdCc6ICdheC1jY2RwLmNvbScsICdicm9rZXJfcG9ydCc6IDYxNjE2LCAndGFza19pZCc6ICdjc3YtcmVhZGVyJ30=" ],
+    "configuration" : { "filename": "/data/ccdp/webapp/frontend/server/data/it_help_desk_less.csv", 
+                        "send-header": "True", 
+                        "number-entries": 1},
+    "task-id" : "csv-reader",
+    "session-id" : "DEFAULT",
+    "node-type" : "DEFAULT",
+    "state": "PENDING",
+    "reply-to" : "CCDP-WebServer",
     "input-ports" : [ ],
     "output-ports" : [ {
-        "port-id" : "selector",
-        "to-port" : [ "selector-1" ]
-        } ]
+      "port-id" : "csv-reader",
+      "from-port" : [ ],
+      "to-port" : [ "csv-selector" ]
     } ]
+  } ],
+  "thread-id" : "csv-reader-thread-1",
+  "session-id" : "DEFAULT",
+  "reply-to" : "CCDP-WebServer",
+  "node-type" : "DEFAULT",
+  "tasks-running-mode" : "PARALLEL"
 }

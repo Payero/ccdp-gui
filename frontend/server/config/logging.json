@@ -98,7 +98,7 @@
         },
         "ThreadController": {
             "level": "DEBUG",
-            "handlers": ["console", "info_file_handler"],
+            "handlers": ["console", "info_file_handler", "test_mod_handler"],
             "propagate": "no"
         }
     }
