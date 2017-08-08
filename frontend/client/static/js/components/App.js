@@ -119,8 +119,8 @@ var App = React.createClass({
     
     socket.on('message', function(data){ 
         console.log('Message has been received');
-        console.log(typeof(data))
-        console.log(data);
+        //console.log(typeof(data))
+        console.log(JSON.parse(data));
         //console.log(socket)
         // Once we receive a message need to check which task it belongs to and 
         // update the state
@@ -141,29 +141,32 @@ var App = React.createClass({
         }
         // Set task status
         if (msg.hasOwnProperty('task-id')) {
-          var node = nodes.filter(function(node) { return node.id === msg['task-id']; })[0];
-          if (msg["status"] === "SUCCESS"){
+          //console.log(msg['task-id'])
+          //console.log('nodes') 
+          //console.log(nodes) 
+          var node = nodes.filter(function(node) {return node.id == msg['task-id']; })[0];
+          //console.log(node)
+          //if (msg["status"] === "SUCCESS"){
             if (msg["state"] === "RUNNING") {
-              console.log("msg is running")
+              //console.log("msg is running")
               node.status = "RUNNING";
             }
             else if (msg["state"] === "SUCCESSFUL") {
-              console.log("msg is finished")
+              //console.log("msg is finished")
               node.status = "SUCCESS";
             }
-          }
-          else if (msg["status"] === "FAILED") {
-            node.status = "FAILED";
-          }
+          //}
+          //else if (msg["status"] === "FAILED") {
+            //node.status = "FAILED";
+          //}
         }
-        console.log(nodes)
-        console.log('logs')
-        console.log(this.state.logs)
-        console.log(logs)
+        //console.log(nodes)
+        //console.log('logs')
+        //console.log(this.state.logs)
+        //console.log(logs)
         //this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
         this.setState({ nodes: nodes });
         //this.setState({ logs: JSON.parse(JSON.stringify(logs)) });
-        //debugger;
         //this.setState({ logs: logs });
         this.setState({ currentThreadIds: currentThreadIds });
     }.bind(this));
@@ -263,7 +266,7 @@ var App = React.createClass({
     request.done(function(msg) {
       // Add tasks to array following proper format
       for (var i = 0; i < msg.length; i++) {
-        tasks.push({ name: msg[i].name, description: msg[i].short_description, type: msg[i].module_type.toLowerCase(), data: JSON.stringify(msg[i]) });
+        tasks.push({ name: msg[i].name, description: msg[i].short_description, type: msg[i].module_type.toLowerCase(), data: JSON.stringify(msg[i]), command: msg[i].command });
       }
       this.setState({tasks: tasks});
     }.bind(this));
@@ -482,6 +485,7 @@ var App = React.createClass({
       "title": task['name'],
       "task": task['module_id'],
       "config": {
+        "command": task['command'], 
         "class-name": task['class_name'],
         "ccdp-type": task['ccdp_type'],
         "max-instances": task['max_instances'],
@@ -709,7 +713,8 @@ var App = React.createClass({
   },
   // Callback for Export Graph button in GraphControls
   handleExportGraph: function() {
-    var generatedJSON = this.generateJSONExport();
+    //var generatedJSON = this.generateJSONExport();
+    var generatedJSON = this.generateJSONRun();
     if ($.isEmptyObject(generatedJSON)) {
         NotificationManager.info("No JSON generated - no workflow thread defined");
         return null;
@@ -853,11 +858,12 @@ var App = React.createClass({
           dictJSON["threads"][i]["request"]["tasks"].push({
             "class-name": node.config["class-name"],
             //"TEST": node.config["ccdp-type"],
-	    "command": ['~/Documents/project/ccdp/engine/data/ccdp-engine/python/ccdp_mod_test.py',
-	      "-a",
-	      "testRandomTime",
-	      "-p",
-	      "min=10,max=30"],
+	    //"command": ['~/Documents/project/ccdp/engine/data/ccdp-engine/python/ccdp_mod_test.py',
+	      //"-a",
+	      //"testRandomTime",
+	      //"-p",
+	      //"min=10,max=30"],
+	    "command": node.config["command"],
 	    "configuration": node.config["task-props"],
 	    "cpu": node.config["cpu"],
 	    "description": "",//tool tip when you hover over the task, blank for now
@@ -909,11 +915,11 @@ var App = React.createClass({
             if (inputIndex > -1 && outputIndex > -1) {
               dictJSON["threads"][i]["request"]["tasks"][inputIndex]["input-ports"].push({
                 "port-id": dictJSON["threads"][i]["request"]["tasks"][inputIndex]["task-id"] + "_input-" + inputPortNums[inputIndex],
-                "from": threads[i]["edges"][k].source.id + "_output-" + outputPortNums[outputIndex]
+                "from-port": [threads[i]["edges"][k].source.id + "_output-" + outputPortNums[outputIndex]]
               });
               dictJSON["threads"][i]["request"]["tasks"][outputIndex]["output-ports"].push({
                 "port-id": dictJSON["threads"][i]["request"]["tasks"][outputIndex]["task-id"] + "_output-" + outputPortNums[outputIndex],
-                "to": threads[i]["edges"][k].target.id + "_input-" + inputPortNums[inputIndex]
+                "to-port": [threads[i]["edges"][k].target.id + "_input-" + inputPortNums[inputIndex]]
               });
               inputPortNums[inputIndex]++;
               outputPortNums[outputIndex]++;

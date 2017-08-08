@@ -86,7 +86,10 @@ def start_processing(version):
                             thread_req=run_json,                # required
                             callback_fn=update_task,            # optional
                             auto_start=True,                    # optional
-                            skip_req=True)                      # optional
+                            #comment broker host line to send to default localhost
+                            #broker_host="ax-ccdp.com",          # optional
+                            broker_port=61616,                  # optional
+                            skip_req=False)                     # optional
     
     return str(200)
 

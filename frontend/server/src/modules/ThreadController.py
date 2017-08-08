@@ -118,7 +118,7 @@ class ThreadController():
   __TASK_DONE = ['FAILED', 'SUCCESSFUL', 'KILLED']
   
   def __init__(self, queue_name, engine_queue, thread_req, 
-               broker_host='http://ax-ccdp.com', broker_port=61616, 
+               broker_host='localhost', broker_port=61616, 
                auto_start=False, callback_fn=None, skip_req=False):
     '''
     Instantiates a new ThreadController object that will send and receive 
@@ -159,11 +159,7 @@ class ThreadController():
 
     self.__tasks = self.__request['tasks']
 
-    
-    print('*******************************************')
-    print(self.__amq_ip)
-    print('*******************************************')
- 
+        
     # registering to receive messages    
     self.__amq.connect(self.__amq_ip, 
                        dest="/queue/%s" % queue_name, 
@@ -176,9 +172,8 @@ class ThreadController():
     req_msg = {"request": self.__request, 
                "msg-type": 1, 
                "configuration": {},
-               "reply-to": ccdp_utils.WEB_QUEUE 
+               "reply-to": queue_name 
                }
-
     if not skip_req:
       self.__amq.send_message(self.__to_engine,  req_msg )
     else:
@@ -396,9 +391,7 @@ class ThreadController():
 
     '''
     body = {'msg-type': 'COMMAND', 'data':{'action': action, 'task': task}}
-    #Sends to a queue named by the task number. 
-    #self.__amq.send_message(task['task-id'],  json.dumps(body) )
-    self.__amq.send_message(self.__to_engine,  json.dumps(body) )
+    self.__amq.send_message(task['task-id'],  json.dumps(body) )
 
 
   def __send_msg_to_all_tasks(self, action):

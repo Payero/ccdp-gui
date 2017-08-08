@@ -2,9 +2,10 @@
   {
     "module_id": "csv-reader",
     "name": "Csv File Reader",
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=4,max=6" ],
     "short_description": "Reads a CSV file as input",
     "class_name": "tasks.csv_demo.CsvReader",
-    "ccdp_type": "ec2",
+    "ccdp_type": "DEFAULT",
     "max_instances": 1,
     "min_instances": 1,
     "configuration": {
@@ -15,9 +16,10 @@
   }, {
     "module_id": "csv-selector",
     "name": "Csv Selector",
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=8,max=10" ],
     "short_description": "Selects all entries matching a simple criteria",
     "class_name": "tasks.csv_demo.CsvSelector",
-    "ccdp_type": "ec2",
+    "ccdp_type": "DEFAULT",
     "max_instances": 1,
     "min_instances": 1,
     "configuration": {
@@ -28,9 +30,10 @@
   }, {
     "module_id": "csv-display",
     "name": "Csv Display",
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=10,max=14" ],
     "class_name": "tasks.csv_demo.CsvDisplay",
     "short_description": "Displays filtered entries",
-    "ccdp_type": "ec2",
+    "ccdp_type": "DEFAULT",
     "max_instances": 1,
     "min_instances": 1,
     "configuration": {

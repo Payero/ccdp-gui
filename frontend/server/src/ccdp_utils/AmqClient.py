@@ -67,10 +67,8 @@ class AmqClient(stomp.ConnectionListener):
 
   def connect(self, broker, port=61613, dest=None, on_message=None, on_error=None):
     self.__logger.info("Connecting to AMQ: %s:%d" % (broker, port)) 
-    # TODO MB Getting Internal Server Error when this is run but cannot run it in a docker container without this
     self.__connection = stomp.Connection(host_and_ports=[(broker, port)], 
                                          auto_content_length=False)
-    #self.__connection = stomp.Connection(auto_content_length=False)
     self.__logger.debug("Setting The listener")
     self.__connection.set_listener('', self)
     self.__logger.debug("Starting the connection")
@@ -80,7 +78,8 @@ class AmqClient(stomp.ConnectionListener):
 
     if dest != None:
       self.register(dest, on_message, on_error)
-    self.__connection.subscribe(destination=self.__destination, id=1, ack='auto')
+      self.__connection.subscribe(destination=dest, id=1, ack='auto')
+
     self.__logger.info("Connected!!")
     self.__thread = Thread(target=self.__run)
     self.__thread.start()
@@ -118,9 +117,6 @@ class AmqClient(stomp.ConnectionListener):
       
 
   def on_message(self, headers, message):
-    self.__logger.debug("*********")
-    self.__logger.debug("In AMQ CLLIENT ON_MESSAGE")
-    self.__logger.debug("*********")
     if self.__onMessage:
       self.__onMessage(message)
 
@@ -162,7 +158,7 @@ if __name__ == '__main__':
 
   msgr =  AmqClient()
   #msgr.register("/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
-  msgr.connect('ax-ccdp.com', dest="/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
+  msgr.connect('localhost', dest="/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
   msgr.send_message('/queue/CcdpTaskingActivity', "This is a test message")
   time.sleep(2)
   msgr.stop()
