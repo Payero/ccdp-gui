@@ -22,8 +22,7 @@ docker containers shared among multiple projects such as ActiveMQ and MongoDb.
     - Somewhere (likely your ccdp project directory) make a virtual environment by runnning virtualenv venv
     - Enter the virtual environment by running '. /venv/bin/activate'
     - Then install the necessary libraries
-        -  Flask
-        - flask-sse
+        - Flask
         - pymongo
         - stomp.py
         - flask_socketio
@@ -57,17 +56,20 @@ CONTAINER ID        IMAGE             COMMAND                  STATUS   NAMES
 ### Running the client
 
 - ``` - Need to verify the steps below are true and edit it as necessary ```
-- First, build the docker images. Thankfully, `docker-compose` provides a way to orchestrate multiple Docker containers.
-- Navigate to /webapp and run
+
+- Instructions to run in a docker container (still some possible issues running this)
+  - First, build the docker images. Thankfully, `docker-compose` provides a way to orchestrate multiple Docker containers.
+  - Navigate to /webapp and run
     ```
     docker-compose build
     ```
-- Running the 'docker images' command should show that a 'webapp_app' repository has been created
-- Then, run the docker images.
+  - Running the 'docker images' command should show that a 'webapp_app' repository has been created
+  - Then, run the docker images.
 
-    ```
-    docker-compose up
-    ```
+      ```
+      docker-compose up
+      ```
+- To run the client outside of the docker container in the webapp directory do ./run_app.sh.  
 
 - At this point, mongo may be empty, so we provide `modules-mongo.json` for seeding. To seed the database, copy `modules-mongo.json` to `ccdp/webapp/data/`. Then, enter the docker container running mongo and import the data. Below illustrates each step.
 
