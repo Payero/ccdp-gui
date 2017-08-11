@@ -19,16 +19,14 @@ import json
 import ccdp_utils
 from pprint import pprint, pformat
 import ccdp_utils.AmqClient as AmqClient
-from flask_socketio import SocketIO, emit, send#, SocketIOTestClient #SocketIO test client is for testing that the messages are sending correctly 
+from flask_socketio import SocketIO, emit
 import eventlet
 from modules.ThreadController import ThreadController
 from numpy import broadcast
 import urllib
 
-#app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
 socketio = SocketIO(app, async_mode="threading")
-#testclient = SocketIOTestClient(app, socketio) #for trying to test socketio stuff MB
 
 #####################################################################
 # View Functions
@@ -67,11 +65,7 @@ def get_status(version):
 
 @app.route("/<version>/run", methods=["POST"])
 def start_processing(version):
-    """Sends a stop processing request to the engine"""
-    #run_json = request.json
-    # send to engine
-    #g.amq.send_message(app.config["FROM_SERVER_QUEUE_NAME"], run_json)
-    #print(type(request))
+    """Sends a thread request to the thread controller"""
     run_json = request.json['body']
     run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
     reply_queue = run_json['request']['reply-to'] 
@@ -86,9 +80,9 @@ def start_processing(version):
                             thread_req=run_json,                # required
                             callback_fn=update_task,            # optional
                             auto_start=True,                    # optional
-                            #comment broker host line to send to default localhost
+                            #define broker host and broker port to send to something other than localhost
                             #broker_host="ax-ccdp.com",          # optional
-                            broker_port=61616,                  # optional
+                            #broker_port=61616,                  # optional
                             skip_req=False)                     # optional
     
     return str(200)
@@ -199,24 +193,20 @@ def _delete_project(db, project_id):
     result =  db["projects"].delete_one({"name": project_id})
     return result
 
-@socketio.on('message')
+#Callback function to handle forwarding task updates to the client via socketio
 def update_task(data): 
     data = json.dumps(data)
-    app.logger.info('**********************************')
     app.logger.info('Inside the callback manager')
     app.logger.info(type(data))
     app.logger.info(data)
-    app.logger.info('**********************************')
     #TODO change this from broadcast
     socketio.emit('message', data, broadcast=True) 
  
 def connect_to_database():
     return pymongo.MongoClient(app.config["DB_IP"], app.config["DB_PORT"])
 
-def message_received(msg):
-    app.logger.info(msg)
-    #app.socketio.emit('msg', { "message": msg }, namespace='/')
-
+#Handler for receiving a socketio msg from the client (currently unused on client end)
+@socketio.on("msg")
 def onMessage(msg):
     app.logger.info("Got a message: %s" % msg)
 
@@ -243,30 +233,16 @@ def get_amq():
     return broker
 
 
-#MB socketio connect and disconnect
+#Triggers when the socketio succesfully connects to a client
 @socketio.on("connect")
 def connected():
     app.logger.info("USER CONNECTED")
-    #print('*****************************')
-    #print('inside the socket connect function')
-    #print('*****************************')
-    #socketio.emit('msg', {'message': "Hello! testing if the connection receiver works"}, namespace='/test')
 
+#Triggers when a client disconnects from the socketio
 @socketio.on("disconnect")
 def disconnected():
     app.logger.info("USER DISCONNECTED")
     socketio = None
-
-@socketio.on("msg", namespace='/test')
-#def sendmsg():
-#    print('**********************')
-#    print('inside the send message function')
-#    print('**********************')
-#    socketio.emit('msg', {'message': "Hello! testing if the message receive works"}, namespace='test')
-
-@socketio.on('disconnect', namespace='/test')
-def test_disconnect():
-    app.logger.info("USER DISCONNECTED")
 
 
 if __name__ == '__main__':

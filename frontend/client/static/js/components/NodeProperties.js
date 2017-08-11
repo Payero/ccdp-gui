@@ -51,7 +51,7 @@ var NodeProperties = React.createClass({
   handleMemoryChange: function(e) {
     this.setState({memory: e.target.value});
   },
-  // Updates state with changes to the Task Running Mode TODO
+  // Updates state with changes to the Task Running Mode
   handleTasksRunningModeChange: function(e) {
     if(this.state.tasksRunningMode !== true) {
         this.setState({tasksRunningMode: true});
@@ -60,7 +60,7 @@ var NodeProperties = React.createClass({
         this.setState({tasksRunningMode: false});
     }
   },
-  // Updates state with changes to Use Single Node setting TODO
+  // Updates state with changes to Use Single Node setting
   handleUseSingleNodeChange: function(e) {
     if(this.state.useSingleNode !== true) {
         this.setState({useSingleNode: true});
@@ -85,8 +85,8 @@ var NodeProperties = React.createClass({
     task.config["cpu"] = this.state.cpu;
     task.config["memory"] = this.state.memory;
     task.config["task-props"] = JSON.parse(JSON.stringify(this.state.taskProps));
-    task.config["tasks-running-mode"] = this.state.tasksRunningMode; //MB
-    task.config["use-single-node"] = this.state.useSingleNode;//MB
+    task.config["tasks-running-mode"] = this.state.tasksRunningMode;
+    task.config["use-single-node"] = this.state.useSingleNode;
     this.props.handleTaskUpdate(task);
   },
   // Resets state to values from props

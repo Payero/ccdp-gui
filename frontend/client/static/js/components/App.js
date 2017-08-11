@@ -8,9 +8,11 @@ var Keybinding = require('react-keybinding');
 var NotificationContainer = require('react-notifications').NotificationContainer;
 var NotificationManager = require('react-notifications').NotificationManager;
 var ModalPrompt = require('./ModalPrompt.js');
-const uuidv4 = require('uuid/v4')
-var sid = uuidv4();
 var io=require('socket.io-client')
+const uuidv4 = require('uuid/v4')
+
+//This generates the session id for the client
+var sid = uuidv4();
 
 /**
  * Top level components for React application, manages all computations involving top level state
@@ -108,31 +110,28 @@ var App = React.createClass({
     this.updateThreads();
     this.updateProjects();
     
-    //var socket = io.connect('http://' + location.hostname + ':5000', { resource : 'node_modules/socket.io' });
-    //var socket = io.connect('http://' + location.hostname + ':5000/test');
+    //Creates a socketio object which by default connects to the current domain
     var socket = io.connect();
+
+    //Logs when the console has connected succesfully 
     socket.on('connect', function() {
-        //console.log(msg);
         console.log('WebSocket connection has been established');
         
     });
     
+    // Handler to receive task update messages from the server  
     socket.on('message', function(data){ 
+        // Console logs to allow inspection of update messages 
         console.log('Message has been received');
         //console.log(typeof(data))
         console.log(JSON.parse(data));
-        //console.log(socket)
-        // Once we receive a message need to check which task it belongs to and 
-        // update the state
 
+        // Once we receive a message need to check which task it belongs to and update the state
         var logs = this.state.logs.concat([]);
         var nodes = this.state.nodes.concat([]);
         var currentThreadIds = this.state.currentThreadIds.concat([]);
         logs.push(data);
-        //var msg = data;
-        //var msg = data['data']['task'];
         var msg = JSON.parse(data)['data']['task'];
-        //if (msg['source'] === 'THREAD' && msg['state'] === 'STOPPED') {
         if (msg['state'] === 'STOPPED') {
           currentThreadIds.splice(currentThreadIds.indexOf(msg['thread-id']), 1);
         }
@@ -141,117 +140,24 @@ var App = React.createClass({
         }
         // Set task status
         if (msg.hasOwnProperty('task-id')) {
-          //console.log(msg['task-id'])
-          //console.log('nodes') 
-          //console.log(nodes) 
           var node = nodes.filter(function(node) {return node.id == msg['task-id']; })[0];
           //console.log(node)
-          //if (msg["status"] === "SUCCESS"){
-            if (msg["state"] === "RUNNING") {
-              //console.log("msg is running")
-              node.status = "RUNNING";
-            }
-            else if (msg["state"] === "SUCCESSFUL") {
-              //console.log("msg is finished")
-              node.status = "SUCCESS";
-            }
-          //}
-          //else if (msg["status"] === "FAILED") {
-            //node.status = "FAILED";
-          //}
+          if (msg["state"] === "RUNNING") {
+            //console.log("task is running")
+            node.status = "RUNNING";
+          }
+          else if (msg["state"] === "SUCCESSFUL") {
+            //console.log("task is finished")
+            node.status = "SUCCESS";
+          }
         }
-        //console.log(nodes)
-        //console.log('logs')
-        //console.log(this.state.logs)
-        //console.log(logs)
         //this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
         this.setState({ nodes: nodes });
-        //this.setState({ logs: JSON.parse(JSON.stringify(logs)) });
         //this.setState({ logs: logs });
         this.setState({ currentThreadIds: currentThreadIds });
     }.bind(this));
-    
-    
-        /*
-        //update task state here
-        var logs = this.state.logs.concat([]);
-        var nodes = this.state.nodes.concat([]);
-        var currentThreadIds = this.state.currentThreadIds.concat([]);
-        logs.push(data['body']);
-        //var msg = data;
-        var msg = JSON.parse(data['body']);
-        if (msg['source'] === 'THREAD' && msg['state'] === 'STOPPED') {
-          currentThreadIds.splice(currentThreadIds.indexOf(msg['thread-id']), 1);
-        }
-        if (currentThreadIds.length === 0) {
-          this.setState({ isRunning: false });
-        }
-        // Set task status
-        if (msg.hasOwnProperty('task-id')) {
-          var node = nodes.filter(function(node) { return node.id === msg['task-id']; })[0];
-          // TODO: Typo in engine with status 'SUCCES' needs to be fixed
-          if (msg["status"] === "SUCCESS" || msg["status"] === "SUCCES"){
-            if (msg["state"] === "RUNNING") {
-              node.status = "RUNNING";
-            }
-            else if (msg["state"] === "FINISHED") {
-              node.status = "SUCCESS";
-            }
-          }
-          else if (msg["status"] === "FAILED") {
-            node.status = "FAILED";
-          }
-        }
-        this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });*/
-    //}.bind(this)); //not sure if need this bind or not?
-    
-    /*
-    // SockJS functionality, will connect to RabbitMQ directly and consume messages
-    var ws = new SockJS('http://' + location.hostname + ':5000/test');
-    var client = Stomp.over(ws); 
-    //client.heartbeat.outgoing = 0;
-    //client.heartbeat.incoming = 0;
-    var on_connect = function() {
-      console.log('Connected');
-      client.subscribe('/queue/CCDP-WebServer', function(data) {
-        var logs = this.state.logs.concat([]);
-        var nodes = this.state.nodes.concat([]);
-        var currentThreadIds = this.state.currentThreadIds.concat([]);
-        logs.push(data['body']);
-        var msg = JSON.parse(data['body']);
-        if (msg['source'] === 'THREAD' && msg['state'] === 'STOPPED') {
-          currentThreadIds.splice(currentThreadIds.indexOf(msg['thread-id']), 1);
-        }
-        if (currentThreadIds.length === 0) {
-          this.setState({ isRunning: false });
-        }
-        // Set task status
-        if (msg.hasOwnProperty('task-id')) {
-          var node = nodes.filter(function(node) { return node.id === msg['task-id']; })[0];
-          // TODO: Typo in engine with status 'SUCCES' needs to be fixed
-          if (msg["status"] === "SUCCESS" || msg["status"] === "SUCCES"){
-            if (msg["state"] === "RUNNING") {
-              node.status = "RUNNING";
-            }
-            else if (msg["state"] === "FINISHED") {
-              node.status = "SUCCESS";
-            }
-          }
-          else if (msg["status"] === "FAILED") {
-            node.status = "FAILED";
-          }
-        }
-        this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
-      }.bind(this));
-    }.bind(this);
-    var on_error =  function() {
-      console.log('Error');
-    };
-    client.connect('guest', 'guest', on_connect, on_error, '/');
-  */  
   },
-  
-
+    
   // Updates array of tasks to be rendered in Sidebar.js as draggable divs
   updateTasks: function() {
     var tasks = [];
@@ -707,7 +613,7 @@ var App = React.createClass({
   // Stops state so we don't have to manually refresh
   handleStopGraph: function() {
     if (this.state.isRunning) {
-        NotificationManager.success("Just for testing, lets pretend we stopped the thread");
+        NotificationManager.success("Successfully stopped the project");
         this.setState({ isRunning: false });
     }
   },
@@ -847,22 +753,11 @@ var App = React.createClass({
             "thread-id": idctThread++,
             "use-single-node": false //an option if I want to add it, tells everything to run on single node
           },
-          //"thread-id": idctThread++,
-          //"name": "",
-          //"starting-task": [],
-          //"tasks": [],
-          //"breakpoints": this.generateThreadBreakpoints(threads[i]["request"])
         });
         for (var j = 0; j < threads[i]["nodes"].length; j++) {
           var node = nodes.filter(function(d) { return d.id === threads[i]["nodes"][j].id; })[0];
           dictJSON["threads"][i]["request"]["tasks"].push({
             "class-name": node.config["class-name"],
-            //"TEST": node.config["ccdp-type"],
-	    //"command": ['~/Documents/project/ccdp/engine/data/ccdp-engine/python/ccdp_mod_test.py',
-	      //"-a",
-	      //"testRandomTime",
-	      //"-p",
-	      //"min=10,max=30"],
 	    "command": node.config["command"],
 	    "configuration": node.config["task-props"],
 	    "cpu": node.config["cpu"],
@@ -878,26 +773,14 @@ var App = React.createClass({
 	    "retries": 3,//default value 3 but can give an option
 	    "session-id": sid, 
             "task-id": node.id
-            /*
-            "task-id": node.id,
-            "module-id": node.task, //unused
-            "name": node.title,
-            "class-name": node.config["class-name"],
-            "ccdp-type": node.config["ccdp-type"],//unused
-            "max-instances": node.config["max-instances"],//unused
-            "min-instances": node.config["min-instances"],//unused
-            "cpu": node.config["cpu"],
-            "memory": node.config["memory"],
-            "configuration": node.config["task-props"],
-            "input-ports": [],
-            "output-ports": []
-            */
           });
         }
-        //Insert the ccdp-type into thread object (TODO: is this required to be the same for all tasks in a thread) 
+        //Insert the ccdp-type and use-single-node setting into the thread object 
+        //Both of these settings should really be set per thread and not pulled from a task
         dictJSON["threads"][i]["request"]["node-type"]=node.config["ccdp-type"];
         dictJSON["threads"][i]["request"]["use-single-node"]=node.config["use-single-node"];
         //dictJSON["threads"][i]["request"]["tasks-running-mode"]=node.config["tasks-running-mode"]
+
 
         // Setup input/output ports and keep track of i/o port number for each task in the thread
         var inputPortNums = [];
@@ -907,7 +790,8 @@ var App = React.createClass({
           inputPortNums.push(1);
           outputPortNums.push(1);
         }
-        //check what this does
+        //Sets up the input and output ports of the tasks
+        //Currently creating a new input and output port for each connection
         if (threads[i]["nodes"].length > 1) {
           for (var k = 0; k < threads[i]["edges"].length; k++) {
             var outputIndex = threads[i]["nodes"].indexOf(threads[i]["edges"][k].source);
@@ -926,20 +810,16 @@ var App = React.createClass({
             }
           }
         }
-        //for the old starting task variable
-        /*for (var j = 0; j < dictJSON["threads"][i]["request"]["tasks"].length; j++) {
-          if (dictJSON["threads"][i]["request"]["tasks"][j]["input-ports"].length == 0) {
-            dictJSON["threads"][i]["request"]["starting-task"].push(dictJSON["threads"][i]["request"]["tasks"][j]["task-id"]);
-          }
-        }*/
       }
       this.setState({ idctThread: idctThread, currentThreadIds: currentThreadIds });
       localStorage.setItem('idctThread', idctThread);
-      //return {}
       return dictJSON;
     }
   },
   // Generates JSON representation of project for Export
+  // This function is unecessary since the generateJSONRun can be used for the Run and export
+  // Currently unused in the code. Calls to this have been replaced with generateJSONRun
+  // If there is a need to use it replace this code with a copy of generateJSONRun for the updated format
   generateJSONExport: function() {
     var nodes = this.state.nodes;
     var edges = this.state.edges;
