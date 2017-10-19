@@ -1,0 +1,102 @@
+ticket,requestor,RequestorSeniority,ITOwner,FiledAgainst,TicketType,Severity,Priority,daysOpen,Satisfaction
+1,1929,1 - Junior,50,Systems,Issue,2 - Normal,0 - Unassigned,3,1 - Unsatisfied
+2,1587,2 - Regular,15,Software,Request,1 - Minor,1 - Low,5,1 - Unsatisfied
+3,925,2 - Regular,15,Access/Login,Request,2 - Normal,0 - Unassigned,0,0 - Unknown
+4,413,4 - Management,22,Systems,Request,2 - Normal,0 - Unassigned,20,0 - Unknown
+5,318,1 - Junior,22,Access/Login,Request,2 - Normal,1 - Low,1,1 - Unsatisfied
+6,858,4 - Management,38,Access/Login,Request,2 - Normal,3 - High,0,0 - Unknown
+7,1978,3 - Senior,10,Systems,Request,2 - Normal,3 - High,9,0 - Unknown
+8,1209,4 - Management,1,Software,Request,2 - Normal,0 - Unassigned,15,0 - Unknown
+9,887,2 - Regular,14,Software,Request,2 - Normal,2 - Medium,6,1 - Unsatisfied
+10,1780,3 - Senior,46,Access/Login,Request,2 - Normal,1 - Low,1,1 - Unsatisfied
+11,1349,3 - Senior,1,Software,Request,2 - Normal,3 - High,7,0 - Unknown
+12,1893,2 - Regular,50,Systems,Request,2 - Normal,1 - Low,17,1 - Unsatisfied
+13,645,2 - Regular,11,Systems,Request,2 - Normal,3 - High,10,1 - Unsatisfied
+14,1492,4 - Management,26,Systems,Issue,2 - Normal,3 - High,4,3 - Highly satisfied
+15,1978,3 - Senior,9,Software,Issue,2 - Normal,0 - Unassigned,7,3 - Highly satisfied
+16,216,4 - Management,7,Software,Request,2 - Normal,0 - Unassigned,11,2 - Satisfied
+17,1586,2 - Regular,20,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+18,1554,2 - Regular,42,Systems,Request,2 - Normal,2 - Medium,7,3 - Highly satisfied
+19,518,4 - Management,16,Systems,Request,2 - Normal,0 - Unassigned,7,3 - Highly satisfied
+20,903,3 - Senior,42,Access/Login,Request,2 - Normal,3 - High,0,3 - Highly satisfied
+21,588,4 - Management,15,Systems,Request,2 - Normal,3 - High,6,3 - Highly satisfied
+22,650,2 - Regular,10,Systems,Request,2 - Normal,2 - Medium,6,0 - Unknown
+23,1435,3 - Senior,9,Systems,Request,2 - Normal,2 - Medium,14,3 - Highly satisfied
+24,1980,4 - Management,15,Access/Login,Request,2 - Normal,3 - High,0,2 - Satisfied
+25,916,4 - Management,11,Hardware,Request,2 - Normal,3 - High,13,2 - Satisfied
+26,86,2 - Regular,36,Software,Issue,2 - Normal,0 - Unassigned,3,0 - Unknown
+27,24,4 - Management,42,Access/Login,Request,2 - Normal,0 - Unassigned,0,0 - Unknown
+28,107,2 - Regular,29,Systems,Request,2 - Normal,0 - Unassigned,5,3 - Highly satisfied
+29,197,2 - Regular,6,Systems,Request,2 - Normal,2 - Medium,20,2 - Satisfied
+30,233,2 - Regular,49,Access/Login,Request,2 - Normal,3 - High,1,0 - Unknown
+31,1574,1 - Junior,28,Systems,Request,2 - Normal,1 - Low,14,1 - Unsatisfied
+32,1706,2 - Regular,13,Systems,Request,2 - Normal,3 - High,13,0 - Unknown
+33,496,2 - Regular,12,Systems,Request,2 - Normal,3 - High,7,0 - Unknown
+34,1151,2 - Regular,31,Systems,Request,2 - Normal,1 - Low,5,3 - Highly satisfied
+35,1618,4 - Management,32,Access/Login,Issue,3 - Major,0 - Unassigned,0,0 - Unknown
+36,1916,4 - Management,14,Access/Login,Request,2 - Normal,3 - High,0,1 - Unsatisfied
+37,82,2 - Regular,43,Systems,Request,2 - Normal,3 - High,5,1 - Unsatisfied
+38,341,3 - Senior,19,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+39,1887,4 - Management,8,Access/Login,Request,2 - Normal,3 - High,0,3 - Highly satisfied
+40,16,4 - Management,25,Systems,Request,2 - Normal,3 - High,11,2 - Satisfied
+41,1222,2 - Regular,1,Access/Login,Request,2 - Normal,2 - Medium,2,1 - Unsatisfied
+42,755,3 - Senior,48,Systems,Request,2 - Normal,0 - Unassigned,5,3 - Highly satisfied
+43,1961,4 - Management,18,Access/Login,Issue,2 - Normal,0 - Unassigned,0,1 - Unsatisfied
+44,1350,2 - Regular,15,Hardware,Request,2 - Normal,2 - Medium,13,1 - Unsatisfied
+45,1704,2 - Regular,32,Systems,Issue,2 - Normal,2 - Medium,3,0 - Unknown
+46,1865,3 - Senior,2,Access/Login,Request,2 - Normal,0 - Unassigned,0,2 - Satisfied
+47,822,2 - Regular,19,Software,Request,2 - Normal,3 - High,5,2 - Satisfied
+48,1595,3 - Senior,43,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+49,1270,1 - Junior,27,Access/Login,Issue,4 - Critical,3 - High,0,3 - Highly satisfied
+50,1166,1 - Junior,35,Systems,Request,2 - Normal,2 - Medium,6,0 - Unknown
+51,207,4 - Management,25,Systems,Request,2 - Normal,0 - Unassigned,23,0 - Unknown
+52,1758,2 - Regular,15,Software,Request,2 - Normal,3 - High,7,3 - Highly satisfied
+53,1506,1 - Junior,10,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+54,953,2 - Regular,26,Systems,Request,2 - Normal,3 - High,10,1 - Unsatisfied
+55,1246,2 - Regular,42,Systems,Request,2 - Normal,0 - Unassigned,8,0 - Unknown
+56,1219,2 - Regular,2,Access/Login,Request,2 - Normal,3 - High,0,2 - Satisfied
+57,1726,3 - Senior,10,Access/Login,Issue,2 - Normal,3 - High,0,2 - Satisfied
+58,1271,2 - Regular,46,Systems,Issue,2 - Normal,3 - High,9,1 - Unsatisfied
+59,1794,2 - Regular,36,Access/Login,Issue,2 - Normal,3 - High,0,0 - Unknown
+60,1289,1 - Junior,9,Systems,Request,2 - Normal,1 - Low,14,0 - Unknown
+61,469,2 - Regular,1,Systems,Request,2 - Normal,2 - Medium,14,0 - Unknown
+62,846,3 - Senior,2,Software,Request,2 - Normal,3 - High,5,3 - Highly satisfied
+63,1021,2 - Regular,40,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+64,39,4 - Management,6,Access/Login,Request,2 - Normal,3 - High,0,2 - Satisfied
+65,1579,2 - Regular,16,Systems,Request,2 - Normal,0 - Unassigned,5,3 - Highly satisfied
+66,1811,1 - Junior,18,Systems,Request,2 - Normal,0 - Unassigned,26,0 - Unknown
+67,1142,2 - Regular,12,Access/Login,Request,1 - Minor,1 - Low,0,3 - Highly satisfied
+68,479,2 - Regular,22,Software,Request,1 - Minor,2 - Medium,13,1 - Unsatisfied
+69,1941,2 - Regular,5,Software,Request,4 - Critical,3 - High,3,3 - Highly satisfied
+70,995,4 - Management,15,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+71,1099,2 - Regular,2,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+72,294,2 - Regular,21,Access/Login,Issue,2 - Normal,1 - Low,0,3 - Highly satisfied
+73,228,4 - Management,47,Systems,Request,2 - Normal,3 - High,5,1 - Unsatisfied
+74,176,3 - Senior,35,Access/Login,Request,4 - Critical,3 - High,1,3 - Highly satisfied
+75,1883,2 - Regular,1,Software,Request,2 - Normal,1 - Low,9,3 - Highly satisfied
+76,668,2 - Regular,18,Access/Login,Request,2 - Normal,1 - Low,0,2 - Satisfied
+77,1178,1 - Junior,25,Systems,Request,4 - Critical,0 - Unassigned,17,0 - Unknown
+78,1065,2 - Regular,44,Access/Login,Issue,2 - Normal,2 - Medium,1,2 - Satisfied
+79,839,4 - Management,16,Hardware,Issue,2 - Normal,3 - High,8,1 - Unsatisfied
+80,1100,2 - Regular,24,Software,Request,2 - Normal,1 - Low,6,2 - Satisfied
+81,1982,3 - Senior,27,Systems,Request,2 - Normal,0 - Unassigned,6,3 - Highly satisfied
+82,1599,2 - Regular,35,Hardware,Issue,2 - Normal,1 - Low,14,0 - Unknown
+83,721,1 - Junior,13,Software,Request,2 - Normal,0 - Unassigned,13,0 - Unknown
+84,886,2 - Regular,36,Access/Login,Request,2 - Normal,3 - High,0,1 - Unsatisfied
+85,598,1 - Junior,23,Access/Login,Request,2 - Normal,0 - Unassigned,0,3 - Highly satisfied
+86,77,2 - Regular,44,Systems,Request,2 - Normal,0 - Unassigned,7,1 - Unsatisfied
+87,1058,4 - Management,39,Access/Login,Request,3 - Major,0 - Unassigned,0,0 - Unknown
+88,643,1 - Junior,35,Systems,Request,2 - Normal,1 - Low,16,1 - Unsatisfied
+89,1413,2 - Regular,23,Systems,Request,2 - Normal,3 - High,6,0 - Unknown
+90,420,3 - Senior,46,Systems,Issue,2 - Normal,0 - Unassigned,9,0 - Unknown
+91,1903,1 - Junior,6,Systems,Request,2 - Normal,0 - Unassigned,13,0 - Unknown
+92,448,4 - Management,19,Systems,Request,2 - Normal,3 - High,5,2 - Satisfied
+93,68,4 - Management,31,Software,Request,2 - Normal,3 - High,7,3 - Highly satisfied
+94,81,1 - Junior,37,Software,Request,2 - Normal,3 - High,4,0 - Unknown
+95,806,3 - Senior,28,Systems,Request,2 - Normal,3 - High,16,0 - Unknown
+96,173,4 - Management,7,Access/Login,Request,2 - Normal,0 - Unassigned,1,0 - Unknown
+97,434,3 - Senior,28,Access/Login,Request,2 - Normal,2 - Medium,1,1 - Unsatisfied
+98,1653,2 - Regular,41,Systems,Request,2 - Normal,3 - High,8,3 - Highly satisfied
+99,1167,2 - Regular,35,Systems,Request,2 - Normal,1 - Low,16,3 - Highly satisfied
+100,634,2 - Regular,21,Software,Request,2 - Normal,2 - Medium,7,3 - Highly satisfied
+

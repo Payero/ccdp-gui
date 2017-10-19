@@ -93,7 +93,7 @@ if __name__ == '__main__':
                         thread_req=thread_req,              # required
                         callback_fn=callback_fn,            # optional
                         auto_start=True,                    # optional
-                        broker_host="localhost",
+                        broker_host="ax-ccdp.com",
                         broker_port=61616,
                         skip_req=False)                     # optional
 

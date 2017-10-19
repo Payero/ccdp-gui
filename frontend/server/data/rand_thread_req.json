@@ -1,11 +1,12 @@
 {
   "name" : "CSV Test Thread",
+  "cpu": 100,
   "description" : "CSV Reading and filtering demo",
   "tasks" : [ {
     "name" : "csv-reader",
     "description" : "Opens a single csv file and process line by line",
     "retries" : 3,
-    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=5,max=10" ],
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=20,max=25" ],
     "configuration" : { "filename": "/data/ccdp/webapp/frontend/server/data/it_help_desk.csv", 
                         "send-header": "True", 
                         "number-entries": 1},
@@ -23,9 +24,10 @@
   },
   {
     "name" : "csv-selector",
+    "cpu": 100,
     "description" : "Selects all entries matching a simple criteria",
     "retries" : 3,
-    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=5,max=10" ],
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=35,max=40" ],
     "configuration" : { "field": "daysOpen", 
                         "operator": "GE", 
                         "value": 5},
@@ -43,9 +45,10 @@
   },
   {
     "name" : "csv-display",
+    "cpu": 100,
     "description" : "Displays filtered entries",
     "retries" : 3,
-    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=5,max=10" ],
+    "command" : [ "/data/ccdp/ccdp-engine/python/ccdp_mod_test.py", "-a", "testRandomTime", "-p", "min=45,max=50" ],
     "configuration" : { "output-url": "file:///tmp/results.csv"},
     "task-id" : "csv-display",
     "session-id" : "DEFAULT",

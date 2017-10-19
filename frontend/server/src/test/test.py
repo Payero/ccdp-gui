@@ -17,7 +17,7 @@ class Test():
     self.__logger.debug("Running Test")
 
     #self.__run_lambda_test()
-    self.decode("eydicm9rZXJfaG9zdCc6ICdheC1jY2RwLmNvbScsICdicm9rZXJfcG9ydCc6IDYxNjE2LCAndGFza19pZCc6ICdjc3YtcmVhZGVyJ30=")
+    self.decode("eydicm9rZXJfaG9zdCc6ICdheC1jY2RwLmNvbScsICdicm9rZXJfcG9ydCc6IDYxNjE2LCAndGFza19pZCc6ICdjc3Ytc2VsZWN0b3InfQ==")
 
 
 

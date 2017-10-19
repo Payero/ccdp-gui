@@ -1,0 +1,6 @@
+/data/ccdp/ccdp-engine/python/CcdpModuleLauncher.py -f /data/ccdp/webapp/frontend/server/src/modules/csv_reader.py -c CsvReader -a eydicm9rZXJfaG9zdCc6ICdheC1jY2RwLmNvbScsICdicm9rZXJfcG9ydCc6IDYxNjE2LCAndGFza19pZCc6ICdjc3YtcmVhZGVyJ30=
+
+/data/ccdp/ccdp-engine/python/CcdpModuleLauncher.py -f /data/ccdp/webapp/frontend/server/src/modules/csv_selector.py -c CsvSelector -a eydicm9rZXJfaG9zdCc6ICdheC1jY2RwLmNvbScsICdicm9rZXJfcG9ydCc6IDYxNjE2LCAndGFza19pZCc6ICdjc3Ytc2VsZWN0b3InfQ==
+
+/data/ccdp/ccdp-engine/python/CcdpModuleLauncher.py -f /data/ccdp/webapp/frontend/server/src/modules/csv_display.py -c CsvDisplay -a eydicm9rZXJfaG9zdCc6ICdheC1jY2RwLmNvbScsICdicm9rZXJfcG9ydCc6IDYxNjE2LCAndGFza19pZCc6ICdjc3YtZGlzcGxheSd9
+
