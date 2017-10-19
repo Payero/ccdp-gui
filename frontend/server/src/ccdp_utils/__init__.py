@@ -1,4 +1,4 @@
-import logging.config, os, json
+import logging.config, os, json, re
 
 # Stores the default verbosity level to use
 __DEF_LEVEL = logging.DEBUG
@@ -95,7 +95,13 @@ def setup_logging( name="root",
     with open(filename, 'rt') as f:
         config = json.load(f)
         
-    logging.config.dictConfig(config)
+    regex = re.compile(r'\$(\w+|\{[^}]*\})')
+    def os_expandvar(match):
+        v = match.group(1)
+        if v.startswith('{') and v.endswith('}'):
+            v = v[1:-1]
+        return json.dumps(os.environ.get(v, ''))[1:-1]
+    logging.config.dictConfig(json.loads(regex.sub(os_expandvar, json.dumps(config))))
     
   else:
     logging.basicConfig(level=default_level)

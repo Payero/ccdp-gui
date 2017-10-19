@@ -15,7 +15,8 @@ var GraphControls = React.createClass({
     // TODO
   },
   onStop: function() {
-    // TODO
+    // TODO - This function still needs to be fleshed out, currently just resets the state flag
+    this.props.onStopGraph();
   },
   onExport: function() {
     var generatedJSON = this.props.onExportGraph();

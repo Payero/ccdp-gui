@@ -11,7 +11,9 @@ var NodeProperties = React.createClass({
       minInstances: this.props.selectedNode.config["min-instances"],
       cpu: this.props.selectedNode.config["cpu"],
       memory: this.props.selectedNode.config["memory"],
-      taskProps: JSON.parse(JSON.stringify(this.props.selectedNode.config["task-props"]))
+      taskProps: JSON.parse(JSON.stringify(this.props.selectedNode.config["task-props"])),
+      tasksRunningMode: this.props.selectedNode.config["tasks-running-mode"],
+      useSingleNode: this.props.selectedNode.config["use-single-node"]
     };
   },
   // When a new node is selected, update state with new props
@@ -23,7 +25,9 @@ var NodeProperties = React.createClass({
         minInstances: nextProps.selectedNode.config["min-instances"],
         cpu: nextProps.selectedNode.config["cpu"],
         memory: nextProps.selectedNode.config["memory"],
-        taskProps: JSON.parse(JSON.stringify(nextProps.selectedNode.config["task-props"]))
+        taskProps: JSON.parse(JSON.stringify(nextProps.selectedNode.config["task-props"])),
+        tasksRunningMode: nextProps.selectedNode.config["tasks-running-mode"],
+        useSingleNode: nextProps.selectedNode.config["use-single-node"]
       });
     }
   },
@@ -47,6 +51,24 @@ var NodeProperties = React.createClass({
   handleMemoryChange: function(e) {
     this.setState({memory: e.target.value});
   },
+  // Updates state with changes to the Task Running Mode
+  handleTasksRunningModeChange: function(e) {
+    if(this.state.tasksRunningMode !== true) {
+        this.setState({tasksRunningMode: true});
+    }
+    else {
+        this.setState({tasksRunningMode: false});
+    }
+  },
+  // Updates state with changes to Use Single Node setting
+  handleUseSingleNodeChange: function(e) {
+    if(this.state.useSingleNode !== true) {
+        this.setState({useSingleNode: true});
+    }
+    else {
+        this.setState({useSingleNode: false});
+    }
+  },
   // Updates state with changes to TaskProps input, uses data-key attribute to find which prop to update
   handleTaskPropsChange: function(e) {
     var key = e.target.getAttribute('data-key');
@@ -63,6 +85,8 @@ var NodeProperties = React.createClass({
     task.config["cpu"] = this.state.cpu;
     task.config["memory"] = this.state.memory;
     task.config["task-props"] = JSON.parse(JSON.stringify(this.state.taskProps));
+    task.config["tasks-running-mode"] = this.state.tasksRunningMode;
+    task.config["use-single-node"] = this.state.useSingleNode;
     this.props.handleTaskUpdate(task);
   },
   // Resets state to values from props
@@ -116,6 +140,15 @@ var NodeProperties = React.createClass({
           <row>
             <label>Memory(GB):</label>
             <input type="text" value={this.state.memory} onChange={this.handleMemoryChange} />
+          </row>
+          <row>
+            <label>Parallel:</label>
+            <input type="checkbox" value={this.state.tasksRunningMode} onChange={this.handleTasksRunningModeChange} checked={this.state.tasksRunningMode} />
+          </row>
+          <br/>
+          <row>
+            <label>Use Single Node:</label>
+            <input type="checkbox" value={this.state.useSingleNode} onChange={this.handleUseSingleNodeChange} checked={this.state.useSingleNode}/>
           </row>
         </div>
         <div className="col-md-3">

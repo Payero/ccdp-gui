@@ -21,10 +21,12 @@ from pprint import pprint, pformat
 import ccdp_utils.AmqClient as AmqClient
 from flask_socketio import SocketIO, emit
 import eventlet
+from modules.ThreadController import ThreadController
+from numpy import broadcast
+import urllib
 
-#app = Flask(__name__, template_folder='../../client/templates/', static_folder='../../client/static/')
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
-socketio = SocketIO(app, async_mode="eventlet")
+socketio = SocketIO(app, async_mode="threading")
 
 #####################################################################
 # View Functions
@@ -63,10 +65,26 @@ def get_status(version):
 
 @app.route("/<version>/run", methods=["POST"])
 def start_processing(version):
-    """Sends a stop processing request to the engine"""
-    run_json = request.json
-    # send to engine
-    g.amq.send_message(app.config["FROM_SERVER_QUEUE_NAME"], run_json)
+    """Sends a thread request to the thread controller"""
+    run_json = request.json['body']
+    run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
+    reply_queue = run_json['request']['reply-to'] 
+    
+    #Currently sending just the request field and padding the values on the thread controller end
+    #But this can be changed by using the commented instrction instead and not padding in the tc 
+    #run_json = json.dumps(run_json) 
+    run_json = json.dumps(run_json['request']) 
+
+    app.config["tc"] = ThreadController(queue_name=reply_queue, # required 
+                            engine_queue=ccdp_utils.ENG_QUEUE,  # required
+                            thread_req=run_json,                # required
+                            callback_fn=update_task,            # optional
+                            auto_start=True,                    # optional
+                            #define broker host and broker port to send to something other than localhost
+                            #broker_host="ax-ccdp.com",          # optional
+                            #broker_port=61616,                  # optional
+                            skip_req=False)                     # optional
+    
     return str(200)
 
 @app.route("/<version>/pause", methods=["POST"])
@@ -175,13 +193,20 @@ def _delete_project(db, project_id):
     result =  db["projects"].delete_one({"name": project_id})
     return result
 
+#Callback function to handle forwarding task updates to the client via socketio
+def update_task(data): 
+    data = json.dumps(data)
+    app.logger.info('Inside the callback manager')
+    app.logger.info(type(data))
+    app.logger.info(data)
+    #TODO change this from broadcast
+    socketio.emit('message', data, broadcast=True) 
+ 
 def connect_to_database():
     return pymongo.MongoClient(app.config["DB_IP"], app.config["DB_PORT"])
 
-def message_received(msg):
-    app.logger.info(msg)
-    socketio.emit('msg', { "message": msg }, namespace='/engine')
-
+#Handler for receiving a socketio msg from the client (currently unused on client end)
+@socketio.on("msg")
 def onMessage(msg):
     app.logger.info("Got a message: %s" % msg)
 
@@ -207,11 +232,18 @@ def get_amq():
         broker = g.amq = connect_to_amq()
     return broker
 
-@socketio.on("connect", namespace='/engine')
+
+#Triggers when the socketio succesfully connects to a client
+@socketio.on("connect")
 def connected():
     app.logger.info("USER CONNECTED")
-    g.amq = connect_to_amq()
-    emit('msg', {'message': "Hello!"}, namespace='/engine')
+
+#Triggers when a client disconnects from the socketio
+@socketio.on("disconnect")
+def disconnected():
+    app.logger.info("USER DISCONNECTED")
+    socketio = None
+
 
 if __name__ == '__main__':
     import argparse
@@ -266,5 +298,6 @@ if __name__ == '__main__':
             mongo_db = connect_to_database()[args.db]
             mongo_db.drop_collection(args.collection)
             mongo_db[args.collection].insert_many(parsed_seed_file)
-
+     
     socketio.run(app, host=args.ip, port=int(args.port), debug=True)
+

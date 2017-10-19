@@ -165,7 +165,7 @@ case $1 in
 
 		if [ "${pid}" != "" ] ; then
 			echo "Stopping ${APP_NAME}: $pid"
-			kill -9 $pid			
+			sudo kill -9 $pid			
 		else
 			echo "Could not find ${APP_NAME}"
 		fi

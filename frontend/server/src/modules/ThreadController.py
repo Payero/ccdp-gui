@@ -172,9 +172,8 @@ class ThreadController():
     req_msg = {"request": self.__request, 
                "msg-type": 1, 
                "configuration": {},
-               "reply-to": ccdp_utils.WEB_QUEUE 
+               "reply-to": queue_name 
                }
-
     if not skip_req:
       self.__amq.send_message(self.__to_engine,  req_msg )
     else:

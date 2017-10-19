@@ -74,6 +74,7 @@ var Graph = React.createClass({
       <div className="col-xs-10 col-md-10">
         <GraphControls
           onRunGraph={this.props.handleRunGraph}
+          onStopGraph={this.props.handleStopGraph}
           onExportGraph={this.props.handleExportGraph} 
           onClearGraph={this.props.handleClearGraph}
           onSaveGraph={this.props.handleSaveProject}
@@ -85,7 +86,7 @@ var Graph = React.createClass({
           selectedNode={this.state.selectedNode}
           selectedEdge={this.state.selectedEdge}
           handleBreakpoint={this.handleBreakpoint}
-          handleTaskUpdate={this.props.onTaskUpdate}
+          handleTaskUpdate={this.props.handleTaskUpdate}
           generateCurrentThreads={this.props.generateCurrentThreads}
           handleSaveSingleThread={this.props.handleSaveSingleThread}
           handleDeleteSingleThread={this.props.handleDeleteSingleThread}

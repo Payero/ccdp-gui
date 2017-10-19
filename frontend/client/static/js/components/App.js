@@ -8,6 +8,11 @@ var Keybinding = require('react-keybinding');
 var NotificationContainer = require('react-notifications').NotificationContainer;
 var NotificationManager = require('react-notifications').NotificationManager;
 var ModalPrompt = require('./ModalPrompt.js');
+var io=require('socket.io-client')
+const uuidv4 = require('uuid/v4')
+
+//This generates the session id for the client
+var sid = uuidv4();
 
 /**
  * Top level components for React application, manages all computations involving top level state
@@ -30,9 +35,12 @@ var App = React.createClass({
       case 'UNDO': this.handleUndo(); break;
       case 'REDO': this.handleRedo(); break;
       case 'RUN': this.handleRunGraph(); break;
+      case 'STOP': this.handleStopGraph(); break;
     }
     event.preventDefault();
   },
+  
+
   // Stacks used for undo/redo functionality, separated from state to avoid performance issues
   undoStacks: {
     undo: [],
@@ -101,20 +109,30 @@ var App = React.createClass({
     this.updateTasks();
     this.updateThreads();
     this.updateProjects();
-    // SockJS functionality, will connect to RabbitMQ directly and consume messages
-    var ws = new SockJS('http://' + location.hostname + ':15674/stomp');
-    var client = Stomp.over(ws);
-    client.heartbeat.outgoing = 0;
-    client.heartbeat.incoming = 0;
-    var on_connect = function() {
-      console.log('Connected');
-      client.subscribe('/queue/CCDP-WebServer', function(data) {
+    
+    //Creates a socketio object which by default connects to the current domain
+    var socket = io.connect();
+
+    //Logs when the console has connected succesfully 
+    socket.on('connect', function() {
+        console.log('WebSocket connection has been established');
+        
+    });
+    
+    // Handler to receive task update messages from the server  
+    socket.on('message', function(data){ 
+        // Console logs to allow inspection of update messages 
+        console.log('Message has been received');
+        //console.log(typeof(data))
+        console.log(JSON.parse(data));
+
+        // Once we receive a message need to check which task it belongs to and update the state
         var logs = this.state.logs.concat([]);
         var nodes = this.state.nodes.concat([]);
         var currentThreadIds = this.state.currentThreadIds.concat([]);
-        logs.push(data['body']);
-        var msg = JSON.parse(data['body']);
-        if (msg['source'] === 'THREAD' && msg['state'] === 'STOPPED') {
+        logs.push(data);
+        var msg = JSON.parse(data)['data']['task'];
+        if (msg['state'] === 'STOPPED') {
           currentThreadIds.splice(currentThreadIds.indexOf(msg['thread-id']), 1);
         }
         if (currentThreadIds.length === 0) {
@@ -122,28 +140,24 @@ var App = React.createClass({
         }
         // Set task status
         if (msg.hasOwnProperty('task-id')) {
-          var node = nodes.filter(function(node) { return node.id === msg['task-id']; })[0];
-          // TODO: Typo in engine with status 'SUCCES' needs to be fixed
-          if (msg["status"] === "SUCCESS" || msg["status"] === "SUCCES"){
-            if (msg["state"] === "RUNNING") {
-              node.status = "RUNNING";
-            }
-            else if (msg["state"] === "FINISHED") {
-              node.status = "SUCCESS";
-            }
+          var node = nodes.filter(function(node) {return node.id == msg['task-id']; })[0];
+          //console.log(node)
+          if (msg["state"] === "RUNNING") {
+            //console.log("task is running")
+            node.status = "RUNNING";
           }
-          else if (msg["status"] === "FAILED") {
-            node.status = "FAILED";
+          else if (msg["state"] === "SUCCESSFUL") {
+            //console.log("task is finished")
+            node.status = "SUCCESS";
           }
         }
-        this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
-      }.bind(this));
-    }.bind(this);
-    var on_error =  function() {
-      console.log('Error');
-    };
-    client.connect('guest', 'guest', on_connect, on_error, '/');
+        //this.setState({ nodes: nodes, logs: logs, currentThreadIds: currentThreadIds });
+        this.setState({ nodes: nodes });
+        //this.setState({ logs: logs });
+        this.setState({ currentThreadIds: currentThreadIds });
+    }.bind(this));
   },
+    
   // Updates array of tasks to be rendered in Sidebar.js as draggable divs
   updateTasks: function() {
     var tasks = [];
@@ -158,7 +172,7 @@ var App = React.createClass({
     request.done(function(msg) {
       // Add tasks to array following proper format
       for (var i = 0; i < msg.length; i++) {
-        tasks.push({ name: msg[i].name, description: msg[i].short_description, type: msg[i].module_type.toLowerCase(), data: JSON.stringify(msg[i]) });
+        tasks.push({ name: msg[i].name, description: msg[i].short_description, type: msg[i].module_type.toLowerCase(), data: JSON.stringify(msg[i]), command: msg[i].command });
       }
       this.setState({tasks: tasks});
     }.bind(this));
@@ -377,13 +391,16 @@ var App = React.createClass({
       "title": task['name'],
       "task": task['module_id'],
       "config": {
+        "command": task['command'], 
         "class-name": task['class_name'],
         "ccdp-type": task['ccdp_type'],
         "max-instances": task['max_instances'],
         "min-instances": task['min_instances'],
         "cpu": task['cpu'],
         "memory": task['memory'],
-        "task-props": task['configuration']
+        "task-props": task['configuration'],
+        "tasks-running-mode": task['tasks-running-mode'],
+        "use-single-node": task['use-single-node']
       }
     };
     var newNodes = nodes.concat([newTask]);
@@ -442,7 +459,9 @@ var App = React.createClass({
         "min-instances": tasks[i]['min-instances'],
         "cpu": tasks[i]['cpu'],
         "memory": tasks[i]['memory'],
-        "task-props": tasks[i]['configuration']
+        "task-props": tasks[i]['configuration'],
+        "tasks-running-mode": tasks[i]['tasks-running-mode'],
+        "use-single-node": tasks[i]['use-single-node']
       };
       newNodes.push({id: id, x: x, y: y, status: "", task: tasks[i]['module-id'], title: tasks[i]['name'], config: config});
       tasks[i].id = id;
@@ -558,40 +577,50 @@ var App = React.createClass({
         NotificationManager.info("No JSON generated - no workflow thread defined");
         return;
     }
-    var req = {
-      "type": "REQUEST",
-      "thread-id": "",
-      "task-id": "",
-      "action": "RUN",
-      "body": generatedJSON
+    for (var k = 0; k < generatedJSON["threads"].length; k++) {
+      var req = {
+        "type": "REQUEST",
+        "thread-id": "",
+        "task-id": "",
+        "action": "RUN",
+        "body": generatedJSON["threads"][k]
+      }
+      var request = $.ajax({
+          url: apiURL + 'run',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(req),
+          dataType: 'json'
+      });
+      request.done(function(msg) {
+          // do something with the `msg` returned
+          NotificationManager.success("Successfully sent a Run request to the engine");
+          var nodes = this.state.nodes.concat([]);
+          for (var i = 0; i < nodes.length; i++) {
+            nodes[i].status = "";
+          }
+          var edges = this.state.edges.concat([]);
+          for (var j = 0; j < edges.length; j++) {
+            edges[j].output = "No output";
+          }
+          this.setState({ nodes: nodes, edges: edges, isRunning: true });
+      }.bind(this))
+      request.fail(function(jqXHR, textStatus) {
+          NotificationManager.error("Request failed: " + textStatus);
+      });
     }
-    var request = $.ajax({
-        url: apiURL + 'run',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(req),
-        dataType: 'json'
-    });
-    request.done(function(msg) {
-        // do something with the `msg` returned
-        NotificationManager.success("Successfully sent a Run request to the engine");
-        var nodes = this.state.nodes.concat([]);
-        for (var i = 0; i < nodes.length; i++) {
-          nodes[i].status = "";
-        }
-        var edges = this.state.edges.concat([]);
-        for (var j = 0; j < edges.length; j++) {
-          edges[j].output = "No output";
-        }
-        this.setState({ nodes: nodes, edges: edges, isRunning: true });
-    }.bind(this))
-    request.fail(function(jqXHR, textStatus) {
-        NotificationManager.error("Request failed: " + textStatus);
-    });
+  },
+  // Stops state so we don't have to manually refresh
+  handleStopGraph: function() {
+    if (this.state.isRunning) {
+        NotificationManager.success("Successfully stopped the project");
+        this.setState({ isRunning: false });
+    }
   },
   // Callback for Export Graph button in GraphControls
   handleExportGraph: function() {
-    var generatedJSON = this.generateJSONExport();
+    //var generatedJSON = this.generateJSONExport();
+    var generatedJSON = this.generateJSONRun();
     if ($.isEmptyObject(generatedJSON)) {
         NotificationManager.info("No JSON generated - no workflow thread defined");
         return null;
@@ -693,8 +722,9 @@ var App = React.createClass({
     var idctThread = this.state.idctThread;
     var currentThreadIds = [];
     var dictJSON = {
-      "threads": []
-    };
+      "threads":[]
+      };
+
     var currentProject = this.generateCurrentThreads();
     var threads = currentProject.threads;
     if (currentProject.cyclesPresent) {
@@ -704,32 +734,54 @@ var App = React.createClass({
       if (threads.length === 0) {
         return {};
       }
+      //console.log("Creating an object with " + threads.length + " threads.");
+
       for (var i = 0; i < threads.length; i++) {
         currentThreadIds.push(idctThread);
         dictJSON["threads"].push({
-          "thread-id": idctThread++,
-          "name": "",
-          "starting-task": [],
-          "tasks": [],
-          "breakpoints": this.generateThreadBreakpoints(threads[i])
+          "configuration":{}, 
+          "msg-type": 1,
+          "reply-to": sid, 
+          "request":{
+            "description": "", //tool tip when you hover over the module, blank for now  
+            "name": "",
+            "node-type": "",//from config ccdp type
+            "reply-to": sid, //reply to a queue named by the session id
+            "session-id": sid,
+            "tasks": [],
+            "tasks-running-mode": "PARALLEL",//add this to gui and then set here
+            "thread-id": idctThread++,
+            "use-single-node": false //an option if I want to add it, tells everything to run on single node
+          },
         });
         for (var j = 0; j < threads[i]["nodes"].length; j++) {
           var node = nodes.filter(function(d) { return d.id === threads[i]["nodes"][j].id; })[0];
-          dictJSON["threads"][i]["tasks"].push({
-            "task-id": node.id,
-            "module-id": node.task,
-            "name": node.title,
+          dictJSON["threads"][i]["request"]["tasks"].push({
             "class-name": node.config["class-name"],
-            "ccdp-type": node.config["ccdp-type"],
-            "max-instances": node.config["max-instances"],
-            "min-instances": node.config["min-instances"],
-            "cpu": node.config["cpu"],
-            "memory": node.config["memory"],
-            "configuration": node.config["task-props"],
-            "input-ports": [],
-            "output-ports": []
+	    "command": node.config["command"],
+	    "configuration": node.config["task-props"],
+	    "cpu": node.config["cpu"],
+	    "description": "",//tool tip when you hover over the task, blank for now
+	    "host-id": "",
+	    "input-ports": [],
+	    "launched-time": 0,
+	    "mem": node.config["memory"],
+	    "name": node.title,
+	    "node-type": node.config["ccdp-type"],
+	    "output-ports": [],
+	    "reply-to": sid,//can set as different than thread if you want 2 receivers
+	    "retries": 3,//default value 3 but can give an option
+	    "session-id": sid, 
+            "task-id": node.id
           });
         }
+        //Insert the ccdp-type and use-single-node setting into the thread object 
+        //Both of these settings should really be set per thread and not pulled from a task
+        dictJSON["threads"][i]["request"]["node-type"]=node.config["ccdp-type"];
+        dictJSON["threads"][i]["request"]["use-single-node"]=node.config["use-single-node"];
+        //dictJSON["threads"][i]["request"]["tasks-running-mode"]=node.config["tasks-running-mode"]
+
+
         // Setup input/output ports and keep track of i/o port number for each task in the thread
         var inputPortNums = [];
         var outputPortNums = [];
@@ -738,27 +790,24 @@ var App = React.createClass({
           inputPortNums.push(1);
           outputPortNums.push(1);
         }
+        //Sets up the input and output ports of the tasks
+        //Currently creating a new input and output port for each connection
         if (threads[i]["nodes"].length > 1) {
           for (var k = 0; k < threads[i]["edges"].length; k++) {
             var outputIndex = threads[i]["nodes"].indexOf(threads[i]["edges"][k].source);
             var inputIndex = threads[i]["nodes"].indexOf(threads[i]["edges"][k].target);
             if (inputIndex > -1 && outputIndex > -1) {
-              dictJSON["threads"][i]["tasks"][inputIndex]["input-ports"].push({
-                "port-id": dictJSON["threads"][i]["tasks"][inputIndex]["task-id"] + "_input-" + inputPortNums[inputIndex],
-                "from": threads[i]["edges"][k].source.id + "_output-" + outputPortNums[outputIndex]
+              dictJSON["threads"][i]["request"]["tasks"][inputIndex]["input-ports"].push({
+                "port-id": dictJSON["threads"][i]["request"]["tasks"][inputIndex]["task-id"] + "_input-" + inputPortNums[inputIndex],
+                "from-port": [threads[i]["edges"][k].source.id + "_output-" + outputPortNums[outputIndex]]
               });
-              dictJSON["threads"][i]["tasks"][outputIndex]["output-ports"].push({
-                "port-id": dictJSON["threads"][i]["tasks"][outputIndex]["task-id"] + "_output-" + outputPortNums[outputIndex],
-                "to": threads[i]["edges"][k].target.id + "_input-" + inputPortNums[inputIndex]
+              dictJSON["threads"][i]["request"]["tasks"][outputIndex]["output-ports"].push({
+                "port-id": dictJSON["threads"][i]["request"]["tasks"][outputIndex]["task-id"] + "_output-" + outputPortNums[outputIndex],
+                "to-port": [threads[i]["edges"][k].target.id + "_input-" + inputPortNums[inputIndex]]
               });
               inputPortNums[inputIndex]++;
               outputPortNums[outputIndex]++;
             }
-          }
-        }
-        for (var j = 0; j < dictJSON["threads"][i]["tasks"].length; j++) {
-          if (dictJSON["threads"][i]["tasks"][j]["input-ports"].length == 0) {
-            dictJSON["threads"][i]["starting-task"].push(dictJSON["threads"][i]["tasks"][j]["task-id"]);
           }
         }
       }
@@ -768,6 +817,9 @@ var App = React.createClass({
     }
   },
   // Generates JSON representation of project for Export
+  // This function is unecessary since the generateJSONRun can be used for the Run and export
+  // Currently unused in the code. Calls to this have been replaced with generateJSONRun
+  // If there is a need to use it replace this code with a copy of generateJSONRun for the updated format
   generateJSONExport: function() {
     var nodes = this.state.nodes;
     var edges = this.state.edges;
@@ -870,6 +922,7 @@ var App = React.createClass({
           updateStateCallback={this.updateStateCallback}
           generateCurrentThreads={this.generateCurrentThreads}
           handleRunGraph={this.handleRunGraph}
+          handleStopGraph={this.handleStopGraph}
           handleExportGraph={this.handleExportGraph}
           handleClearGraph={this.handleClearGraph}
           handleSaveProject={this.handleSaveProject}
@@ -892,5 +945,9 @@ var App = React.createClass({
     );
   }
 });
-
+/*
+        <NodeProperties
+          handleTaskUpdate={this.handleTaskUpdate} />
+*/
 module.exports = DragDropContext(HTML5Backend)(App);
+
