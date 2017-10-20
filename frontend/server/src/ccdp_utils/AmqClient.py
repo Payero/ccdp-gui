@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
   msgr =  AmqClient()
   #msgr.register("/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
-  msgr.connect('ax-ccdp.com', dest="/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
+  msgr.connect('localhost', dest="/queue/CcdpTaskingActivity", on_message=onMessage, on_error=onError)
   msgr.send_message('/queue/CcdpTaskingActivity', "This is a test message")
   time.sleep(2)
   msgr.stop()
