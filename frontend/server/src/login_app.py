@@ -16,7 +16,7 @@ from flask import (
   jsonify
 )
 
-import webbrowser
+import webbrowser, threading
 
 from flask_login import LoginManager, UserMixin, \
                                 login_required, login_user, logout_user 
@@ -135,7 +135,7 @@ def connect_to_amq(onMsg, onErr):
   print "Connecting to ther Server %s:%d" % (app.config["AMQ_IP"], app.config["AMQ_PORT"])
   amq = AmqClient.AmqClient()
   amq.connect(app.config["AMQ_IP"], 
-              dest="/queue/CcdpTaskingActivity", 
+              dest="/queue/" + app.config["TO_CCDP_ENG"], 
               on_message=onMsg, 
               on_error=onErr)
   return amq
@@ -145,9 +145,12 @@ def connect_to_amq(onMsg, onErr):
 def send_start_msg():
   app.logger.info("Sending start message")
 
+  event = threading.Event()
+
   def onMessage(msg):
       app.logger.info("Got a message: %s" % msg)
-      return str(200)
+      print "**********************************\nGot a message: %s\n\n" % msg
+      event.set()
 
 
   def onError(msg):
@@ -171,10 +174,10 @@ def send_start_msg():
   task['description'] = "Start NiFi Application"
   task['state'] = "PENDING"
   task['retries'] = 3
-  task['command'] = ["/home/oeg/dev/oeg/brecky/app/brecky.py"]
+  task['command'] = ["/nishome/oegante/workspace/brecky/app/brecky.py"]
   task['task-id'] = str(uuid.uuid4())
   task['reply-to'] = app.config["FROM_CCDP_ENG"]
-  task['node-type'] = "DEFAULT"
+  task['node-type'] = "NIFI"
   task['submitted'] = False
   task['cpu'] = 100.0
   task['session-id'] = 'oeg-123'
@@ -182,6 +185,17 @@ def send_start_msg():
 
   amq.send_message(app.config["TO_CCDP_ENG"], req )
   
+  while not event.isSet():
+    print "Waiting a little"
+    time.sleep(0.5)
+
+  print "Got a continue request"
+
+  return render_template('logout.html')
+
+
+
+
 
 if __name__ == '__main__':
   import argparse
