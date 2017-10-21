@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="/static/css/nifi.css" type="text/css">
+{% block body %}
+{% if session['logged_in'] %}
+
+
+ 
+ 
+<form action="/logout" method="POST">
+  <div class="login">
+    <div class="login-screen">
+      <div class="app-title">
+        <h1>Logout</h1>
+      </div>
+ 
+      <div class="login-form">
+        <h3>Welcome {{ username }}! Click the button below to end session</h3>
+        <input type="submit" value="Log out" class="btn btn-primary btn-large btn-block" >
+        <br>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% else %}
+  <p>You Need to login first</p> 
+{% endif %}
+
+{% endblock %}

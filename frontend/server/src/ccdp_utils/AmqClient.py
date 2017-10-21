@@ -84,16 +84,17 @@ class AmqClient(stomp.ConnectionListener):
     self.__thread = Thread(target=self.__run)
     self.__thread.start()
 
+
   def register(self, dest=None, on_message=None, on_error=None):
     if callable(on_message):
       self.__onMessage = on_message
-    else:
-      print "Error: the on_message is not a callable object"
+    #else:
+    #  print "Error: the on_message is not a callable object"
 
     if callable(on_message):
       self.__onError = on_error
-    else:
-      print "Error: the on_error is not a callable object"  
+    #else:
+    #  print "Error: the on_error is not a callable object"  
     
     self.__logger.info("Registering to %s" % dest)
     self.__destination = dest
