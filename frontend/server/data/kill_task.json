@@ -1,0 +1,28 @@
+{
+  "msg-type":3,
+  "howMany":0,
+  "configuration":{},
+  "reply-to":null,
+  "task":
+    {
+      "name":"TaskKiller",
+      "description":null,
+      "state":"PENDING",
+      "retries":3,
+      "command":["/data/ccdp/nifi-1.3.0/bin/nifi.sh", "stop"],
+      "configuration":{},
+      "task-id":"d6e1743d-7d33-4858-89b2-131ea47e32ac",
+      "class-name":null,
+      "node-type":"DEFAULT",
+      "reply-to":"",
+      "host-id":null,
+      "submitted":false,
+      "cpu":0.0,
+      "mem":0.0,
+      "input-ports":[],
+      "output-ports":[],
+      "session-id":null,
+      "hostname":null,
+      "launched-time":0
+    }  
+}

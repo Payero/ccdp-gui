@@ -6,7 +6,7 @@ from flask_login import LoginManager, UserMixin, \
                                 login_required, login_user, logout_user 
 
 
-import ccdp_utils, os, sys, time, logging, uuid, webbrowser, threading, json
+import ccdp_utils, os, sys, time, logging, uuid, webbrowser, threading, json, urllib
 from pprint import pprint, pformat
 import ccdp_utils.AmqClient as AmqClient
 from flask_socketio import SocketIO, emit
@@ -20,13 +20,16 @@ socketio = SocketIO(app, async_mode="threading")
 app.config.update(
     DEBUG = True,
     SECRET_KEY = os.urandom(12),
-    WAIT_FOR_MSG=False,
-    NIFI_URL='http://localhost:8080/brecky',
+    WAIT_FOR_MSG=True,
+    REQ_MSG_FILE= os.environ['CCDP_GUI'] + "/data/start_task.json",
+    KILL_MSG_FILE= os.environ['CCDP_GUI'] + "/data/kill_task.json",
+    NIFI_URL='http://%s:8080/nifi',
+    NIFI_CMD=["/opt/nifi/bin/nifi.sh", "run"],
     SESSION_NUMBER=1
 )
 
 __users = ['Mark', 'Mindy', 'Oscar']
-__session_keys = ['user', 'session-id', 'task-id', 'open-nifi', 'logged_in']
+__SESSIONS = {}
 
 
 # silly user model
@@ -56,14 +59,16 @@ users = [User(name) for name in __users]
 
 @app.route('/')
 def home():
-  print "At Home"
+  app.logger.debug("At Home EndPoint")
+
   if not session.get('logged_in'):
     return render_template('nifi_login.html')
   else:
     user = session['user']
-    
-    if session['open-nifi']:
-      webbrowser.open_new_tab( app.config['NIFI_URL'] )
+    user_session = __SESSIONS[app.session_id]
+    if user_session['open-nifi']:
+      url = app.config['NIFI_URL'] % user_session['hostname']
+      webbrowser.open_new_tab( url )
     
     return render_template('nifi_logout.html', username=user)
 
@@ -85,6 +90,12 @@ def do_admin_login():
 
     session['logged_in'] = True
     session['user'] = username
+    sid = "%s-%03d" % ( username , app.config['SESSION_NUMBER'] )
+    app.config['SESSION_NUMBER'] += 1
+    
+    app.session_id = sid
+    __SESSIONS[sid] = {'session-id': sid}
+
     send_start_msg()
 
   else:
@@ -94,9 +105,9 @@ def do_admin_login():
  
 
 def connect_to_amq(onMsg=None, onErr=None):
-  print "Connecting to ther Server %s:%d" % (app.config["AMQ_IP"], app.config["AMQ_PORT"])
+  app.logger.debug("Connecting to ther Server %s:%d" % 
+                   (app.config["AMQ_IP"], app.config["AMQ_PORT"]) )
   amq = AmqClient.AmqClient()
-
   amq.connect(app.config["AMQ_IP"], 
               dest="/queue/" + app.config["FROM_CCDP_ENG"], 
               on_message=onMsg, 
@@ -108,37 +119,50 @@ def connect_to_amq(onMsg=None, onErr=None):
 def send_start_msg():
   app.logger.info("Sending start message")
 
-  event = threading.Event()
-  session['open-nifi'] = False
+  sid = app.session_id
+  user_session = __SESSIONS[ sid ]
+  user_session['open-nifi'] = False
 
   def onMessage(msg):
     app.logger.debug("Got a message: %s" % msg)
-    print "**********************************\nGot a message: %s\n\n" % msg
+
     json_msg = json.loads(msg)
     if json_msg['msg-type'] == 4:
       app.logger.info("Got a Task Update Message")
       task = json_msg['task']
-      if task['task-id'] == session['task-id']:
+      if task['task-id'] == user_session['task-id']:
         app.logger.info("And is my task")
         if task['state'] == 'RUNNING':
           app.logger.info("And is RUNNING")
-          session['open-nifi'] = True
-
-
-        event.set()
-
+          user_session['hostname'] = task['hostname']
+          __SESSIONS[sid] = user_session
+          
 
   def onError(msg):
       app.logger.error("Got an error: %s" % msg)
 
 
   amq = connect_to_amq(onMessage, onError)
-  amq.send_message(app.config["TO_CCDP_ENG"], get_request() )
+  amq.send_message(app.config["TO_CCDP_ENG"], get_request(sid, 'START') )
   
   if app.config['WAIT_FOR_MSG']:
-    while not event.isSet():
-      print "Waiting a little"
-      time.sleep(0.5)
+    is_open = False
+    while not is_open:
+      try:
+        if user_session.has_key('hostname'):
+          url = app.config['NIFI_URL'] % user_session['hostname']
+          code = urllib.urlopen( url ).getcode()
+          if code == 200:
+            app.logger.info("NiFi is up and running")
+            is_open = True
+            user_session['open-nifi'] = True
+            __SESSIONS[sid] = user_session
+        else:
+          app.logger.debug("Waiting for the hostname")
+          time.sleep(0.5)
+      except:
+        app.logger.debug("Is not open, waiting")
+        time.sleep(0.5)
 
   amq.stop()
 
@@ -146,79 +170,65 @@ def send_start_msg():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-  print "Loging out"
+
   session['logged_in'] = False
-  
+  sid = app.session_id
+  app.logger.info("Ending Session %s" % sid)
   amq = connect_to_amq()
-  amq.send_message(app.config["TO_CCDP_ENG"], get_request() )
+  amq.send_message(app.config["TO_CCDP_ENG"], get_request(sid, 'STOP') )
   amq.stop()
 
-  for key in __session_keys:
-    if session.has_key(key):
-      session.pop(key)
+  if __SESSIONS.has_key( sid ):
+    __SESSIONS.pop( sid )
+  else:
+    app.logger.error("The Session %s was not found" % sid)
 
 
   return home()
  
 
 
-def get_request():
+def get_request( sid, action ):
   app.logger.debug("Getting request for %s" %  session['user'] )
 
-  req = {}
-  req['request'] = {}
-  task = {}
-
-  if not session.has_key('task-id'):
-    app.logger.debug("Did not found task id so it must me a start request")
+  if action == 'START':
+    app.logger.debug("Generating a Start Request")
+    fname = app.config['REQ_MSG_FILE'] 
+    app.logger.info("Using template file %s" % fname)
     
-    sid = "%s-%03d" % ( session['user'], app.config['SESSION_NUMBER'] )
-    app.config['SESSION_NUMBER'] += 1
+    req = json.load( open( fname, 'r') )
+    task = req['request']['tasks'][0]
+    task['reply-to'] = app.config["FROM_CCDP_ENG"]
+    req['reply-to'] = app.config["FROM_CCDP_ENG"]
 
     tid = str(uuid.uuid4())
-    session['session-id'] = sid
-    session['task-id'] = tid
+    user_session = __SESSIONS[ sid ]
+    user_session['task-id'] = tid
+    __SESSIONS[sid] = user_session
 
-
-    req['msg-type'] = 1
     req['request']['session-id'] = sid
-    req['request']["description"] = "Starts a new NiFi Session"
-    
 
     task['task-id'] = tid
     task['session-id'] = sid
-    task['name'] = 'NiFi Start'
-    task['description'] = "Starts NiFi Application"
+    
+    req['request']["tasks"][0] = task
 
 
   else:
-    app.logger.debug("Found a task id so it must me a stop request")
-    req['msg-type'] = 3
-    req['request']['session-id'] = session['session-id']
-    req['request']["description"] = "Stops a new NiFi Session"
+    app.logger.debug("Generating a Stop Request")
+    
+    fname = app.config['KILL_MSG_FILE']
+    app.logger.info("Using template file %s" % fname)
+    
+    req = json.load( open( fname, 'r') )
+    task = req['task']
 
-    task['task-id'] = session['task-id'] 
-    task['session-id'] = session['session-id'] 
-    task['name'] = 'NiFi Stop'
-    task['description'] = "Stops NiFi Application"
-
+    user_session = __SESSIONS[sid]
+    task['reply-to'] = app.config["FROM_CCDP_ENG"]
+    task['task-id'] = user_session['task-id'] 
+    task['session-id'] = sid 
+    req["task"] = task
   
-  
-  req['reply-to'] = app.config["FROM_CCDP_ENG"]
-
-  
-  req['request']["name"] = "NiFi Session"
-  req['request']["tasks"] = []
-  
-  
-  task['state'] = "PENDING"
-  task['retries'] = 3
-  task['command'] = ["/home/oeg/dev/oeg/brecky/app//brecky.py"]
-  task['reply-to'] = app.config["FROM_CCDP_ENG"]
-  task['node-type'] = "NIFI"
-  task['submitted'] = False
-  task['cpu'] = 100.0
-  req['request']["tasks"].append(task)
 
   return req
 

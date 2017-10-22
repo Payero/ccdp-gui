@@ -7,7 +7,7 @@ box-sizing: border-box;
 }
 body {
 font-family: Arial;
-background-color: #3498DB;
+background-color: #AABBC3;
 padding: 50px;
 }
 .login {
@@ -45,13 +45,13 @@ transition: border .5s;
 }
  
 input:focus {
-border: 2px solid #3498DB;
+border: 2px solid #AABBC3;
 box-shadow: none;
 }
  
 .btn {
   border: 2px solid transparent;
-  background: #3498DB;
+  background: #6A8791;
   color: #ffffff;
   font-size: 16px;
   line-height: 25px;
