@@ -9,7 +9,7 @@
       "description":null,
       "state":"PENDING",
       "retries":3,
-      "command":["/data/ccdp/nifi-1.3.0/bin/nifi.sh", "stop"],
+      "command":["/data/ccdp/run_nifi.sh", "stop"],
       "configuration":{},
       "task-id":"d6e1743d-7d33-4858-89b2-131ea47e32ac",
       "class-name":null,
