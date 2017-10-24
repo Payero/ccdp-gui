@@ -20,7 +20,7 @@ socketio = SocketIO(app, async_mode="threading")
 app.config.update(
     DEBUG = True,
     SECRET_KEY = os.urandom(12),
-    WAIT_FOR_MSG=True,
+    WAIT_FOR_MSG=False,
     REQ_MSG_FILE= os.environ['CCDP_GUI'] + "/data/start_task.json",
     KILL_MSG_FILE= os.environ['CCDP_GUI'] + "/data/kill_task.json",
     NIFI_URL='http://%s:8080/nifi',
@@ -55,6 +55,17 @@ class User(UserMixin):
 
 # create some users with ids 1 to 20       
 users = [User(name) for name in __users]
+
+
+@app.route('/test',  methods=['GET', 'POST'])
+def test():
+  app.logger.debug("Testing Page")
+
+  time.sleep(5)
+  app.logger.debug("Done waiting")
+
+  return render_template('test.html')
+
 
 
 @app.route('/')
@@ -163,6 +174,11 @@ def send_start_msg():
       except:
         app.logger.debug("Is not open, waiting")
         time.sleep(0.5)
+
+  else:
+    app.logger.debug("Simulating activity...")
+    time.sleep(3)
+    
 
   amq.stop()
 

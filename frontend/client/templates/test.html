@@ -16,31 +16,27 @@
     // ]]></script>
 
   </head>
-
   <body>
 
-    {% block body %}
-    {% if session['logged_in'] %}
-    <p>You're logged in already!</p>
-    {% else %}
-     
-    <div id="loading"></div>
-    <form id="content" action="/login" method="POST">
-      <div class="login">
+    <div id="loading">
+    </div>
+
+    <form action="/test" method="POST">
+      <div id="content" class="login" >
         <div class="login-screen">
           <div class="app-title">
-            <h1>Login</h1>
+            <h1>Testing</h1>
           </div>
      
           <div class="login-form">
             <div class="control-group">
-              <input type="text" class="login-field" value="" placeholder="username" name="username">
-              <label class="login-field-icon fui-user" for="login-name"></label>
+            <input type="text" class="login-field" value="" placeholder="username" name="username">
+            <label class="login-field-icon fui-user" for="login-name"></label>
             </div>
      
             <div class="control-group">
-              <input type="password" class="login-field" value="" placeholder="password" name="password">
-              <label class="login-field-icon fui-lock" for="login-pass"></label>
+            <input type="password" class="login-field" value="" placeholder="password" name="password">
+            <label class="login-field-icon fui-lock" for="login-pass"></label>
             </div>
      
             <input type="submit" name="submitBtn" value="Log in" class="btn btn-primary btn-large btn-block" onClick="loading()">
@@ -49,9 +45,6 @@
         </div>
       </div>
     </form>
-     
-    {% endif %}
-    {% endblock %}
-  </body>
 
+    </body>
 </html>

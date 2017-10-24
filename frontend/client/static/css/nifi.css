@@ -76,3 +76,25 @@ box-shadow: none;
   display: block;
   margin-top: 12px;
 }
+
+div#loading {
+  position: absolute;
+  width: 300px;
+  height: 200px;
+  z-index: 15;
+  top: 50%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+  /*width: 35px;
+  height: 35px;
+  */
+  display: none;
+  /*
+  background: url(/static/images/loading-gears-animation-13-3.gif) no-repeat;
+  background: url(/static/images/loading-gif-transparent.gif) no-repeat;
+  background: url(/static/images/1420082-Loading.gif) no-repeat;
+  */
+  
+  background: url(/static/images/loading-gears-animation-13-3.gif) no-repeat;
+  cursor: wait;
+}
