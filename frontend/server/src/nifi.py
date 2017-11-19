@@ -254,6 +254,7 @@ def get_request( sid, action ):
 
     tid = str(uuid.uuid4())
     user_session = __SESSIONS[ sid ]
+    user_session['open-nifi'] = False
     user_session['task-id'] = tid
     __SESSIONS[sid] = user_session
 
