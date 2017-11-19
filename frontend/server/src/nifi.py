@@ -20,7 +20,7 @@ socketio = SocketIO(app, async_mode="threading")
 app.config.update(
     DEBUG = True,
     SECRET_KEY = os.urandom(12),
-    WAIT_FOR_MSG=False,
+    WAIT_FOR_MSG=True,
     REQ_MSG_FILE= os.environ['CCDP_GUI'] + "/data/start_task.json",
     KILL_MSG_FILE= os.environ['CCDP_GUI'] + "/data/kill_task.json",
     NIFI_URL='http://%s:8080/nifi',
