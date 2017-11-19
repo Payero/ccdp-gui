@@ -20,8 +20,9 @@ socketio = SocketIO(app, async_mode="threading")
 app.config.update(
     DEBUG = True,
     SECRET_KEY = os.urandom(12),
-    WAIT_FOR_MSG=True,
+    WAIT_FOR_MSG=False,
     REQ_MSG_FILE= os.environ['CCDP_GUI'] + "/data/start_task.json",
+    ADD_MSG_FILE= os.environ['CCDP_GUI'] + "/data/additional_task.json",
     KILL_MSG_FILE= os.environ['CCDP_GUI'] + "/data/kill_task.json",
     NIFI_URL='http://%s:8080/nifi',
     NIFI_CMD=["/opt/nifi/bin/nifi.sh", "run"],
@@ -202,6 +203,18 @@ def logout():
 
   return home()
  
+@app.route("/send_additional_task", methods=["POST"])
+def additional_task():
+
+  sid = app.session_id
+  app.logger.info("Sending additional Task to %s" % sid)
+  amq = connect_to_amq()
+  amq.send_message(app.config["TO_CCDP_ENG"], get_request(sid, 'TASK') )
+  amq.stop()
+
+
+  return home()
+ 
 
 
 def get_request( sid, action ):
@@ -229,6 +242,27 @@ def get_request( sid, action ):
     
     req['request']["tasks"][0] = task
 
+  elif action == 'TASK':
+    app.logger.debug("Generating a Task Request")
+    fname = app.config['ADD_MSG_FILE'] 
+    app.logger.info("Using template file %s" % fname)
+    
+    req = json.load( open( fname, 'r') )
+    task = req['request']['tasks'][0]
+    task['reply-to'] = app.config["FROM_CCDP_ENG"]
+    req['reply-to'] = app.config["FROM_CCDP_ENG"]
+
+    tid = str(uuid.uuid4())
+    user_session = __SESSIONS[ sid ]
+    user_session['task-id'] = tid
+    __SESSIONS[sid] = user_session
+
+    req['request']['session-id'] = sid
+
+    task['task-id'] = tid
+    task['session-id'] = sid
+    
+    req['request']["tasks"][0] = task
 
   else:
     app.logger.debug("Generating a Stop Request")
