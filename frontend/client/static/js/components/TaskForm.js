@@ -1,3 +1,46 @@
+var Upload = function (file) {
+    this.file = file;
+};
+
+Upload.prototype.getType = function() {
+    return this.file.type;
+};
+Upload.prototype.getSize = function() {
+    return this.file.size;
+};
+Upload.prototype.getName = function() {
+    return this.file.name;
+};
+Upload.prototype.doUpload = function () {
+    var that = this;
+    var formData = new FormData();
+
+    // add assoc key values, this will be posts values
+    formData.append("file", this.file, this.getName());
+    formData.append("upload_file", true);
+
+    $.ajax({
+        type: "POST",
+        url: "script", //make endpoint in flash server to receive file
+        xhr: function () {
+            var myXhr = $.ajaxSettings.xhr();
+            return myXhr;
+        },
+        success: function (data) {
+          console.log("uploaded " + data)
+        },
+        error: function (error) {
+          console.log("file upload error " + error)
+        },
+        async: true,
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        timeout: 60000
+    });
+};
+
 /**
  * TaskForm component to handle uploading tasks (TODO)
  */
@@ -24,8 +67,16 @@ var TaskForm = React.createClass({
     var moduleId = this.state.moduleId.trim();
     var className = this.state.className.trim();
     if (!name || !description || !moduleId || !className) {
-      return;
+      // return;
     }
+
+    var file = e.target.files[0];
+    var upload = new Upload(file);
+
+    // maby check size or type here with upload.getSize() and upload.getType()
+
+    // execute upload
+    upload.doUpload();
     // TODO: file upload & save task info in database
     this.setState({name: '', description: '', moduleId: '', className: ''});
   },
@@ -68,11 +119,15 @@ var TaskForm = React.createClass({
           />
         </div>
         <div className="form-group">
-          <input type="submit" value="Upload Task" className="form-control" onSubmit={this.handleSubmit} />
+          <input type="file" name="upload_file" id = "upload_file" value="" className="form-control"onChange={this.handleSubmit} />
         </div>
       </form>
     );
   }
+});
+
+$("#upload_file").on("change", function (e) {
+    console.log("click")
 });
 
 module.exports = TaskForm;

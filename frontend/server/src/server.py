@@ -35,9 +35,9 @@ socketio = SocketIO(app, async_mode="threading")
 def home():
     modules = _get_available_modules(g.db)
     threads = _get_available_threads(g.db)
-    return render_template('index.html', 
-                           modules=modules, 
-                           threads=threads, 
+    return render_template('index.html',
+                           modules=modules,
+                           threads=threads,
                            async_mode=socketio.async_mode)
 
 #####################################################################
@@ -68,14 +68,11 @@ def start_processing(version):
     """Sends a thread request to the thread controller"""
     run_json = request.json['body']
     run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
-    reply_queue = run_json['request']['reply-to'] 
-    
-    #Currently sending just the request field and padding the values on the thread controller end
-    #But this can be changed by using the commented instrction instead and not padding in the tc 
-    #run_json = json.dumps(run_json) 
-    run_json = json.dumps(run_json['request']) 
+    reply_queue = run_json['request']['reply-to']
 
-    app.config["tc"] = ThreadController(queue_name=reply_queue, # required 
+    run_json = json.dumps(run_json)
+
+    app.config["tc"] = ThreadController(queue_name=reply_queue, # required
                             engine_queue=ccdp_utils.ENG_QUEUE,  # required
                             thread_req=run_json,                # required
                             callback_fn=update_task,            # optional
@@ -84,7 +81,7 @@ def start_processing(version):
                             #broker_host="ax-ccdp.com",          # optional
                             #broker_port=61616,                  # optional
                             skip_req=False)                     # optional
-    
+
     return str(200)
 
 @app.route("/<version>/pause", methods=["POST"])
@@ -173,6 +170,12 @@ def _save_thread(db, thread):
     result = db["threads"].update(thread_query, thread, upsert=True)
     return result
 
+def _save_task(db, task):
+    task_name = task["name"]
+    task_query = {"name": task_name}
+    result = db["modules"].update(task_query, task, upsert=True)
+    return result
+
 def _delete_thread(db, thread_id):
     result =  db["threads"].delete_one({"name": thread_id})
     return result
@@ -194,14 +197,14 @@ def _delete_project(db, project_id):
     return result
 
 #Callback function to handle forwarding task updates to the client via socketio
-def update_task(data): 
+def update_task(data):
     data = json.dumps(data)
     app.logger.info('Inside the callback manager')
     app.logger.info(type(data))
     app.logger.info(data)
     #TODO change this from broadcast
-    socketio.emit('message', data, broadcast=True) 
- 
+    socketio.emit('message', data, broadcast=True)
+
 def connect_to_database():
     return pymongo.MongoClient(app.config["DB_IP"], app.config["DB_PORT"])
 
@@ -217,7 +220,7 @@ def connect_to_amq():
     amq = AmqClient.AmqClient()
     amq.register(app.config["TO_SERVER_QUEUE_NAME"], on_message=onMessage, on_error=onError)
     amq.connect(app.config["AMQ_IP"])
-    
+
     return amq
 
 def get_db():
@@ -298,6 +301,5 @@ if __name__ == '__main__':
             mongo_db = connect_to_database()[args.db]
             mongo_db.drop_collection(args.collection)
             mongo_db[args.collection].insert_many(parsed_seed_file)
-     
-    socketio.run(app, host=args.ip, port=int(args.port), debug=True)
 
+    socketio.run(app, host=args.ip, port=int(args.port), debug=True)

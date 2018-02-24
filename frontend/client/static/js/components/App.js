@@ -16,7 +16,7 @@ var sid = uuidv4();
 
 /**
  * Top level components for React application, manages all computations involving top level state
- * Some computational functionality is moved down to Graph, however all ajax and node/edge logic present in App 
+ * Some computational functionality is moved down to Graph, however all ajax and node/edge logic present in App
  */
 var App = React.createClass({
   // react-keybinding mixin, define keybindings and map them in the keybinding callback
@@ -39,7 +39,7 @@ var App = React.createClass({
     }
     event.preventDefault();
   },
-  
+
 
   // Stacks used for undo/redo functionality, separated from state to avoid performance issues
   undoStacks: {
@@ -109,19 +109,19 @@ var App = React.createClass({
     this.updateTasks();
     this.updateThreads();
     this.updateProjects();
-    
+
     //Creates a socketio object which by default connects to the current domain
     var socket = io.connect();
 
-    //Logs when the console has connected succesfully 
+    //Logs when the console has connected succesfully
     socket.on('connect', function() {
         console.log('WebSocket connection has been established');
-        
+
     });
-    
-    // Handler to receive task update messages from the server  
-    socket.on('message', function(data){ 
-        // Console logs to allow inspection of update messages 
+
+    // Handler to receive task update messages from the server
+    socket.on('message', function(data){
+        // Console logs to allow inspection of update messages
         console.log('Message has been received');
         //console.log(typeof(data))
         console.log(JSON.parse(data));
@@ -157,7 +157,7 @@ var App = React.createClass({
         this.setState({ currentThreadIds: currentThreadIds });
     }.bind(this));
   },
-    
+
   // Updates array of tasks to be rendered in Sidebar.js as draggable divs
   updateTasks: function() {
     var tasks = [];
@@ -282,7 +282,7 @@ var App = React.createClass({
     };
     var projectJSON = JSON.stringify(project);
     this.setState({currentProjectName: projectName, currentProjectDescription: projectDescription});
-    
+
     var port   = location.port;
     var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
     var request = $.ajax({
@@ -391,7 +391,7 @@ var App = React.createClass({
       "title": task['name'],
       "task": task['module_id'],
       "config": {
-        "command": task['command'], 
+        "command": task['command'],
         "class-name": task['class_name'],
         "ccdp-type": task['ccdp_type'],
         "max-instances": task['max_instances'],
@@ -476,7 +476,7 @@ var App = React.createClass({
           for (var l = 0; l < tasks[k]["input-ports"].length; l++) {
             if (tasks[i]["output-ports"][j]["port-id"] === tasks[k]["input-ports"][l]["from"]) {
               var sourceNode = newNodes.filter(function(node) { return tasks[i].id === node.id; })[0];
-              var targetNode = newNodes.filter(function(node) { return tasks[k].id === node.id; })[0];          
+              var targetNode = newNodes.filter(function(node) { return tasks[k].id === node.id; })[0];
               newEdges.push({source: sourceNode, target: targetNode, breakpoint: false, output: "No output"});
             }
           }
@@ -739,11 +739,11 @@ var App = React.createClass({
       for (var i = 0; i < threads.length; i++) {
         currentThreadIds.push(idctThread);
         dictJSON["threads"].push({
-          "configuration":{}, 
-          "msg-type": 1,
-          "reply-to": sid, 
+          "configuration":{},
+          "msg-type": 12,
+          "reply-to": sid,
           "request":{
-            "description": "", //tool tip when you hover over the module, blank for now  
+            "description": "", //tool tip when you hover over the module, blank for now
             "name": "",
             "node-type": "",//from config ccdp type
             "reply-to": sid, //reply to a queue named by the session id
@@ -771,11 +771,11 @@ var App = React.createClass({
 	    "output-ports": [],
 	    "reply-to": sid,//can set as different than thread if you want 2 receivers
 	    "retries": 3,//default value 3 but can give an option
-	    "session-id": sid, 
+	    "session-id": sid,
             "task-id": node.id
           });
         }
-        //Insert the ccdp-type and use-single-node setting into the thread object 
+        //Insert the ccdp-type and use-single-node setting into the thread object
         //Both of these settings should really be set per thread and not pulled from a task
         dictJSON["threads"][i]["request"]["node-type"]=node.config["ccdp-type"];
         dictJSON["threads"][i]["request"]["use-single-node"]=node.config["use-single-node"];
@@ -950,4 +950,3 @@ var App = React.createClass({
           handleTaskUpdate={this.handleTaskUpdate} />
 */
 module.exports = DragDropContext(HTML5Backend)(App);
-
