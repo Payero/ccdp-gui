@@ -26,7 +26,7 @@ const KEYS_TO_FILTERS = ['name'];
 var Sidebar = React.createClass({
   // Initial state has emoty search terms
   getInitialState: function() {
-    return { 
+    return {
       taskSearchTerm: '',
       threadSearchTerm: '',
       projectSearchTerm: ''
@@ -43,6 +43,10 @@ var Sidebar = React.createClass({
   // Updates project search term when input is edited
   projectSearchUpdated: function(term) {
     this.setState({projectSearchTerm: term});
+  },
+  handleUploadFile: function(e) {
+    var file = e.target.files[0];
+    this.props.handleSaveTask(file);
   },
   // Tasks/Threads/Projects filtered using React Search Input
   render: function() {
@@ -81,7 +85,7 @@ var Sidebar = React.createClass({
                   )
                 })}
               </Panel>
-            </Collapse>  
+            </Collapse>
           </Panel>
           <Panel header={<FontAwesome name="cubes"> Threads</FontAwesome>} key="2">
             <SearchInput className="search-input" onChange={this.threadSearchUpdated} />
@@ -102,10 +106,16 @@ var Sidebar = React.createClass({
           <Panel header={<FontAwesome name="plus"> Add Task</FontAwesome>} key="4">
             <TaskForm/>
           </Panel>
-          <Panel header={<FontAwesome name="info-circle"> About</FontAwesome>} key="5">
+          <Panel header={<FontAwesome name="plus"> Add Task (JSON File)</FontAwesome>} key="5">
+            <div>
+              <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleUploadFile} />
+              <input type="button" value="Choose JSON File" onClick={() => {$("#upload_file").trigger('click')}} />
+            </div>
+          </Panel>
+          <Panel header={<FontAwesome name="info-circle"> About</FontAwesome>} key="6">
             About
           </Panel>
-          <Panel header={<FontAwesome name="question-circle"> Help</FontAwesome>} key="6">
+          <Panel header={<FontAwesome name="question-circle"> Help</FontAwesome>} key="7">
             <h4 style={{ backgroundColor: '#f4f4f4'}}>Project Editor</h4>
             <div>
               <label>Basic Controls</label>
@@ -163,7 +173,7 @@ var Sidebar = React.createClass({
               <p>Redo the last deletion/addition operation for tasks, edges, and projects</p>
             </div>
           </Panel>
-          <Panel header={<FontAwesome name="life-ring"> Contact Us</FontAwesome>} key="7">
+          <Panel header={<FontAwesome name="life-ring"> Contact Us</FontAwesome>} key="8">
             Contact
           </Panel>
         </Collapse>

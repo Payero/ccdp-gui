@@ -67,17 +67,8 @@ var TaskForm = React.createClass({
     var moduleId = this.state.moduleId.trim();
     var className = this.state.className.trim();
     if (!name || !description || !moduleId || !className) {
-      // return;
+      return;
     }
-
-    var file = e.target.files[0];
-    var upload = new Upload(file);
-
-    // maby check size or type here with upload.getSize() and upload.getType()
-
-    // execute upload
-    upload.doUpload();
-    // TODO: file upload & save task info in database
     this.setState({name: '', description: '', moduleId: '', className: ''});
   },
   render: function() {
@@ -91,7 +82,7 @@ var TaskForm = React.createClass({
             type="text"
             placeholder="Name"
             value={this.state.name}
-            onChange={this.handleNameChange}
+            onChange={this.handleNaeChange}
           />
         </div>
         <div className="form-group">
@@ -119,15 +110,11 @@ var TaskForm = React.createClass({
           />
         </div>
         <div className="form-group">
-          <input type="file" name="upload_file" id = "upload_file" value="" className="form-control"onChange={this.handleSubmit} />
+          <input type="submit"  value="Sumbit Task" className="form-control" onSubmit={this.handleSubmit} />
         </div>
       </form>
     );
   }
-});
-
-$("#upload_file").on("change", function (e) {
-    console.log("click")
 });
 
 module.exports = TaskForm;

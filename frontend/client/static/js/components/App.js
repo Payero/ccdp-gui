@@ -336,6 +336,38 @@ var App = React.createClass({
       NotificationManager.error("Request failed: " + textStatus);
     });
   },
+  // Sends a POST to endpoint with param taskJSON as data
+  handleSaveTask: function(taskFile) {
+    console.log("Save task file " + taskFile.name)
+    var formData = new FormData();
+    formData.append("file", taskFile, taskFile.name);
+    formData.append("upload_file", true);
+    var port   = location.port;
+    var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+    var request = $.ajax({
+      url: apiURL + 'modules/save',
+      type: 'POST',
+      async: true,
+      data: formData,
+      cache: false,
+      contentType: false,
+      processData: false,
+      timeout: 60000
+    });
+    request.done(function(msg) {
+      NotificationManager.success("Task saved");
+      this.updateThreads();
+    }.bind(this))
+    request.fail(function(jqXHR, textStatus) {
+      var message = textStatus;
+      if (jqXHR.responseText && jqXHR.responseText['message']) {
+        message = jqXHR.responseText['message'];
+      } else if (jqXHR.responseJSON && jqXHR.responseJSON['message']) {
+        message = jqXHR.responseJSON['message'];
+      }
+      NotificationManager.error("Request failed: " + message);
+    });
+  },
   // Removes all edges and nodes in a specific thread from the Project Editor
   handleDeleteThreadFromGraph: function(thread) {
     if (this.state.isRunning) {
@@ -914,7 +946,8 @@ var App = React.createClass({
           threads={this.state.threads}
           projects={this.state.projects}
           handleDeleteThread={this.handleDeleteThreadFromSidebar}
-          handleDeleteProject={this.handleDeleteProjectFromSidebar} />
+          handleDeleteProject={this.handleDeleteProjectFromSidebar}
+          handleSaveTask={this.handleSaveTask} />
         <Graph
           nodes={this.state.nodes}
           edges={this.state.edges}

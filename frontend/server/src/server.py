@@ -25,6 +25,21 @@ from modules.ThreadController import ThreadController
 from numpy import broadcast
 import urllib
 
+class InvalidRequest(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+    
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
 socketio = SocketIO(app, async_mode="threading")
 
@@ -138,6 +153,21 @@ def delete_project(version, project_id):
     """Deletes project from database"""
     return str(_delete_thread(g.db, project_id).deleted_count)
 
+@app.route("/<version>/modules/save", methods=["POST"])
+def save_task(version):
+    """Saves task to database"""
+    f = request.files['file'];
+    if f:
+        task = f.read();
+        try:
+            task_json = json.loads(task)
+        except ValueError as e:
+            raise InvalidRequest(e.message, status_code=410)
+        return str(_save_task(g.db, task_json)["n"])
+    raise InvalidRequest("No file received", status_code=410)
+    
+
+
 @app.before_request
 def before_request():
     g.db = get_db()
@@ -246,6 +276,12 @@ def connected():
 def disconnected():
     app.logger.info("USER DISCONNECTED")
     socketio = None
+    
+@app.errorhandler(InvalidRequest)
+def handle_invalid_request(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
 
 if __name__ == '__main__':
