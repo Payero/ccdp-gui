@@ -26,7 +26,8 @@ MESSAGES = ["UNDEFINED",
             "END_SESSION",
             "START_THREAD",
             "PAUSE_THREAD",
-            "STOP_THREAD"]
+            "STOP_THREAD",
+            "SHUTDOWN"]
 
 ENG_QUEUE    = 'CCDP-Engine'
 WEB_QUEUE    = 'CCDP-WebServer'

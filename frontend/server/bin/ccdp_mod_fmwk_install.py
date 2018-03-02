@@ -33,6 +33,10 @@ class CcdpInstaller:
     self.__root = os.environ['CCDP_GUI']
 
     log_dir = os.path.join(self.__root, 'logs')
+    if not os.path.isdir(log_dir):
+      os.makedirs(log_dir)
+
+
     filelog = logging.FileHandler('%s/ccdp_install.log' % log_dir)
 
     formatter = logging.Formatter(

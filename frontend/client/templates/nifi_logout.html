@@ -21,6 +21,23 @@
   </div>
 </form>
 
+<form action="/send_additional_task" method="POST">
+  <div class="login">
+    <div class="login-screen">
+      <div class="app-title">
+        <h1>Send Task</h1>
+      </div>
+ 
+      <div class="task-form">
+        <h3>Click the button below to send an additional task</h3>
+        <input type="submit" value="Send Task" class="btn btn-primary btn-large btn-block" >
+        <br>
+      </div>
+    </div>
+  </div>
+</form>
+
+
 {% else %}
   <p>You Need to login first</p> 
 {% endif %}
