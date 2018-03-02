@@ -16,6 +16,9 @@ mongo=`docker ps | grep  mongo | awk '{print $1}' | xargs docker inspect | grep 
 #Display mongo and amq IP addresses so server.py args can be entered into a PyDev launch config to enable PyDev debugging
 echo AMQ IP: $amq
 echo MONGO IP: $mongo
+# In some cases this might be necessary (like running from my laptop)
+# mongo=0.0.0.0
+#
 echo COMAMND LINE: python ./frontend/server/src/server.py --ip=0.0.0.0 --port=5000 --db=ccdp --collection=modules --logfile=../ccdp.log --amq-ip=$amq --amq-port=61616 --db-ip=$mongo --db-port=27017
 
 echo CCD_GUI $CCDP_GUI

@@ -298,6 +298,7 @@ if __name__ == '__main__':
             mongo_db = connect_to_database()[args.db]
             mongo_db.drop_collection(args.collection)
             mongo_db[args.collection].insert_many(parsed_seed_file)
-     
+    
+    print "Runnning on %s:%s" % (args.ip, args.port)
     socketio.run(app, host=args.ip, port=int(args.port), debug=True)
 
