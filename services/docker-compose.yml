@@ -22,7 +22,7 @@ services:
       - "61613:61613"
       - "1099:1099"
     volumes:
-      - ./conf:/opt/activemq/conf
+      - ./conf/activemq.xml:/opt/activemq/conf/activemq.xml
     environment:
       - ACTIVEMQ_NAME=ActiveMQ-Srvr1
       - ACTIVEMQ_MIN_MEMORY=1024
