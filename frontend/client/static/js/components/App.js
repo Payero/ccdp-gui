@@ -947,7 +947,8 @@ var App = React.createClass({
           projects={this.state.projects}
           handleDeleteThread={this.handleDeleteThreadFromSidebar}
           handleDeleteProject={this.handleDeleteProjectFromSidebar}
-          handleSaveTask={this.handleSaveTask} />
+          handleSaveTask={this.handleSaveTask}
+          app={App} />
         <Graph
           nodes={this.state.nodes}
           edges={this.state.edges}

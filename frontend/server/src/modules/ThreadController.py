@@ -171,7 +171,7 @@ class ThreadController():
 
     req_msg = self.__request;
     req_msg['msg-type'] = 12;
-    req_msg['configuration'] = {};
+#     req_msg['configuration'] = {};
 
     if not skip_req:
       self.__amq.send_message(self.__to_engine,  req_msg )
@@ -461,6 +461,3 @@ if __name__ == '__main__':
   time.sleep(15)
   print("Stopping all threads")
   tc.stop_thread()
-
-
-

@@ -59,6 +59,12 @@ svg {
     font-size: 0.75em;
 }
 
+.transpNoBorder {
+  border-width: 0px;
+  border: none;
+  background-color: transparent;
+}
+
 marker {
     fill: #333;
 }
@@ -211,7 +217,7 @@ input[type=search], textarea {
     padding: 3px 0px 3px 3px;
     border: 1px solid black;
 }
- 
+
 input[type=search]:focus, textarea:focus {
     box-shadow: 0 0 5px rgba(81, 203, 238, 1);
     padding: 3px 0px 3px 3px;

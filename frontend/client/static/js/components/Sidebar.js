@@ -1,6 +1,6 @@
 var Collapse = require('rc-collapse');
 var Panel = Collapse.Panel;
-var TaskForm = require('./TaskForm.js');
+var ModuleForm = require('./ModuleForm.js');
 var FontAwesome = require('react-fontawesome');
 var Task = require('./Task.js');
 var Thread = require('./Thread.js');
@@ -103,8 +103,8 @@ var Sidebar = React.createClass({
               )
             })}
           </Panel>
-          <Panel header={<FontAwesome name="plus"> Add Task</FontAwesome>} key="4">
-            <TaskForm/>
+          <Panel header={<FontAwesome name="plus"> Add Module</FontAwesome>} key="4">
+            <ModuleForm app={this.props.app} />
           </Panel>
           <Panel header={<FontAwesome name="plus"> Add Task (JSON File)</FontAwesome>} key="5">
             <div>

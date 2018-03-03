@@ -39,7 +39,7 @@ class InvalidRequest(Exception):
         rv = dict(self.payload or ())
         rv['message'] = self.message
         return rv
-    
+
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
 socketio = SocketIO(app, async_mode="threading")
 
@@ -82,7 +82,7 @@ def get_status(version):
 def start_processing(version):
     """Sends a thread request to the thread controller"""
     run_json = request.json['body']
-    run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
+#     run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
     reply_queue = run_json['request']['reply-to']
 
     run_json = json.dumps(run_json)
@@ -165,7 +165,7 @@ def save_task(version):
             raise InvalidRequest(e.message, status_code=410)
         return str(_save_task(g.db, task_json)["n"])
     raise InvalidRequest("No file received", status_code=410)
-    
+
 
 
 @app.before_request
@@ -276,7 +276,7 @@ def connected():
 def disconnected():
     app.logger.info("USER DISCONNECTED")
     socketio = None
-    
+
 @app.errorhandler(InvalidRequest)
 def handle_invalid_request(error):
     response = jsonify(error.to_dict())
