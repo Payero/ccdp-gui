@@ -170,7 +170,7 @@ def save_module_file(version):
 def save_module(version):
     """Saves module JSON to database"""
     module = request.json
-    print "Received JSON " + request.json
+    print "Received JSON " + json.dumps(request.json)
     return str(_save_module(g.db, module)["n"])
 
 
@@ -209,7 +209,7 @@ def _save_thread(db, thread):
     return result
 
 def _save_module(db, task):
-    print "Saving module " + task
+    print "Saving module " + json.dumps(task)
     task_name = task["name"]
     task_query = {"name": task_name}
     result = db["modules"].update(task_query, task, upsert=True)

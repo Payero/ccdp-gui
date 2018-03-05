@@ -33,7 +33,7 @@ var ModuleForm = React.createClass({
   handleMinInstancesChange: function(e) {
     this.setState({minInstances: e.target.value})
   },
-  handleaxInstancesChange: function(e) {
+  handleMaxInstancesChange: function(e) {
     this.setState({maxInstances: e.target.value})
   },
   modalCallback: function(body) {
@@ -49,7 +49,7 @@ var ModuleForm = React.createClass({
       max_instances: this.state.maxInstances
     }
     console.log(moduleJson);
-    this.props.handleSaveModule(moduleJson);
+    this.props.handleSaveModule(JSON.stringify(moduleJson));
     this.hideModal();
   },
   render: function() {
