@@ -1,68 +1,145 @@
-var Modal = require('react-modal');
-var Task = require('./Task.js');
-
-const customStyles = {
-  content : {
-    top                   : '20%',
-    left                  : '50%',
-    right                 : 'auto',
-    bottom                : 'auto',
-    marginRight           : '-50%',
-    transform             : 'translate(-50%, -50%)',
-    border                : '5px'
-  }
-};
+var ModalView = require('./ModalView.js');
+var ControlLabel = require('react-bootstrap').ControlLabel;
+var FormControl = require('react-bootstrap').FormControl;
+var FormGroup = require('react-bootstrap').FormGroup;
+var Form = require('react-bootstrap').Form;
+var Col = require('react-bootstrap').Col;
 
 var ModuleForm = React.createClass({
-  getInitialState: function(){
-    return { modalOpened: false };
+  getInitialState: function() {
+    return {show: false};
   },
-  toggleModal: function() {
-    this.setState(prevState => ({ modalOpened: !prevState.modalOpened }));
+  hideModal: function() {
+    this.props.hideAddModuleModal();
+  },
+  handleModuleNameChange: function(e) {
+    this.setState({moduleName: e.target.value})
+  },
+  handleModuleIDChange: function(e) {
+    this.setState({moduleID: e.target.value})
+  },
+  handleModuleDescriptionChange: function(e) {
+    this.setState({moduleDescription: e.target.value})
+  },
+  handleNodeTypeChange: function(e) {
+    this.setState({nodeType: e.target.value})
+  },
+  handleModuleTypeChange: function(e) {
+    this.setState({moduleType: e.target.value})
+  },
+  handleCommandChange: function(e) {
+    this.setState({command: e.target.value})
+  },
+  handleMinInstancesChange: function(e) {
+    this.setState({minInstances: e.target.value})
+  },
+  handleaxInstancesChange: function(e) {
+    this.setState({maxInstances: e.target.value})
+  },
+  modalCallback: function(body) {
+    let moduleJson = {
+      module_id: this.state.moduleID,
+      name: this.state.moduleName,
+      short_description: this.state.moduleDescription,
+      command: this.state.command,
+      ccdp_type: this.state.nodeType,
+      module_type: this.state.moduleType,
+      configuration: {},
+      min_instances: this.state.minInstances,
+      max_instances: this.state.maxInstances
+    }
+    console.log(moduleJson);
+    this.props.handleSaveModule(moduleJson);
+    this.hideModal();
   },
   render: function() {
-    const { data } = this.props;
-    const dragHandle = "modal-header";
-    // Modal.setAppElement(this.props.app);
-    return (
+    const body = (
       <div>
-        <Modal
-          style={customStyles}
-          isOpen={this.state.modalOpened}
-          onRequestClose={this.toggleModal}
-          contentLabel="New Module"
-          appElement={document.getElementById('content')} >
-            <div ref={(div) => {
-                     const target = $(div).parent();
-                     // target.draggable({handle: `.${dragHandle}`});
-                     this.props.forcedWidth && target.width(this.props.forcedWidth);
-                 }}>
-              <div className="modal-header">
-                <h4 className="modal-title">New Module</h4>
-              </div>
-              <div className="modal-body">
-                <div className="row">
-                  <div className="col-md-4"> Module Name:<input type="text" /></div>
-                  <div className="col-md-4">Module ID: <input type="text" /></div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">Description:<input type="text" /></div>
-                  <div className="col-md-4">CCDP Ttype:<input type="text" /></div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-primary" onClick={this.toggleModal}>Close</button>
-              </div>
-            </div>
-        </Modal>
-        <div className="addTask">
-          <input type="button" value="New Module" className="transpNoBorder" onClick={this.toggleModal} />
-        </div>
-        <div className="addTask" >
-          <input type="button" value="From Existing JSON Fie" className="transpNoBorder" />
-        </div>
-      </div>
-    );
+        <Form horizontal>
+          <FormGroup>
+            <Col componentClass={ControlLabel} sm={2}>
+              Name:
+            </Col>
+            <Col sm={4}>
+              <FormControl type="text" value={this.props.moduleName} onChange={this.handleModuleNameChange} />
+            </Col>
+            <Col componentClass={ControlLabel} sm={2}>
+              ID:
+            </Col>
+            <Col sm={4}>
+              <FormControl type="text" value={this.props.moduleID} onChange={this.handleModuleIDChange} />
+            </Col>
+          </FormGroup>
+          <FormGroup>
+            <Col componentClass={ControlLabel} sm={2}>
+              Description:
+            </Col>
+            <Col sm={10}>
+              <FormControl type="text" value={this.props.moduleDescription} onChange={this.handleModuleDescriptionChange} />
+            </Col>
+          </FormGroup>
+          <FormGroup>
+            <Col componentClass={ControlLabel} sm={2}>
+              Command:
+            </Col>
+            <Col sm={10}>
+              <FormControl type="text" value={this.props.command} onChange={this.handleCommandChange} />
+            </Col>
+          </FormGroup>
+          <FormGroup>
+            <Col componentClass={ControlLabel} sm={2}>
+              Module Type:
+            </Col>
+            <Col sm={4}>
+              <FormControl componentClass="select"
+              placeholder="select"
+              value={this.state.moduleType}
+              onChange={this.handleModuleTypeChange} >
+                <option value="reader">Reader</option>
+                <option value="processor">Processor</option>
+                <option value="writer">Writer</option>
+              </FormControl>
+            </Col>
+            <Col componentClass={ControlLabel} sm={2}>
+              Node Type:
+            </Col>
+            <Col sm={4}>
+              <FormControl componentClass="select"
+                placeholder="select"
+                value={this.state.nodeType}
+                onChange={this.handleNodeTypeChange} >
+                  <option value="default">Default</option>
+                  <option value="ec2">EC2</option>
+              </FormControl>
+            </Col>
+          </FormGroup>
+          <FormGroup>
+            <Col componentClass={ControlLabel} sm={2}>
+              Instances:
+            </Col>
+            <Col componentClass={ControlLabel} sm={1}>
+              Min
+            </Col>
+            <Col sm={1}>
+              <FormControl type="text" value={this.props.minInstances} onChange={this.handleMinInstancesChange} />
+            </Col>
+            <Col componentClass={ControlLabel} sm={1}>
+              Max
+            </Col>
+            <Col sm={1}>
+              <FormControl type="text" value={this.props.maxInstances} onChange={this.handleMaxInstancesChange} />
+            </Col>
+          </FormGroup>
+        </Form>
+      </div>);
+    return (<ModalView
+            modalTitle="Create New Module"
+            modalBody={body}
+            confirmButtonText="Save Module"
+            hideModal={this.hideModal}
+            show={this.props.show}
+            modalCallback={this.modalCallback}
+            />);
   }
 });
 

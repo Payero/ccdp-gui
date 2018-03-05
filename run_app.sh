@@ -9,9 +9,9 @@ export DB_PORT_27017_TCP_ADDR=db
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export CCDP_GUI=$DIR/frontend/server
 
-amq=`docker ps | grep  amq | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
+#amq=`docker ps | grep  amq | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
 
-mongo=`docker ps | grep  mongo | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
+#mongo=`docker ps | grep  mongo | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
 
 amq=localhost
 mongo=localhost

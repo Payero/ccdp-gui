@@ -336,6 +336,25 @@ var App = React.createClass({
       NotificationManager.error("Request failed: " + textStatus);
     });
   },
+  handleSaveModule: function(moduleJSON) {
+    var port   = location.port;
+    var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+    var request = $.ajax({
+      url: apiURL + 'modules/save',
+      type: 'POST',
+      contentType: 'application/json',
+      data: moduleJSON,
+      dataType: 'json'
+    });
+    request.done(function(msg) {
+      // do something with the `msg` returned
+      NotificationManager.success("Module saved");
+      this.updateThreads();
+    }.bind(this))
+    request.fail(function(jqXHR, textStatus) {
+      NotificationManager.error("Request failed: " + textStatus);
+    });
+  },
   // Sends a POST to endpoint with param taskJSON as data
   handleSaveTask: function(taskFile) {
     console.log("Save task file " + taskFile.name)
@@ -947,7 +966,7 @@ var App = React.createClass({
           projects={this.state.projects}
           handleDeleteThread={this.handleDeleteThreadFromSidebar}
           handleDeleteProject={this.handleDeleteProjectFromSidebar}
-          handleSaveTask={this.handleSaveTask}
+          handleSaveModule={this.handleSaveModule}
           app={App} />
         <Graph
           nodes={this.state.nodes}

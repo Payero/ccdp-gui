@@ -40,7 +40,7 @@ var TaskForm = React.createClass({
             type="text"
             placeholder="Name"
             value={this.state.name}
-            onChange={this.handleNaeChange}
+            onChange={this.handleNameChange}
           />
         </div>
         <div className="form-group">
