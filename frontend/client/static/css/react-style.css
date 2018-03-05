@@ -59,6 +59,10 @@ svg {
     font-size: 0.75em;
 }
 
+.centered {
+  text-align: center;
+}
+
 .transpNoBorder {
   border-width: 0px;
   border: none;

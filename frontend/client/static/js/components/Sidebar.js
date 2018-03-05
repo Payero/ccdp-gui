@@ -44,10 +44,6 @@ var Sidebar = React.createClass({
   projectSearchUpdated: function(term) {
     this.setState({projectSearchTerm: term});
   },
-  handleUploadFile: function(e) {
-    var file = e.target.files[0];
-    this.props.handleSaveTask(file);
-  },
   showAddModuleModal: function() {
     this.setState({showAddModule: true})
   },
@@ -110,10 +106,12 @@ var Sidebar = React.createClass({
             })}
           </Panel>
           <Panel header={<FontAwesome name="plus"> Add Module</FontAwesome>} key="4">
-            <div>
-              <input type="button" value="Add Module" onClick={this.showAddModuleModal}/>
+            <div className="centered">
+              <button className="addTask" onClick={this.showAddModuleModal}>
+                 <i className="fa fa-upload"></i> Create New Module
+              </button>
               <ModuleForm show={this.state.showAddModule} hideAddModuleModal={this.hideAddModuleModal} handleSaveModule={this.props.handleSaveModule} />
-            </div>
+          </div>
           </Panel>
           <Panel header={<FontAwesome name="plus"> Add Task (JSON File)</FontAwesome>} key="5">
             <div>

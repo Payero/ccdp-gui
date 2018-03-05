@@ -349,7 +349,7 @@ var App = React.createClass({
     request.done(function(msg) {
       // do something with the `msg` returned
       NotificationManager.success("Module saved");
-      this.updateThreads();
+      this.updateTasks();
     }.bind(this))
     request.fail(function(jqXHR, textStatus) {
       NotificationManager.error("Request failed: " + textStatus);
@@ -375,7 +375,7 @@ var App = React.createClass({
     });
     request.done(function(msg) {
       NotificationManager.success("Task saved");
-      this.updateThreads();
+      this.updateTasks();
     }.bind(this))
     request.fail(function(jqXHR, textStatus) {
       var message = textStatus;
