@@ -49,14 +49,13 @@ var ModuleForm = React.createClass({
       module_id: this.state.moduleID,
       name: this.state.moduleName,
       short_description: this.state.moduleDescription,
-      command: this.state.command,
+      command: this.parseCommand(this.state.command),
       ccdp_type: this.state.nodeType,
       module_type: this.state.moduleType,
-      configuration: this.state.config || {},
+      configuration: this.parseConfig(this.state.config),
       min_instances: this.state.minInstances,
       max_instances: this.state.maxInstances
     }
-    console.log(moduleJson);
     this.props.handleSaveModule(JSON.stringify(moduleJson));
     this.setState({
       moduleID: "",
@@ -71,7 +70,13 @@ var ModuleForm = React.createClass({
     });
     this.hideModal();
   },
-  parseCommand: function(cmds) {
+  parseCommand : function(cmd_str) {
+    if (!cmd_str || cmd_str.length == 0) {
+      return [];
+    }
+    return cmd_str.split(" ");
+  },
+  stringifyCommand: function(cmds) {
     let buf = '';
     let delim = '';
     for (let cmd of cmds) {
@@ -80,7 +85,21 @@ var ModuleForm = React.createClass({
     }
     return buf;
   },
-  parseConfig: function(config) {
+  parseConfig: function(cfg_str) {
+    if (!cfg_str || cfg_str.length == 0) {
+      return {};
+    }
+    let arr = cfg_str.split(",");
+    let obj = {};
+    for (let entry of arr) {
+      let kv = entry.split("=");
+      if (kv.length == 2) {
+        obj[kv[0].trim()] = kv[1].trim()
+      }
+    }
+    return obj;
+  },
+  stringifyConfig: function(config) {
     let buf = '';
     let delim = '';
     for (let k in config) {
@@ -89,23 +108,21 @@ var ModuleForm = React.createClass({
     }
     return buf;
   },
-  handleUploadFile: function(e) {
+  handleReadFile: function(e) {
     var file = e.target.files[0];
-    console.log("Upload file " + file.name);
     var reader = new FileReader();
     reader.addEventListener("loadend", () => {
       var res = reader.result;
-      console.log("contents: " + res)
       if (res) {
         res = JSON.parse(res);
         this.setState({
           moduleID: res['module_id'],
           moduleName: res['name'],
           moduleDescription: res['short_description'],
-          command: this.parseCommand(res['command']),
+          command: this.stringifyCommand(res['command']),
           nodeType: res['ccdp_type'],
           moduleType: res['module_type'],
-          config: this.parseConfig(res['configuration']),
+          config: this.stringifyConfig(res['configuration']),
           minInstances: res['min_instances'],
           maxInstances: res['max_instances']
         })
@@ -116,7 +133,7 @@ var ModuleForm = React.createClass({
   render: function() {
     const body = (
       <div>
-        <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleUploadFile} />
+        <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleReadFile} />
         <Form horizontal>
           <FormGroup>
             <Col sm={2}>
@@ -161,7 +178,7 @@ var ModuleForm = React.createClass({
             <Col componentClass={ControlLabel} sm={2}>
               Configuration:
             </Col>
-            <Col sm={10}>props
+            <Col sm={10}>
               <FormControl type="text" value={this.state.config} onChange={this.handleConfigurationChange} />
             </Col>
           </FormGroup>

@@ -108,16 +108,15 @@ var Sidebar = React.createClass({
           <Panel header={<FontAwesome name="plus"> Add Module</FontAwesome>} key="4">
             <div className="centered">
               <button className="addTask" onClick={this.showAddModuleModal}>
-                 <i className="fa fa-upload"></i> Create New Module
+                 <i className="fa fa-upload"></i>New Module
               </button>
-              <ModuleForm show={this.state.showAddModule} hideAddModuleModal={this.hideAddModuleModal} handleSaveModule={this.props.handleSaveModule} />
+              <button className="addTask" onClick={this.showAddModuleModal}>
+                 <i className="fa fa-upload"></i>New Lambda Module
+              </button>
+              <ModuleForm show={this.state.showAddModule}
+                  hideAddModuleModal={this.hideAddModuleModal}
+                  handleSaveModule={this.props.handleSaveModule} />
           </div>
-          </Panel>
-          <Panel header={<FontAwesome name="plus"> Add Task (JSON File)</FontAwesome>} key="5">
-            <div>
-              <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleUploadFile} />
-              <input type="button" value="Choose JSON File" onClick={() => {$("#upload_file").trigger('click')}} />
-            </div>
           </Panel>
           <Panel header={<FontAwesome name="info-circle"> About</FontAwesome>} key="6">
             About
