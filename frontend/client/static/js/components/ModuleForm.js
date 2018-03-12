@@ -267,7 +267,8 @@ handleSelectedArchiveFileChange: function(selectedArchiveFile) {
           <FormGroup>
             <Col sm={3}>
               <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
-              <FormControl className="file-upload" type="file" placeholder="select file" onChange={this.handleUploadModule}/>
+              <FormControl bsStyle="primary" className="file-upload" type="file" placeholder="select file" onChange={this.handleUploadModule}/>
+              <button className="file-upload2" bsStyle="primary" onClick={this.doFileUpload}>Upload</button>
             </Col>
             <Col sm={3}>
               <Select
@@ -283,19 +284,6 @@ handleSelectedArchiveFileChange: function(selectedArchiveFile) {
           </FormGroup>
         </Form>
       </div>);
-            // <Col componentClass={ControlLabel} sm={2}>
-            //   <div id="moduleUpload">Upload Module File</div>
-            // </Col>
-            // <Col style={{"textalign": "left"}}>
-            //   <FormControl
-            //     type="file"
-            //     bsStyle="primary"
-            //     id="moduleUpload"
-            //     onChange={this.handleUploadModule}
-            //     />
-            // </Col>
-      //   </Form>
-      // </div>);
     return (<ModalView
             modalTitle="Create New Module"
             modalBody={body}

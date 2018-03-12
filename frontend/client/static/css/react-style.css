@@ -406,3 +406,10 @@ input[type=search]:focus, textarea:focus {
   margin:0px;
   padding:0px;
 }
+
+.file-upload2 {
+  margin:0px;
+  padding:0px;
+  width: 33%;
+  height: 80%;
+}
