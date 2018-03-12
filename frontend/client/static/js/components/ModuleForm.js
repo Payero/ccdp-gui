@@ -22,6 +22,7 @@ var ModuleForm = React.createClass({
       maxInstances: 1,
       archiveFiles: [],
       selectedArchiveFile: '',
+      configuration: {},
       disableArchiveFileSelect: true,
       fileToUpload: null
     };
@@ -62,7 +63,8 @@ var ModuleForm = React.createClass({
       ccdp_type: this.state.nodeType,
       module_type: this.state.moduleType,
       min_instances: this.state.minInstances,
-      max_instances: this.state.maxInstances
+      max_instances: this.state.maxInstances,
+      configuration: {} //unused, but UI not yet updated
     }
     this.props.handleSaveModule(JSON.stringify(moduleJson));
     this.setState({
