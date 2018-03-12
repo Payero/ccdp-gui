@@ -5,13 +5,24 @@ var FormControl = require('react-bootstrap').FormControl;
 var FormGroup = require('react-bootstrap').FormGroup;
 var Form = require('react-bootstrap').Form;
 var Col = require('react-bootstrap').Col;
+var NotificationManager = require('react-notifications').NotificationManager;
+import Select from 'react-select';
+import JSZip from 'jszip';
+
+const s3 = new AWS.S3({
+  accessKeyId: 'AKIAI3S5UN7PY44WAWGQ',
+  secretAccessKey: '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'
+});
 
 var ModuleForm = React.createClass({
   getInitialState: function() {
     return {
       moduleType: 'Reader',
       minInstances: 1,
-      maxInstances: 1
+      maxInstances: 1,
+      archiveFiles: [],
+      selectedArchiveFile: '',
+      disableArchiveFileSelect: true
     };
   },
   hideModal: function() {
@@ -35,9 +46,6 @@ var ModuleForm = React.createClass({
   handleCommandChange: function(e) {
     this.setState({command: e.target.value})
   },
-  handleConfigurationChange: function(e) {
-    this.setState({config: e.target.value})
-  },
   handleMinInstancesChange: function(e) {
     this.setState({minInstances: e.target.value})
   },
@@ -52,7 +60,6 @@ var ModuleForm = React.createClass({
       command: this.parseCommand(this.state.command),
       ccdp_type: this.state.nodeType,
       module_type: this.state.moduleType,
-      configuration: this.parseConfig(this.state.config),
       min_instances: this.state.minInstances,
       max_instances: this.state.maxInstances
     }
@@ -64,7 +71,6 @@ var ModuleForm = React.createClass({
       command: "",
       nodeType: "",
       moduleType: "",
-      config: "",
       minInstances: "",
       maxInstances: ""
     });
@@ -85,29 +91,6 @@ var ModuleForm = React.createClass({
     }
     return buf;
   },
-  parseConfig: function(cfg_str) {
-    if (!cfg_str || cfg_str.length == 0) {
-      return {};
-    }
-    let arr = cfg_str.split(",");
-    let obj = {};
-    for (let entry of arr) {
-      let kv = entry.split("=");
-      if (kv.length == 2) {
-        obj[kv[0].trim()] = kv[1].trim()
-      }
-    }
-    return obj;
-  },
-  stringifyConfig: function(config) {
-    let buf = '';
-    let delim = '';
-    for (let k in config) {
-      buf+= delim + k + " = " + (config[k] ? config[k] : "\"\"");
-      delim = ", ";
-    }
-    return buf;
-  },
   handleReadFile: function(e) {
     var file = e.target.files[0];
     var reader = new FileReader();
@@ -122,7 +105,6 @@ var ModuleForm = React.createClass({
           command: this.stringifyCommand(res['command']),
           nodeType: res['ccdp_type'],
           moduleType: res['module_type'],
-          config: this.stringifyConfig(res['configuration']),
           minInstances: res['min_instances'],
           maxInstances: res['max_instances']
         })
@@ -130,7 +112,71 @@ var ModuleForm = React.createClass({
     });
     reader.readAsText(file);
   },
+  handleUploadModule: function(e) {
+    let file = e.target.files[0];
+    console.log("Upload file " + file.name);
+    let zip = new JSZip();
+    zip.loadAsync(file)
+     .then(zip => {
+         let files = zip.filter((path, file) => {
+           return !path.endsWith("/");
+         });
+         //Store path for dup file names, otherwise store file name
+         let filenames = files.map(file => {
+           if (files.filter( (f) =>
+              f.name.substring(f.name.lastIndexOf('/'))
+                == file.name.substring(file.name.lastIndexOf('/'))
+           ).length > 1) {
+             return file.name;
+           }
+           return file.name.substring(file.name.lastIndexOf('/') + 1);
+         });
+         this.setState({archiveFiles: filenames})
+         if (filenames && filenames.length > 0) {
+            this.setState({disableArchiveFileSelect: false})
+            this.doUploadFile(file);
+         }
+       }, function() {
+         NotificationManager.warning("Not a valid zip file")
+       });
+
+  },
+  getUploadUrl: function(filename) {
+    return s3.getSignedUrl('putObject', {
+    Bucket: 'ccdp-tasks',
+    Key: filename,
+    ACL: 'authenticated-read',
+    // This must match the ajax contentType parameter
+    ContentType: 'binary/octet-stream'
+});
+
+},
+doUploadFile: function(file) {
+  let url = this.getUploadUrl(file.name);
+  $.ajax({
+    type: 'PUT',
+    url: url,
+    // Content type must much with the parameter you signed your URL with
+    contentType: 'binary/octet-stream',
+    // this flag is important, if not set, it will try to send data as a form
+    processData: false,
+    // the actual file is sent raw
+    data: file
+  })
+  .success(function() {
+    alert('File uploaded');
+  })
+  .error(function() {
+    alert('File NOT uploaded');
+    console.log( arguments);
+  });
+},
+handleSelectedArchiveFileChange: function(selectedArchiveFile) {
+    this.setState({ selectedArchiveFile });
+  },
   render: function() {
+    const { selectedArchiveFile } = this.state;
+    const selectedArchiveFileValue = selectedArchiveFile && selectedArchiveFile.value;
     const body = (
       <div>
         <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleReadFile} />
@@ -176,14 +222,6 @@ var ModuleForm = React.createClass({
           </FormGroup>
           <FormGroup>
             <Col componentClass={ControlLabel} sm={2}>
-              Configuration:
-            </Col>
-            <Col sm={10}>
-              <FormControl type="text" value={this.state.config} onChange={this.handleConfigurationChange} />
-            </Col>
-          </FormGroup>
-          <FormGroup>
-            <Col componentClass={ControlLabel} sm={2}>
               Module Type:
             </Col>
             <Col sm={2}>
@@ -199,7 +237,7 @@ var ModuleForm = React.createClass({
             <Col componentClass={ControlLabel} sm={2}>
               Node Type:
             </Col>
-            <Col sm={2}>
+            <Col sm={2} style={{"textalign": "left"}}>
               <FormControl componentClass="select"
                 placeholder="select"
                 value={this.state.nodeType}
@@ -226,8 +264,38 @@ var ModuleForm = React.createClass({
               <FormControl type="text" value={this.state.maxInstances} onChange={this.handleMaxInstancesChange} />
             </Col>
           </FormGroup>
+          <FormGroup>
+            <Col sm={3}>
+              <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
+              <FormControl className="file-upload" type="file" placeholder="select file" onChange={this.handleUploadModule}/>
+            </Col>
+            <Col sm={3}>
+              <Select
+                value={selectedArchiveFileValue}
+                placeholder={this.state.disableArchiveFileSelect ? 'Archive files' :'Select an archive file...'}
+                disabled={this.state.disableArchiveFileSelect}
+                onChange={this.handleSelectedArchiveFileChange}
+                options={this.state.archiveFiles.map(file => {
+                  console.log("render option for " + file)
+                  return {value: file, label:file}
+                })}/>
+            </Col>
+          </FormGroup>
         </Form>
       </div>);
+            // <Col componentClass={ControlLabel} sm={2}>
+            //   <div id="moduleUpload">Upload Module File</div>
+            // </Col>
+            // <Col style={{"textalign": "left"}}>
+            //   <FormControl
+            //     type="file"
+            //     bsStyle="primary"
+            //     id="moduleUpload"
+            //     onChange={this.handleUploadModule}
+            //     />
+            // </Col>
+      //   </Form>
+      // </div>);
     return (<ModalView
             modalTitle="Create New Module"
             modalBody={body}

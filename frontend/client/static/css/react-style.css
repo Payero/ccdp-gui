@@ -402,3 +402,7 @@ input[type=search]:focus, textarea:focus {
     position: absolute;
     right: 7px;
 }
+.file-upload {
+  margin:0px;
+  padding:0px;
+}
