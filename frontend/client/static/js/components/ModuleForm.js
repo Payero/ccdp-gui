@@ -22,7 +22,8 @@ var ModuleForm = React.createClass({
       maxInstances: 1,
       archiveFiles: [],
       selectedArchiveFile: '',
-      disableArchiveFileSelect: true
+      disableArchiveFileSelect: true,
+      fileToUpload: null
     };
   },
   hideModal: function() {
@@ -133,11 +134,12 @@ var ModuleForm = React.createClass({
          });
          this.setState({archiveFiles: filenames})
          if (filenames && filenames.length > 0) {
-            this.setState({disableArchiveFileSelect: false})
-            this.doUploadFile(file);
+            this.setState({disableArchiveFileSelect: false, fileToUpload: file})
          }
-       }, function() {
-         NotificationManager.warning("Not a valid zip file")
+       }, () => {
+         //not a zip file
+         console.log("Setting non zip file for upload: " + file.name)
+         this.setState({fileToUpload: file})
        });
 
   },
@@ -151,25 +153,30 @@ var ModuleForm = React.createClass({
 });
 
 },
-doUploadFile: function(file) {
-  let url = this.getUploadUrl(file.name);
-  $.ajax({
-    type: 'PUT',
-    url: url,
-    // Content type must much with the parameter you signed your URL with
-    contentType: 'binary/octet-stream',
-    // this flag is important, if not set, it will try to send data as a form
-    processData: false,
-    // the actual file is sent raw
-    data: file
-  })
-  .success(function() {
-    alert('File uploaded');
-  })
-  .error(function() {
-    alert('File NOT uploaded');
-    console.log( arguments);
-  });
+doUploadFile: function() {
+  let file = this.state.fileToUpload;
+  if (file)  {
+    let url = this.getUploadUrl(file.name);
+    $.ajax({
+      type: 'PUT',
+      url: url,
+      // Content type must much with the parameter you signed your URL with
+      contentType: 'binary/octet-stream',
+      // this flag is important, if not set, it will try to send data as a form
+      processData: false,
+      // the actual file is sent raw
+      data: file
+    })
+    .success(function() {
+      NotificationManager.success('File uploaded');
+    })
+    .error(function() {
+      NotificationManager.erro('File not uploaded');
+      console.log( arguments);
+    });
+  } else {
+    NotificationManager.warning("No file has been selected for upload")
+  }
 },
 handleSelectedArchiveFileChange: function(selectedArchiveFile) {
     this.setState({ selectedArchiveFile });
@@ -267,8 +274,8 @@ handleSelectedArchiveFileChange: function(selectedArchiveFile) {
           <FormGroup>
             <Col sm={3}>
               <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
-              <FormControl bsStyle="primary" className="file-upload" type="file" placeholder="select file" onChange={this.handleUploadModule}/>
-              <button className="file-upload2" bsStyle="primary" onClick={this.doFileUpload}>Upload</button>
+              <FormControl bsStyle="primary" className="file-upload" type="file" onChange={this.handleUploadModule}/>
+              <Button className="file-upload2" bsStyle="primary" onClick={this.doUploadFile}>Upload</Button>
             </Col>
             <Col sm={3}>
               <Select
