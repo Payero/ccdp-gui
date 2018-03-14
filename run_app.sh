@@ -9,12 +9,14 @@ export DB_PORT_27017_TCP_ADDR=db
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export CCDP_GUI=$DIR/frontend/server
 
-#amq=`docker ps | grep  amq | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
+if [[ -z "$amq" ]];then
+	amq=`docker ps | grep  amq | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
+fi
 
-#mongo=`docker ps | grep  mongo | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
+if [[ -z "$mongo" ]];then
+	mongo=`docker ps | grep  mongo | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
+fi
 
-amq=localhost
-mongo=localhost
 #Display mongo and amq IP addresses so server.py args can be entered into a PyDev launch config to enable PyDev debugging
 echo AMQ IP: $amq
 echo MONGO IP: $mongo
