@@ -117,7 +117,6 @@ var ModuleForm = React.createClass({
   },
   handleUploadModule: function(e) {
     let file = e.target.files[0];
-    console.log("Upload file " + file.name);
     let zip = new JSZip();
     zip.loadAsync(file)
      .then(zip => {
@@ -136,12 +135,12 @@ var ModuleForm = React.createClass({
          });
          this.setState({archiveFiles: filenames})
          if (filenames && filenames.length > 0) {
-            this.setState({disableArchiveFileSelect: false, fileToUpload: file})
+            this.setState({disableArchiveFileSelect: false, fileToUpload: file});
          }
        }, () => {
          //not a zip file
          console.log("Setting non zip file for upload: " + file.name)
-         this.setState({fileToUpload: file})
+         this.setState({fileToUpload: file, disableArchiveFileSelect: true, archiveFiles: []})
        });
 
   },
@@ -183,116 +182,123 @@ doUploadFile: function() {
 handleSelectedArchiveFileChange: function(selectedArchiveFile) {
     this.setState({ selectedArchiveFile });
   },
-  render: function() {
-    const { selectedArchiveFile } = this.state;
-    const selectedArchiveFileValue = selectedArchiveFile && selectedArchiveFile.value;
-    const body = (
-      <div>
-        <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleReadFile} />
-        <Form horizontal>
-          <FormGroup>
-            <Col sm={2}>
-              <Button bsStyle="primary" onClick={() => {$("#upload_file").trigger('click')}}>
-                Import from JSON File
-              </Button>
-            </Col>
-          </FormGroup>
-          <FormGroup>
-            <Col componentClass={ControlLabel} sm={2}>
-              Name:
-            </Col>
-            <Col sm={4}>
-              <FormControl type="text"
-                value={this.state.moduleName}
-                onChange={this.handleModuleNameChange}/>
-            </Col>
-            <Col componentClass={ControlLabel} sm={2}>
-              ID:
-            </Col>
-            <Col sm={4}>
-              <FormControl type="text" value={this.state.moduleID} onChange={this.handleModuleIDChange} />
-            </Col>
-          </FormGroup>
-          <FormGroup>
-            <Col componentClass={ControlLabel} sm={2}>
-              Description:
-            </Col>
-            <Col sm={10}>
-              <FormControl type="text" value={this.state.moduleDescription} onChange={this.handleModuleDescriptionChange} />
-            </Col>
-          </FormGroup>
-          <FormGroup>
-            <Col componentClass={ControlLabel} sm={2}>
-              Command:
-            </Col>
-            <Col sm={10}>
-              <FormControl type="text" value={this.state.command} onChange={this.handleCommandChange} />
-            </Col>
-          </FormGroup>
-          <FormGroup>
-            <Col componentClass={ControlLabel} sm={2}>
-              Module Type:
-            </Col>
-            <Col sm={2}>
-              <FormControl componentClass="select"
+render: function() {
+  const { selectedArchiveFile } = this.state;
+  let selectedArchiveFileValue = selectedArchiveFile && selectedArchiveFile.value;
+  if (this.state.archiveFiles && this.state.archiveFiles.length == 1) {
+    selectedArchiveFileValue = this.state.archiveFiles[0];
+  }
+  const body = (
+    <div>
+      <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleReadFile} />
+      <Form horizontal>
+        <FormGroup>
+          <Col sm={2}>
+            <Button bsStyle="primary" onClick={() => {$("#upload_file").trigger('click')}}>
+              Import from JSON File
+            </Button>
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Name:
+          </Col>
+          <Col sm={4}>
+            <FormControl type="text"
+              value={this.state.moduleName}
+              onChange={this.handleModuleNameChange}/>
+          </Col>
+          <Col componentClass={ControlLabel} sm={2}>
+            ID:
+          </Col>
+          <Col sm={4}>
+            <FormControl type="text" value={this.state.moduleID} onChange={this.handleModuleIDChange} />
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Description:
+          </Col>
+          <Col sm={10}>
+            <FormControl type="text" value={this.state.moduleDescription} onChange={this.handleModuleDescriptionChange} />
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Command:
+          </Col>
+          <Col sm={10}>
+            <FormControl type="text" value={this.state.command} onChange={this.handleCommandChange} />
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Module Type:
+          </Col>
+          <Col sm={2}>
+            <FormControl componentClass="select"
+            placeholder="select"
+            value={this.state.moduleType}
+            onChange={this.handleModuleTypeChange} >
+              <option value="Reader">Reader</option>
+              <option value="Processor">Processor</option>
+              <option value="Writer">Writer</option>
+            </FormControl>
+          </Col>
+          <Col componentClass={ControlLabel} sm={2}>
+            Node Type:
+          </Col>
+          <Col sm={2} style={{"textalign": "left"}}>
+            <FormControl componentClass="select"
               placeholder="select"
-              value={this.state.moduleType}
-              onChange={this.handleModuleTypeChange} >
-                <option value="Reader">Reader</option>
-                <option value="Processor">Processor</option>
-                <option value="Writer">Writer</option>
-              </FormControl>
-            </Col>
-            <Col componentClass={ControlLabel} sm={2}>
-              Node Type:
-            </Col>
-            <Col sm={2} style={{"textalign": "left"}}>
-              <FormControl componentClass="select"
-                placeholder="select"
-                value={this.state.nodeType}
-                onChange={this.handleNodeTypeChange} >
-                  <option value="DEFAULT">Default</option>
-                  <option value="EC2">EC2</option>
-              </FormControl>
-            </Col>
-          </FormGroup>
-          <FormGroup>
-            <Col componentClass={ControlLabel} sm={2}>
-              Instances:
-            </Col>
-            <Col componentClass={ControlLabel} sm={1}>
-              Min:
-            </Col>
-            <Col sm={1}>
-              <FormControl type="text" value={this.state.minInstances} onChange={this.handleMinInstancesChange} />
-            </Col>
-            <Col componentClass={ControlLabel} sm={1}>
-              Max:
-            </Col>
-            <Col sm={1}>
-              <FormControl type="text" value={this.state.maxInstances} onChange={this.handleMaxInstancesChange} />
-            </Col>
-          </FormGroup>
-          <FormGroup>
-            <Col sm={3}>
-              <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
-              <FormControl bsStyle="primary" className="file-upload" type="file" onChange={this.handleUploadModule}/>
-              <Button className="file-upload2" bsStyle="primary" onClick={this.doUploadFile}>Upload</Button>
-            </Col>
-            <Col sm={3}>
-              <Select
-                value={selectedArchiveFileValue}
-                placeholder={this.state.disableArchiveFileSelect ? 'Archive files' :'Select an archive file...'}
-                disabled={this.state.disableArchiveFileSelect}
-                onChange={this.handleSelectedArchiveFileChange}
-                options={this.state.archiveFiles.map(file => {
-                  console.log("render option for " + file)
-                  return {value: file, label:file}
-                })}/>
-            </Col>
-          </FormGroup>
-        </Form>
-      </div>);
+              value={this.state.nodeType}
+              onChange={this.handleNodeTypeChange} >
+                <option value="DEFAULT">Default</option>
+                <option value="EC2">EC2</option>
+            </FormControl>
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Instances:
+          </Col>
+          <Col componentClass={ControlLabel} sm={1}>
+            Min:
+          </Col>
+          <Col sm={1}>
+            <FormControl type="text" value={this.state.minInstances} onChange={this.handleMinInstancesChange} />
+          </Col>
+          <Col componentClass={ControlLabel} sm={1}>
+            Max:
+          </Col>
+          <Col sm={1}>
+            <FormControl type="text" value={this.state.maxInstances} onChange={this.handleMaxInstancesChange} />
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col sm={3}>
+            <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
+            <FormControl bsStyle="primary" className="file-upload" type="file" onChange={this.handleUploadModule}/>
+            <Button className="file-upload2" bsStyle="primary" onClick={this.doUploadFile}>Upload</Button>
+          </Col>
+          <Col sm={3}>
+            <ControlLabel>Module File</ControlLabel>
+            <Select
+              value={selectedArchiveFileValue}
+              placeholder={this.state.disableArchiveFileSelect ? 'Archive files' :'Select an archive file...'}
+              disabled={this.state.disableArchiveFileSelect}
+              onChange={this.handleSelectedArchiveFileChange}
+              options={this.state.archiveFiles.map(file => {
+                return {value: file, label:file}
+              })}/>
+          </Col>
+          <Col sm={3}>
+            <ControlLabel>Python Class</ControlLabel>
+            <FormControl componentClass="text" />
+          </Col>
+        </FormGroup>
+      </Form>
+    </div>);
     return (<ModalView
             modalTitle="Create New Module"
             modalBody={body}

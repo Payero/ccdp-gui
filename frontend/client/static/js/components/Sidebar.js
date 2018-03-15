@@ -110,9 +110,6 @@ var Sidebar = React.createClass({
               <button className="addTask" onClick={this.showAddModuleModal}>
                  <i className="fa fa-upload"></i>New Module
               </button>
-              <button className="addTask" onClick={this.showAddModuleModal}>
-                 <i className="fa fa-upload"></i>New Lambda Module
-              </button>
               <ModuleForm show={this.state.showAddModule}
                   hideAddModuleModal={this.hideAddModuleModal}
                   handleSaveModule={this.props.handleSaveModule} />
