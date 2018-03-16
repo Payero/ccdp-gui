@@ -1,6 +1,6 @@
 var Collapse = require('rc-collapse');
 var Panel = Collapse.Panel;
-var TaskForm = require('./TaskForm.js');
+var ModuleForm = require('./ModuleForm.js');
 var FontAwesome = require('react-fontawesome');
 var Task = require('./Task.js');
 var Thread = require('./Thread.js');
@@ -44,9 +44,11 @@ var Sidebar = React.createClass({
   projectSearchUpdated: function(term) {
     this.setState({projectSearchTerm: term});
   },
-  handleUploadFile: function(e) {
-    var file = e.target.files[0];
-    this.props.handleSaveTask(file);
+  showAddModuleModal: function() {
+    this.setState({showAddModule: true})
+  },
+  hideAddModuleModal: function() {
+    this.setState({showAddModule: false})
   },
   // Tasks/Threads/Projects filtered using React Search Input
   render: function() {
@@ -103,14 +105,15 @@ var Sidebar = React.createClass({
               )
             })}
           </Panel>
-          <Panel header={<FontAwesome name="plus"> Add Task</FontAwesome>} key="4">
-            <TaskForm/>
-          </Panel>
-          <Panel header={<FontAwesome name="plus"> Add Task (JSON File)</FontAwesome>} key="5">
-            <div>
-              <input type="file" id="upload_file" style={{display: "none"}} onChange={this.handleUploadFile} />
-              <input type="button" value="Choose JSON File" onClick={() => {$("#upload_file").trigger('click')}} />
-            </div>
+          <Panel header={<FontAwesome name="plus"> Add Module</FontAwesome>} key="4">
+            <div className="centered">
+              <button className="addTask" onClick={this.showAddModuleModal}>
+                 <i className="fa fa-upload"></i>New Module
+              </button>
+              <ModuleForm show={this.state.showAddModule}
+                  hideAddModuleModal={this.hideAddModuleModal}
+                  handleSaveModule={this.props.handleSaveModule} />
+          </div>
           </Panel>
           <Panel header={<FontAwesome name="info-circle"> About</FontAwesome>} key="6">
             About

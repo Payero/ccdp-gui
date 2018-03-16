@@ -39,7 +39,7 @@ class InvalidRequest(Exception):
         rv = dict(self.payload or ())
         rv['message'] = self.message
         return rv
-    
+
 app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
 socketio = SocketIO(app, async_mode="threading")
 
@@ -82,7 +82,7 @@ def get_status(version):
 def start_processing(version):
     """Sends a thread request to the thread controller"""
     run_json = request.json['body']
-    run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
+#     run_json['configuration'] = urllib.base64.standard_b64encode(str(run_json['configuration']))
     reply_queue = run_json['request']['reply-to']
 
     run_json = json.dumps(run_json)
@@ -153,9 +153,9 @@ def delete_project(version, project_id):
     """Deletes project from database"""
     return str(_delete_thread(g.db, project_id).deleted_count)
 
-@app.route("/<version>/modules/save", methods=["POST"])
-def save_task(version):
-    """Saves task to database"""
+@app.route("/<version>/modules/saveFile", methods=["POST"])
+def save_module_file(version):
+    """Uploads module file to cloud storage"""
     f = request.files['file'];
     if f:
         task = f.read();
@@ -165,7 +165,15 @@ def save_task(version):
             raise InvalidRequest(e.message, status_code=410)
         return str(_save_task(g.db, task_json)["n"])
     raise InvalidRequest("No file received", status_code=410)
-    
+
+@app.route("/<version>/modules/save", methods=["POST"])
+def save_module(version):
+    """Saves module JSON to database"""
+    module = request.json
+    print "Received JSON " + json.dumps(request.json)
+    return str(_save_module(g.db, module)["n"])
+
+
 
 
 @app.before_request
@@ -200,7 +208,8 @@ def _save_thread(db, thread):
     result = db["threads"].update(thread_query, thread, upsert=True)
     return result
 
-def _save_task(db, task):
+def _save_module(db, task):
+    print "Saving module " + json.dumps(task)
     task_name = task["name"]
     task_query = {"name": task_name}
     result = db["modules"].update(task_query, task, upsert=True)
@@ -276,7 +285,7 @@ def connected():
 def disconnected():
     app.logger.info("USER DISCONNECTED")
     socketio = None
-    
+
 @app.errorhandler(InvalidRequest)
 def handle_invalid_request(error):
     response = jsonify(error.to_dict())
