@@ -87,7 +87,7 @@ class CcdpModule(object):
     '''
     self._logger = ccdp_utils.setup_logging(self.__class__.__name__)
     try:
-      dec_str = urllib.base64.standard_b64decode( args )
+      dec_str = urllib.base64.standard_b64decode( enc_args )
       args = ast.literal_eval( dec_str )
     except:
       args = enc_args

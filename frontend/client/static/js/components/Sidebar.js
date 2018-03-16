@@ -1,6 +1,6 @@
 var Collapse = require('rc-collapse');
 var Panel = Collapse.Panel;
-var TaskForm = require('./TaskForm.js');
+var ModuleForm = require('./ModuleForm.js');
 var FontAwesome = require('react-fontawesome');
 var Task = require('./Task.js');
 var Thread = require('./Thread.js');
@@ -26,7 +26,7 @@ const KEYS_TO_FILTERS = ['name'];
 var Sidebar = React.createClass({
   // Initial state has emoty search terms
   getInitialState: function() {
-    return { 
+    return {
       taskSearchTerm: '',
       threadSearchTerm: '',
       projectSearchTerm: ''
@@ -43,6 +43,12 @@ var Sidebar = React.createClass({
   // Updates project search term when input is edited
   projectSearchUpdated: function(term) {
     this.setState({projectSearchTerm: term});
+  },
+  showAddModuleModal: function() {
+    this.setState({showAddModule: true})
+  },
+  hideAddModuleModal: function() {
+    this.setState({showAddModule: false})
   },
   // Tasks/Threads/Projects filtered using React Search Input
   render: function() {
@@ -81,7 +87,7 @@ var Sidebar = React.createClass({
                   )
                 })}
               </Panel>
-            </Collapse>  
+            </Collapse>
           </Panel>
           <Panel header={<FontAwesome name="cubes"> Threads</FontAwesome>} key="2">
             <SearchInput className="search-input" onChange={this.threadSearchUpdated} />
@@ -99,13 +105,20 @@ var Sidebar = React.createClass({
               )
             })}
           </Panel>
-          <Panel header={<FontAwesome name="plus"> Add Task</FontAwesome>} key="4">
-            <TaskForm/>
+          <Panel header={<FontAwesome name="plus"> Add Module</FontAwesome>} key="4">
+            <div className="centered">
+              <button className="addTask" onClick={this.showAddModuleModal}>
+                 <i className="fa fa-upload"></i>New Module
+              </button>
+              <ModuleForm show={this.state.showAddModule}
+                  hideAddModuleModal={this.hideAddModuleModal}
+                  handleSaveModule={this.props.handleSaveModule} />
+          </div>
           </Panel>
-          <Panel header={<FontAwesome name="info-circle"> About</FontAwesome>} key="5">
+          <Panel header={<FontAwesome name="info-circle"> About</FontAwesome>} key="6">
             About
           </Panel>
-          <Panel header={<FontAwesome name="question-circle"> Help</FontAwesome>} key="6">
+          <Panel header={<FontAwesome name="question-circle"> Help</FontAwesome>} key="7">
             <h4 style={{ backgroundColor: '#f4f4f4'}}>Project Editor</h4>
             <div>
               <label>Basic Controls</label>
@@ -163,7 +176,7 @@ var Sidebar = React.createClass({
               <p>Redo the last deletion/addition operation for tasks, edges, and projects</p>
             </div>
           </Panel>
-          <Panel header={<FontAwesome name="life-ring"> Contact Us</FontAwesome>} key="7">
+          <Panel header={<FontAwesome name="life-ring"> Contact Us</FontAwesome>} key="8">
             Contact
           </Panel>
         </Collapse>

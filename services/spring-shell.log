@@ -1,0 +1,4 @@
+// ActiveMQ CLI 1.1.0.RELEASE log opened at 2018-03-02 11:25:37
+connect --broker local
+exit
+// ActiveMQ CLI 1.1.0.RELEASE log closed at 2018-03-02 11:25:47

@@ -1,3 +1,4 @@
+
 /**
  * TaskForm component to handle uploading tasks (TODO)
  */
@@ -26,7 +27,6 @@ var TaskForm = React.createClass({
     if (!name || !description || !moduleId || !className) {
       return;
     }
-    // TODO: file upload & save task info in database
     this.setState({name: '', description: '', moduleId: '', className: ''});
   },
   render: function() {
@@ -68,7 +68,7 @@ var TaskForm = React.createClass({
           />
         </div>
         <div className="form-group">
-          <input type="submit" value="Upload Task" className="form-control" onSubmit={this.handleSubmit} />
+          <input type="submit"  value="Sumbit Task" className="form-control" onSubmit={this.handleSubmit} />
         </div>
       </form>
     );

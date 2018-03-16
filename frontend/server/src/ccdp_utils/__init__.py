@@ -15,19 +15,20 @@ __DEF_CFG_FILE = "${CCDP_GUI}/config/logging.json"
 #
 ###############################################################################
 
-MESSAGES = ["UNDEFINED", 
-            "THREAD_REQUEST", 
-            "RUN_TASK", 
-            "KILL_TASK", 
-            "TASK_UPDATE", 
-            "RESOURCE_UPDATE",
-            "ASSIGN_SESSION", 
-            "START_SESSION", 
-            "END_SESSION",
-            "START_THREAD",
-            "PAUSE_THREAD",
-            "STOP_THREAD",
-            "SHUTDOWN"]
+MESSAGES = ["ASSIGN_SESSION",
+    "END_SESSION",
+    "ERROR_MSG",
+    "KILL_TASK",
+    "PAUSE_THREAD",
+    "RESOURCE_UPDATE",
+    "RUN_TASK",
+    "SHUTDOWN",
+    "START_SESSION",
+    "START_THREAD",
+    "STOP_THREAD",
+    "TASK_UPDATE",
+    "THREAD_REQUEST",
+    "UNDEFINED"]
 
 ENG_QUEUE    = 'CCDP-Engine'
 WEB_QUEUE    = 'CCDP-WebServer'
@@ -49,7 +50,7 @@ EC2_SEC_GRP = 'sg-386c5b43'
 EMR_SEC_GRP = 'sg-386c5b43'
 
 
-def setup_logging( name="root", 
+def setup_logging( name="root",
                    default_cfg_file=__DEF_CFG_FILE,
                    default_level=__DEF_LEVEL,
                    cfg_file=None
@@ -59,22 +60,22 @@ def setup_logging( name="root",
   in which searches for the configuration file to evaluate is as follow:
      - First checks if the cfg_file is set, if is and the file exists then
        it uses the cfg_file
-     - If the cfg_file is not provided it uses the CCDP_HOME environment 
-       variable to look for ${CCDP_HOME}/config/logging.json, if the file 
+     - If the cfg_file is not provided it uses the CCDP_HOME environment
+       variable to look for ${CCDP_HOME}/config/logging.json, if the file
        exists then it uses it
-     - If none of the two options above are valid, then it uses a basic 
+     - If none of the two options above are valid, then it uses a basic
        configuration
-  
+
   Arguments:
-  
+
     name:              The name of the logger as defined in the configuration
-                       file 
+                       file
     cfg_file:          The name of the configuration file to use
     default_level:     The default verbosity level to use if no configuration
                        file is provided
     default_cfg_file:  The absolute path of the configuration file using the
                        CCDP_HOME environment variable.
-  
+
   """
   filename = None
 
@@ -82,20 +83,20 @@ def setup_logging( name="root",
   if cfg_file == None:
     cfg_filename = os.path.expandvars(default_cfg_file)
     print "Using file %s" % cfg_filename
-    
+
     if os.path.exists(cfg_filename):
       filename = cfg_filename
     else:
       print "The file %s cannot be found" % cfg_filename
-      
+
   elif os.path.exists(cfg_file):
     if os.path.exists(cfg_file):
       filename = cfg_file
-  
+
   if filename is not None:
     with open(filename, 'rt') as f:
         config = json.load(f)
-        
+
     regex = re.compile(r'\$(\w+|\{[^}]*\})')
     def os_expandvar(match):
         v = match.group(1)
@@ -103,36 +104,36 @@ def setup_logging( name="root",
             v = v[1:-1]
         return json.dumps(os.environ.get(v, ''))[1:-1]
     logging.config.dictConfig(json.loads(regex.sub(os_expandvar, json.dumps(config))))
-    
+
   else:
     logging.basicConfig(level=default_level)
-  
+
   logger = logging.getLogger(name)
   logger.propagate = False
-  
+
   return logger
-      
+
 
 def json_load(file_handle):
   """
-  Returns the contents of a file in the form of a python dictionary.  It 
+  Returns the contents of a file in the form of a python dictionary.  It
   eliminates the unicode symbol '\uKey' from all the strings.
-  
+
   <file_handle>  The handle to the file containing the Python dictionary string
   """
   return __byteify(
-      
+
       json.load(file_handle, object_hook=__byteify),
       ignore_dicts=True
   )
 
 def json_loads(json_text):
   """
-  Returns the contents of the string in the form of a python dictionary.  It 
+  Returns the contents of the string in the form of a python dictionary.  It
   eliminates the unicode symbol '\uKey' from all the strings.
-  
+
   <json_text>  The string containing the Python structure
-  """  
+  """
   return __byteify(
       json.loads(json_text, object_hook=__byteify),
       ignore_dicts=True
@@ -140,9 +141,9 @@ def json_loads(json_text):
 
 def __byteify(data, ignore_dicts = False):
   """
-  Eliminates all the unicode symbols for all the string variables when 
+  Eliminates all the unicode symbols for all the string variables when
   constructing a Python Dictionary
-  
+
   <data>  The data to convert
   """
   # if this is a unicode string, return its string representation
@@ -160,35 +161,35 @@ def __byteify(data, ignore_dicts = False):
       }
   # if it's anything else, return it in its original form
   return data
-          
-          
+
+
 def get_class( kls ):
   """
   Gets a class that can be used to instantiate objects based on the contents
   of the string.  The string needs to be the fully qualified package and module
-  name up to the name of the class name to use.  For instance if a module bar 
+  name up to the name of the class name to use.  For instance if a module bar
   is in the package foo and it has a class called FooBar, then the arguments
   needs to be foo.bar.FooBar.
-  
+
   <kls> The fully qualified class name to use to create objects
-  
+
   """
   parts = kls.split('.')
   module = ".".join(parts[:-1])
   m = __import__( module )
   for comp in parts[1:]:
-      m = getattr(m, comp)            
+      m = getattr(m, comp)
   return m
-          
+
 
 from logging.handlers import RotatingFileHandler
- 
+
 class EnvVarRotatingFileHandler(RotatingFileHandler):
   '''
-  Rotating File Handler that evaluates the given filename for environment 
-  variables used to define the path.  It expands them if present and checks 
+  Rotating File Handler that evaluates the given filename for environment
+  variables used to define the path.  It expands them if present and checks
   for the path to exist.  If the directory does not exists it creates it
-   
+
   '''
   def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=0):
     '''
@@ -199,6 +200,6 @@ class EnvVarRotatingFileHandler(RotatingFileHandler):
     path = os.path.split(filename)
     if not os.path.isdir(path[0]):
       os.makedirs(path[0])
-      
+
     RotatingFileHandler.__init__(self, filename, mode, maxBytes, backupCount, encoding, delay)
- 
+
