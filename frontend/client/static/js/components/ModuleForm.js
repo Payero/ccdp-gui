@@ -23,8 +23,9 @@ var ModuleForm = React.createClass({
       archiveFiles: [],
       selectedArchiveFile: '',
       configuration: {},
-      disableArchiveFileSelect: true,
-      fileToUpload: null
+      fileToUpload: null,
+      moduleFileVisibility: "hidden",
+      pythonClassVisibility: "hidden"
     };
   },
   hideModal: function() {
@@ -133,14 +134,25 @@ var ModuleForm = React.createClass({
            }
            return file.name.substring(file.name.lastIndexOf('/') + 1);
          });
-         this.setState({archiveFiles: filenames})
+         this.setState({
+           archiveFiles: filenames,
+           moduleFileVisibility: "visible"
+         })
          if (filenames && filenames.length > 0) {
-            this.setState({disableArchiveFileSelect: false, fileToUpload: file});
+            this.setState({
+              fileToUpload: file
+            });
          }
        }, () => {
          //not a zip file
-         console.log("Setting non zip file for upload: " + file.name)
-         this.setState({fileToUpload: file, disableArchiveFileSelect: true, archiveFiles: []})
+         let pyModSelected = file.name.endsWith(".py");
+         this.setState({
+           fileToUpload: file,
+           selectedArchiveFile: "",
+           moduleFileVisibility: "hidden",
+           pythonClassVisibility : (pyModSelected ? "visible" : "hidden"),
+           archiveFiles: []
+         });
        });
 
   },
@@ -180,7 +192,12 @@ doUploadFile: function() {
   }
 },
 handleSelectedArchiveFileChange: function(selectedArchiveFile) {
-    this.setState({ selectedArchiveFile });
+  console.log("selected " + selectedArchiveFile.value);
+  let pyModSelected = (selectedArchiveFile && selectedArchiveFile.value.endsWith(".py"));
+    this.setState({
+      selectedArchiveFile,
+      pythonClassVisibility : (pyModSelected ? "visible" : "hidden"),
+    });
   },
 render: function() {
   const { selectedArchiveFile } = this.state;
@@ -282,19 +299,21 @@ render: function() {
             <Button className="file-upload2" bsStyle="primary" onClick={this.doUploadFile}>Upload</Button>
           </Col>
           <Col sm={3}>
-            <ControlLabel>Module File</ControlLabel>
+            <ControlLabel style={{visibility:this.state.moduleFileVisibility}}>
+              Module File
+            </ControlLabel>
             <Select
+              style={{visibility:this.state.moduleFileVisibility}}
               value={selectedArchiveFileValue}
-              placeholder={this.state.disableArchiveFileSelect ? 'Archive files' :'Select an archive file...'}
-              disabled={this.state.disableArchiveFileSelect}
+              placeholder={'Select an archive file...'}
               onChange={this.handleSelectedArchiveFileChange}
               options={this.state.archiveFiles.map(file => {
                 return {value: file, label:file}
               })}/>
           </Col>
           <Col sm={3}>
-            <ControlLabel>Python Class</ControlLabel>
-            <FormControl componentClass="text" />
+            <ControlLabel style={{visibility:this.state.pythonClassVisibility}}>Python Class</ControlLabel>
+            <FormControl type="text" style={{visibility:this.state.pythonClassVisibility}}  />
           </Col>
         </FormGroup>
       </Form>
