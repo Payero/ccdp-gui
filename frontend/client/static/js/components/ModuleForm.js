@@ -5,6 +5,7 @@ var FormControl = require('react-bootstrap').FormControl;
 var FormGroup = require('react-bootstrap').FormGroup;
 var Form = require('react-bootstrap').Form;
 var Col = require('react-bootstrap').Col;
+var Radio = require('react-bootstrap').Radio;
 var NotificationManager = require('react-notifications').NotificationManager;
 import Select from 'react-select';
 import JSZip from 'jszip';
@@ -28,7 +29,8 @@ var ModuleForm = React.createClass({
       configuration: {},
       fileToUpload: null,
       showModuleSelect: false,
-      showPyClassSelect: false
+      showPyClassSelect: false,
+      serverlessMode: false
     };
   },
   hideModal: function() {
@@ -202,6 +204,10 @@ handleSelectedArchiveFileChange: function(selectedArchiveFile) {
       showPyClassSelect : pyModSelected
     });
   },
+handleRunModeChange: function(e) {
+  console.log("Run mode " + e.target.id);
+  this.setState({serverlessMode: e.target.id == 'serverless'})
+},
 render: function() {
   const { selectedArchiveFile } = this.state;
   let selectedArchiveFileValue = selectedArchiveFile && selectedArchiveFile.value;
@@ -294,6 +300,16 @@ render: function() {
           <Col sm={1}>
             <FormControl type="text" value={this.state.maxInstances} onChange={this.handleMaxInstancesChange} />
           </Col>
+          <Col sm={2}>
+            <ControlLabel>Run Mode</ControlLabel>
+            <Radio id="conventional" name="runModeGroup" defaultChecked onChange={this.handleRunModeChange}>Conventional</Radio>
+            <Radio id="serverless" name="runModeGroup" onChange={this.handleRunModeChange}>Serverless</Radio>
+          </Col>
+          {this.state.serverlessMode ?
+          <Col sm={4}>
+            <ControlLabel inline>Lambda Function</ControlLabel>
+            <FormControl inline type="text" />
+          </Col> : null}
         </FormGroup>
         <FormGroup>
           <Col sm={3}>
