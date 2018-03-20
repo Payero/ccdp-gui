@@ -30,7 +30,8 @@ var ModuleForm = React.createClass({
       fileToUpload: null,
       showModuleSelect: false,
       showPyClassSelect: false,
-      serverlessMode: false
+      serverlessMode: false,
+      fileOnHost: false
     };
   },
   hideModal: function() {
@@ -208,6 +209,9 @@ handleRunModeChange: function(e) {
   console.log("Run mode " + e.target.id);
   this.setState({serverlessMode: e.target.id == 'serverless'})
 },
+handleFileLocChange: function(e) {
+  this.setState({fileOnHost: e.target.id == "fileOnHost"});
+},
 render: function() {
   const { selectedArchiveFile } = this.state;
   let selectedArchiveFileValue = selectedArchiveFile && selectedArchiveFile.value;
@@ -313,6 +317,15 @@ render: function() {
         </FormGroup>
         <FormGroup>
           <Col sm={3}>
+            <ControlLabel>File Location</ControlLabel>
+              <Radio id="fileOnHost" name="fileLocGroup" onChange={this.handleFileLocChange}>On Host</Radio>
+              <Radio id="s3Bucket" name="fileLocGroup" defaultChecked onChange={this.handleFileLocChange}>S3 Bucket</Radio>
+              {!this.state.fileOnHost ?
+              <div>
+              <ControlLabel>S3 Bucket</ControlLabel>
+              <FormControl type="text" /> </div> : null}
+          </Col>
+          <Col sm={3}>
             <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
             <FormControl bsStyle="primary" className="file-upload" type="file" onChange={this.handleUploadModule}/>
             <Button className="file-upload2" bsStyle="primary" onClick={this.doUploadFile}>Upload</Button>
@@ -330,7 +343,7 @@ render: function() {
                 return {value: file, label:file}
               })}/>
             </Col> : null}
-          {this.state.showPyClassSelect ?
+          {this.state.showPyClassSelect || selectedArchiveFileValue.endsWith('py') ?
           <Col sm={3}>
             <ControlLabel>Python Class</ControlLabel>
             <FormControl type="text"  />
