@@ -1,0 +1,10 @@
+.Sys-header {
+  background-color: #222;
+  height: 50px;
+  padding: 5px;
+  color: white;
+}
+
+.Sys-title {
+  font-size: 1.5em;
+}

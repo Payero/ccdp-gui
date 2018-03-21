@@ -1,0 +1,5 @@
+#!/bin/sh
+
+browserify static/js/index.js -o static/js/bundle.js \
+-t [ babelify --presets [ es2015 react ] ] \
+-t [ browserify-css  --global true ] 
