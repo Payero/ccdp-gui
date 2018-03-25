@@ -414,8 +414,10 @@ input[type=search]:focus, textarea:focus {
   height: 80%;
 }
 
-label.disabled {
-  color: #aaa;
+label.disabled,
+input.disabled {
+  color: #CCC;
+  border: none;
 }
 
 .hidden {

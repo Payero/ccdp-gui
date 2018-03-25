@@ -31,11 +31,24 @@ var ModuleForm = React.createClass({
       showModuleSelect: false,
       showPyClassSelect: false,
       serverlessMode: false,
-      fileOnHost: false
+      fileOnHost: false,
+      showArgs: false
     };
   },
   hideModal: function() {
     this.props.hideAddModuleModal();
+    /* Since the file input value will be lost when modal is hidden,
+     * clear state values that depend on the upload file. Preserve
+     * other state values for user convenience.
+    */
+    this.setState({
+      archiveFiles: [],
+      selectedArchiveFile: '',
+      fileToUpload: null
+    })
+  },
+  hideArgsModal: function() {
+    this.setState({showArgs: false})
   },
   handleModuleNameChange: function(e) {
     this.setState({moduleName: e.target.value})
@@ -212,6 +225,9 @@ handleRunModeChange: function(e) {
 handleFileLocChange: function(e) {
   this.setState({fileOnHost: e.target.id == "fileOnHost"});
 },
+handleEditArguments: function() {
+  this.setState({showArgs: true})
+},
 render: function() {
   const { selectedArchiveFile } = this.state;
   let selectedArchiveFileValue = selectedArchiveFile && selectedArchiveFile.value;
@@ -238,10 +254,10 @@ render: function() {
               value={this.state.moduleName}
               onChange={this.handleModuleNameChange}/>
           </Col>
-          <Col componentClass={ControlLabel} sm={2}>
+          <Col componentClass={ControlLabel} sm={1}>
             ID:
           </Col>
-          <Col sm={4}>
+          <Col sm={5}>
             <FormControl type="text" value={this.state.moduleID} onChange={this.handleModuleIDChange} />
           </Col>
         </FormGroup>
@@ -259,6 +275,14 @@ render: function() {
           </Col>
           <Col sm={10}>
             <FormControl type="text" value={this.state.command} onChange={this.handleCommandChange} />
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Arguments:
+          </Col>
+          <Col sm={10}>
+            <FormControl type="text" value={this.state.argumentString} onChange={this.handleArgumentsChange} />
           </Col>
         </FormGroup>
         <FormGroup>
@@ -287,6 +311,11 @@ render: function() {
                 <option value="EC2">EC2</option>
             </FormControl>
           </Col>
+          <Col sm={4}>
+            <Button bsStyle="primary" onClick={this.handleEditArguments}>
+              Edit Arguments
+            </Button>
+          </Col>
         </FormGroup>
         <FormGroup>
           <Col componentClass={ControlLabel} sm={2}>
@@ -309,21 +338,22 @@ render: function() {
             <Radio id="conventional" name="runModeGroup" defaultChecked onChange={this.handleRunModeChange}>Conventional</Radio>
             <Radio id="serverless" name="runModeGroup" onChange={this.handleRunModeChange}>Serverless</Radio>
           </Col>
-          {this.state.serverlessMode ?
-          <Col sm={4}>
-            <ControlLabel inline>Lambda Function</ControlLabel>
-            <FormControl inline type="text" />
-          </Col> : null}
         </FormGroup>
         <FormGroup>
           <Col sm={3}>
             <ControlLabel>File Location</ControlLabel>
               <Radio id="fileOnHost" name="fileLocGroup" onChange={this.handleFileLocChange}>On Host</Radio>
               <Radio id="s3Bucket" name="fileLocGroup" defaultChecked onChange={this.handleFileLocChange}>S3 Bucket</Radio>
-              {!this.state.fileOnHost ?
-              <div>
-              <ControlLabel>S3 Bucket</ControlLabel>
-              <FormControl type="text" /> </div> : null}
+              {this.state.fileOnHost ?
+                <div>
+                  <ControlLabel className="disabled">S3 Bucket Name</ControlLabel>
+                  <FormControl className="disabled" disabled type="text" />
+                </div> :
+                <div>
+                  <ControlLabel>S3 Bucket Name</ControlLabel>
+                  <FormControl placeholder="ccdp-tasks" type="text" />
+                </div>
+              }
           </Col>
           <Col sm={3}>
             <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
@@ -331,29 +361,53 @@ render: function() {
             <Button className="file-upload2" bsStyle="primary" onClick={this.doUploadFile}>Upload</Button>
           </Col>
           {this.state.showModuleSelect ?
-          <Col sm={3}>
-            <ControlLabel>
-              Module File
-            </ControlLabel>
-            <Select
-              value={selectedArchiveFileValue}
-              placeholder={'Select an archive file...'}
-              onChange={this.handleSelectedArchiveFileChange}
-              options={this.state.archiveFiles.map(file => {
-                return {value: file, label:file}
-              })}/>
-            </Col> : null}
+            <Col sm={3}>
+              <ControlLabel>
+                Module File
+              </ControlLabel>
+              <Select
+                value={selectedArchiveFileValue}
+                placeholder={'Select an archive file...'}
+                onChange={this.handleSelectedArchiveFileChange}
+                options={this.state.archiveFiles.map(file => {
+                  return {value: file, label:file}
+                })}/>
+            </Col> :
+            <Col sm={3}>
+              <ControlLabel className="disabled">
+                Module File
+              </ControlLabel>
+              <Select
+                value={selectedArchiveFileValue}
+                className="disabled"
+                />
+            </Col>
+          }
           {this.state.showPyClassSelect || selectedArchiveFileValue.endsWith('py') ?
-          <Col sm={3}>
-            <ControlLabel>Python Class</ControlLabel>
-            <FormControl type="text"  />
-          </Col> : null}
+            <Col sm={3}>
+              <ControlLabel>Python Class</ControlLabel>
+              <FormControl type="text"  />
+            </Col> :
+            <Col sm={3}>
+              <ControlLabel className="disabled">Python Class</ControlLabel>
+              <FormControl className="disabled" disabled type="text"  />
+            </Col>
+          }
         </FormGroup>
       </Form>
+      <ModalView
+              modalTitle="Edit Arguments"
+              modalBody={null}
+              confirmButtonText="Save Arguments"
+              hideModal={this.hideArgsModal}
+              show={this.state.showArgs}
+              modalCallback={this.argsModalCallback}
+              />
     </div>);
     return (<ModalView
             modalTitle="Create New Module"
             modalBody={body}
+            size="large"
             confirmButtonText="Save Module"
             hideModal={this.hideModal}
             show={this.props.show}

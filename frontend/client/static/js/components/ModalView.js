@@ -12,7 +12,7 @@ var ModalView = React.createClass({
   render: function() {
     return (
       <Modal
-        bsSize="large"
+        bsSize={this.props.size}
         aria-labelledby="contained-modal-title-lg"
         show={this.props.show}
         onHide={this.hideModal}>
