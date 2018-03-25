@@ -363,11 +363,11 @@ render: function() {
           {this.state.showModuleSelect ?
             <Col sm={3}>
               <ControlLabel>
-                Module File
+                Module Archive File
               </ControlLabel>
               <Select
                 value={selectedArchiveFileValue}
-                placeholder={'Select an archive file...'}
+                placeholder={'Select a module file...'}
                 onChange={this.handleSelectedArchiveFileChange}
                 options={this.state.archiveFiles.map(file => {
                   return {value: file, label:file}
@@ -375,9 +375,10 @@ render: function() {
             </Col> :
             <Col sm={3}>
               <ControlLabel className="disabled">
-                Module File
+                Module Archive File
               </ControlLabel>
               <Select
+                disabled
                 value={selectedArchiveFileValue}
                 className="disabled"
                 />
@@ -396,9 +397,9 @@ render: function() {
         </FormGroup>
       </Form>
       <ModalView
-              modalTitle="Edit Arguments"
+              modalTitle="Command Arguments"
               modalBody={null}
-              confirmButtonText="Save Arguments"
+              confirmButtonText="Save"
               hideModal={this.hideArgsModal}
               show={this.state.showArgs}
               modalCallback={this.argsModalCallback}
