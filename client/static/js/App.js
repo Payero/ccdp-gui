@@ -5,12 +5,14 @@ import '../css/App.css';
 //import SearchData from './components/SearchData';
 import SysViewTable from './components/SysViewTable';
 import SessionViewTable from './components/SessionViewTable';
+import InstanceViewTable from './components/InstanceViewTable';
 class App extends Component {
   render() {
     return (
       <div className="App">
         <SysViewTable/>
         <SessionViewTable/>
+        <InstanceViewTable/>
       </div>
 
     );

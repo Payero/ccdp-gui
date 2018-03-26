@@ -75,6 +75,19 @@ def getSystemData(version):
 def getSessionData(version):
     return jsonify(_get_session_data(g.db))
 
+@app.route("/<version>/TaskStatus", methods=["GET"])
+def getTaskStatus(version):
+    vm = request.args.get("vmId")
+    Runn= _get_VM_numOfTask_perState(g.db,vm, request.args.get("state1"))
+    Succ = _get_VM_numOfTask_perState(g.db,vm, request.args.get("state2"))
+    Fail = _get_VM_numOfTask_perState(g.db,vm, request.args.get("state3"))
+    return jsonify([Runn["hits"]["total"],Succ["hits"]["total"], Fail["hits"]["total"]])
+
+@app.route("/<version>/VMviewTable", methods=["GET"])
+def getTask_for_VM(version):
+    vm = request.args.get("vmId")
+    return jsonify(_get_taskInfo_forVM(g.db,vm))
+
 #####################################################################
 # Helper/Private-ish Functions
 #####################################################################
@@ -90,31 +103,12 @@ def get_db():
     return db
 
 def _get_system_data(db):
-    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=300, sort='@timestamp:desc')
+    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=5, sort='@timestamp:desc')
 
 def _get_session_data(db):
-    SessionData = db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=90, sort='@timestamp:desc')
-    i = 0
-    for data in SessionData["hits"]["hits"]:
-        vmID =  data["_source"]["instance-id"]
-        AvgCPU = data["_source"]["assigned-cpu"]
-        if AvgCPU != 0:
-            AvgCPU = (AvgCPU/data["_source"]["total-cpu"])*100
-        SessionData["hits"]["hits"][i]["_source"]["AvgCPU"] = AvgCPU
-        AvgMem = data["_source"]["assigned-mem"]
-        if AvgMem != 0:
-            AvgMem = (AvgMem/data["_source"]["total-mem"])*100
-        SessionData["hits"]["hits"][i]["_source"]["AvgMem"] = AvgMem
-        Succ = get_VM_numOfTask_perState(db,vmID, "SUCCESSFUL")
-        Runn = get_VM_numOfTask_perState(db,vmID, "RUNNING")
-        Fail = get_VM_numOfTask_perState(db,vmID, "FAILED")
-        SessionData["hits"]["hits"][i]["_source"]["Task-completed"] = Succ["hits"]["total"]
-        SessionData["hits"]["hits"][i]["_source"]["Task-running"] = Runn["hits"]["total"]
-        SessionData["hits"]["hits"][i]["_source"]["Task-failed"] = Fail["hits"]["total"]
-        i = i+1
-    return  SessionData
+    return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
 
-def get_VM_numOfTask_perState(db,vm, state):
+def _get_VM_numOfTask_perState(db,vm, state):
     return db.search(index='task-index',filter_path=['hits.total'], body={
       "query": {
         "bool": {
@@ -132,6 +126,16 @@ def get_VM_numOfTask_perState(db,vm, state):
           ]
         }
       }})
+
+def _get_taskInfo_forVM(db,vm):
+    return db.search(index='task-index',filter_path=['hits.hits._source'], body={
+        "query": {
+            "match_phrase": {
+                "host-id": vm
+            }
+        }
+    })
+
 #Triggers when the socketio succesfully connects to a client
 @socketio.on("connect")
 def connected():
@@ -187,6 +191,5 @@ if __name__ == "__main__":
         print "Running from %s" % os.getcwd()
         pprint( os.listdir( os.getcwd() ) )
         sys.exit(-1)
-
     #run the server
     socketio.run(app,  host=args.ip, port=int(args.port), debug=True)
