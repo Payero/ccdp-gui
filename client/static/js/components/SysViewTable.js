@@ -4,12 +4,19 @@ import "react-table/react-table.css";
 import "../../css/SysViewTable.css";
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import SessionViewTable from './SessionViewTable';
+import {
+ Route,
+ NavLink,
+ HashRouter
+} from "react-router-dom";
 
 class SysViewTable extends Component {
   constructor(){
     super();
     this.state ={
-      data : []
+      data : [],
+      sessionId : ""
     };
   }
  getSystemData1(){
@@ -34,11 +41,9 @@ class SysViewTable extends Component {
   });
 }
 
-
 componentDidMount (){
   this.getSystemData1();
 }
-
   render() {
     const {data} = this.state;
     return (
@@ -72,7 +77,17 @@ componentDidMount (){
           ]}
           defaultPageSize={10}
           className="-striped -highlight"
+          getTrProps={(state, rowInfo, column, instance) => ({
+            onClick: (e, handleOriginal) => {
+              console.log('click on :', rowInfo["row"]["session-id"])
+              this.setState({sessionId:rowInfo["row"]["session-id"]})
+            },
+            style: {
+              cursor: "pointer"
+            }
+          })}
         />
+        <SessionViewTable sesId = {this.state.sessionId}/>
       </div>
     );
   }

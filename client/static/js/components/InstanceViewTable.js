@@ -20,17 +20,23 @@ class InstanceViewTable extends Component {
     url: apiURL + 'VMviewTable',
     type: 'GET',
     data: {
-      "vmId" : "i-mock-ddb45b7a8069",
+      "vmId" : this.props.instance
     },
     dataType: 'json'
   });
   request.done( (msg) => {
-    var data = msg.hits.hits
-    for(var i =0; i<data.length; i++)
-    {
-     dataSet.push(data[i]["_source"])
+    if(msg.hasOwnProperty("hits")){
+      var data = msg.hits.hits
+      for(var i =0; i<data.length; i++)
+      {
+       dataSet.push(data[i]["_source"])
+      }
+      this.setState({data: dataSet});
     }
-    this.setState({data: dataSet});
+    else {
+        this.setState({data: []});
+    }
+
   });
   request.fail(function(jqXHR, textStatus) {
     NotificationManager.error("Could not get system data" + textStatus);
@@ -42,12 +48,17 @@ componentDidMount (){
   this.getTaskinVM();
 }
 
+componentDidUpdate(prevProps){
+  if(this.props.instance !== prevProps.instance){
+      this.getTaskinVM();
+  }
+}
   render() {
     const {data} = this.state;
     return (
       <div>
         <header className="Instance-header">
-          <h1 className="Instance-title">Cloud Computing Data Processing-Instance View</h1>
+          <h1 className="Instance-title">Cloud Computing Data Processing-Instance View: {this.props.instance}</h1>
         </header>
         <ReactTable
            data= {data}

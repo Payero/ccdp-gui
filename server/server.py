@@ -73,7 +73,8 @@ def getSystemData(version):
 
 @app.route("/<version>/SessionViewTable", methods=["GET"])
 def getSessionData(version):
-    return jsonify(_get_session_data(g.db))
+    sid = request.args.get("session")
+    return jsonify(_get_session_data(g.db, sid))
 
 @app.route("/<version>/TaskStatus", methods=["GET"])
 def getTaskStatus(version):
@@ -86,6 +87,7 @@ def getTaskStatus(version):
 @app.route("/<version>/VMviewTable", methods=["GET"])
 def getTask_for_VM(version):
     vm = request.args.get("vmId")
+    print vm
     return jsonify(_get_taskInfo_forVM(g.db,vm))
 
 #####################################################################
@@ -103,10 +105,20 @@ def get_db():
     return db
 
 def _get_system_data(db):
-    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=5, sort='@timestamp:desc')
+    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
 
-def _get_session_data(db):
-    return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
+def _get_session_data(db, sid):
+    if (sid == ""):
+        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
+    else:
+        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc', body={
+            "query": {
+                "match": {
+                    "session-id": sid
+                }
+            }
+        })
+
 
 def _get_VM_numOfTask_perState(db,vm, state):
     return db.search(index='task-index',filter_path=['hits.total'], body={
@@ -120,7 +132,7 @@ def _get_VM_numOfTask_perState(db,vm, state):
             },
             {
               "match" :{
-                "state" : state
+              "state" : state
               }
             }
           ]
@@ -128,13 +140,16 @@ def _get_VM_numOfTask_perState(db,vm, state):
       }})
 
 def _get_taskInfo_forVM(db,vm):
-    return db.search(index='task-index',filter_path=['hits.hits._source'], body={
-        "query": {
-            "match_phrase": {
-                "host-id": vm
+    if(vm == ""):
+        return db.search(index='task-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
+    else:
+        return db.search(index='task-index',filter_path=['hits.hits._source'], body={
+            "query": {
+                "match_phrase": {
+                    "host-id": vm
+                }
             }
-        }
-    })
+        })
 
 #Triggers when the socketio succesfully connects to a client
 @socketio.on("connect")

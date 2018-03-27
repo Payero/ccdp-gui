@@ -4,32 +4,44 @@ import "react-table/react-table.css";
 import "../../css/SessionViewTable.css";
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-
+import InstanceViewTable from './InstanceViewTable';
 class SessionViewTable extends Component {
-  constructor(){
-    super();
+  constructor(props){
+    super(props);
     this.state ={
       data : [],
-      sizeOfData : 0
+      sizeOfData : 0,
+      instance : ""
     };
   }
  getSystemData1(){
+   console.log("I'm here now")
   var port   = location.port;
   var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
   var dataSet = [];
   var request = $.ajax({
     url: apiURL + 'SessionViewTable',
     type: 'GET',
+    data:{
+      session: this.props.sesId
+    },
     dataType: 'json'
   });
   request.done( (msg) => {
-   var data = msg.hits.hits;
-   var status = ["RUNNING", "SUCCESSFUL", "FAILED"];
-    for(var i =0; i<data.length; i++)
-    {
-    dataSet.push(data[i]["_source"])
-   }
-    this.setState({data: dataSet});
+    if(msg.hasOwnProperty("hits")){
+      var data = msg.hits.hits;
+      var status = ["RUNNING", "SUCCESSFUL", "FAILED"];
+       for(var i =0; i<data.length; i++)
+       {
+       dataSet.push(data[i]["_source"])
+      }
+       this.setState({data: dataSet});
+    }
+    else {
+
+      this.setState({data: []});
+    }
+
   });
   request.fail(function(jqXHR, textStatus) {
     NotificationManager.error("Could not get system data" + textStatus);
@@ -85,23 +97,23 @@ get_number_task_perState(){
   }
 }
 
-  componentDidMount (){
-    this.getSystemData1();
-    //this.get_number_task_perState();
-  }
 componentDidMount(){
   this.getSystemData1();
 }
-componentDidUpdate()
+componentDidUpdate(prevProps)
 {
   this.get_number_task_perState();
+  if(this.props.sesId !== prevProps.sesId){
+      this.getSystemData1();
+  }
 }
+
   render() {
     const {data} = this.state;
     return (
       <div>
       <header className="Session-header">
-        <h1 className="Session-title">Cloud Computing Data Processing-Session View</h1>
+        <h1 className="Session-title">Cloud Computing Data Processing-Session View: {this.props.sesId}</h1>
       </header>
         <ReactTable
            data= {data}
@@ -138,7 +150,18 @@ componentDidUpdate()
           ]}
           defaultPageSize={10}
           className="-striped -highlight"
+
+          getTrProps={(state, rowInfo, column, instance) => ({
+            onClick: (e, handleOriginal) => {
+              console.log('click on :', rowInfo["row"]["instance-id"])
+              this.setState({instance:rowInfo["row"]["instance-id"]})
+            },
+            style: {
+              cursor: "pointer"
+            }
+          })}
         />
+        <InstanceViewTable instance={this.state.instance}/>
       </div>
     );
   }
