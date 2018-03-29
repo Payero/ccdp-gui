@@ -1,4 +1,5 @@
 var ModalView = require('./ModalView.js');
+var ArgumentsView = require('./ArgumentsView.js');
 var ControlLabel = require('react-bootstrap').ControlLabel;
 var Button = require('react-bootstrap').Button;
 var FormControl = require('react-bootstrap').FormControl;
@@ -32,7 +33,11 @@ var ModuleForm = React.createClass({
       showPyClassSelect: false,
       serverlessMode: false,
       fileOnHost: false,
-      showArgs: false
+      showArgs: false,
+      arguments: [{_name:'Argument 1', _value:'def val 1', _flag: false},
+                  {_name:'Argument 2', _value:'def val 2', _flag: false},
+                  {_name:'Argument 3', _flag: true}
+                 ]
     };
   },
   hideModal: function() {
@@ -97,6 +102,15 @@ var ModuleForm = React.createClass({
       minInstances: "",
       maxInstances: ""
     });
+    this.hideModal();
+  },
+  handleSetArgs: function(args) {
+    this.args = args;
+  },
+  argsModalCallback: function() {
+    for (let arg in this.args) {
+      console.log(this.args[arg])
+    }
     this.hideModal();
   },
   parseCommand : function(cmd_str) {
@@ -219,7 +233,6 @@ handleSelectedArchiveFileChange: function(selectedArchiveFile) {
     });
   },
 handleRunModeChange: function(e) {
-  console.log("Run mode " + e.target.id);
   this.setState({serverlessMode: e.target.id == 'serverless'})
 },
 handleFileLocChange: function(e) {
@@ -227,6 +240,13 @@ handleFileLocChange: function(e) {
 },
 handleEditArguments: function() {
   this.setState({showArgs: true})
+},
+handleAddArg: function() {
+  this.setState((prev) => {
+    const _args = prev.arguments;
+    _args.push({_name:'', _value:'', _flag: false})
+    return {arguments: _args};
+  });
 },
 render: function() {
   const { selectedArchiveFile } = this.state;
@@ -396,12 +416,14 @@ render: function() {
           }
         </FormGroup>
       </Form>
-      <ModalView
+      <ArgumentsView
               modalTitle="Command Arguments"
-              modalBody={null}
+              arguments={this.state.arguments}
+              addArgHandler={this.handleAddArg}
               confirmButtonText="Save"
               hideModal={this.hideArgsModal}
               show={this.state.showArgs}
+              handleSetArgs={this.handleSetArgs}
               modalCallback={this.argsModalCallback}
               />
     </div>);

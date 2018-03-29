@@ -20,11 +20,11 @@ var ModalView = React.createClass({
           <Modal.Title id="contained-modal-title-lg">{this.props.modalTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {this.props.modalBody}
+          {this.props.modalBody || this.modalBody}
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={this.hideModal}>Cancel</Button>
-          <Button bsStyle="primary" onClick={() => {this.props.modalCallback(this.props.modalBody);} }>{this.props.confirmButtonText}</Button>
+          <Button bsStyle="primary" onClick={this.props.modalCallback}>{this.props.confirmButtonText}</Button>
         </Modal.Footer>
       </Modal>
     );
