@@ -425,6 +425,10 @@ render: function() {
               show={this.state.showArgs}
               handleSetArgs={this.handleSetArgs}
               modalCallback={this.argsModalCallback}
+              dialogClass='custom-dialog'
+              style={{width: '80%'}}
+              size="large"
+
               />
     </div>);
     return (<ModalView

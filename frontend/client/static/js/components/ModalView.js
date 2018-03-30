@@ -15,6 +15,7 @@ var ModalView = React.createClass({
         bsSize={this.props.size}
         aria-labelledby="contained-modal-title-lg"
         show={this.props.show}
+        dialogClassName={this.props.dialogClass}
         onHide={this.hideModal}>
         <Modal.Header>
           <Modal.Title id="contained-modal-title-lg">{this.props.modalTitle}</Modal.Title>

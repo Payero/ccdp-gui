@@ -87,6 +87,11 @@ class ArgumentsView extends ModalView {
     }
   }
 
+  // Currently not used. Provide additional on-change behavior here if needed.
+  handleChange(pathToArray, index, newValue, originalValue, arrayElementSubPath) {
+
+  }
+
   render() {
     this.modalBody = this.createModalBody(this.props.arguments);
     return super.render();

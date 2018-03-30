@@ -423,3 +423,8 @@ input.disabled {
 .hidden {
    visibility: hidden;
 }
+
+.custom-dialog {
+   width:47% !important;
+   top:10%;
+}
