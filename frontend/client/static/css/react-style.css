@@ -425,6 +425,6 @@ input.disabled {
 }
 
 .custom-dialog {
-   width:47% !important;
-   top:10%;
+  width:70% !important;
+  top:10%;
 }

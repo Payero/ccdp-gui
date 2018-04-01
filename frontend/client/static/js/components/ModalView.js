@@ -24,6 +24,10 @@ var ModalView = React.createClass({
           {this.props.modalBody || this.modalBody}
         </Modal.Body>
         <Modal.Footer>
+          {this.props.handleResetForm ?
+            <Button onClick={this.props.handleResetForm}>Reset Form</Button> :
+            null
+          }
           <Button onClick={this.hideModal}>Cancel</Button>
           <Button bsStyle="primary" onClick={this.props.modalCallback}>{this.props.confirmButtonText}</Button>
         </Modal.Footer>
