@@ -16,8 +16,25 @@ class ArgumentsView extends ModalView {
   constructor(props, context) {
     super(props, context);
 
+    this.argHelpBody = (
+      <div>
+        <li>Use the argument string to specify how parameters are passed to the module.</li>
+        <li>For each argument, specify the parameter key and an optional default value,<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with "=" or &lt;space&gt; as a key-value separator.</li>
+        <li>Specify "=" for the separator, with no value, to indicate a flag argument.</li>
+        <li>Specify any custom argument string format with the default value wrapped in $().</li>
+        <br />
+        <b>Examples:</b><br />
+        <br />
+        <ul><b>-f tmp.txt</b> — parameter -f has default value tmp.txt</ul>
+        <ul><b>-q=</b> — parameter -q is a flag, taking no value</ul>
+        <ul><b>timeout=5</b> — parameter timeout has default value 5</ul>
+        <ul><b>log:$(INFO)</b> — parameter log has default value INFO, and : is the separator</ul>
+      </div>
+    );
+
     this.state = {
-      arguments: this.props.arguments
+      arguments: this.props.arguments,
     }
   }
 
@@ -114,7 +131,7 @@ class ArgumentsView extends ModalView {
         })}
         <FormGroup>
           <Col sm={2}>
-            <Button bsStyle='primary' onClick={this.props.showArgHelp}>
+            <Button bsStyle='primary' onClick={() => {this.setState({showHelp: true})}}>
                <i className="fa fa-question-circle"></i>{' '}Argument Help
             </Button>
           </Col>
@@ -125,6 +142,16 @@ class ArgumentsView extends ModalView {
           </Col>
         </FormGroup>
         </Form>
+        <ModalView
+                modalTitle="Arguments Help"
+                modalBody={this.argHelpBody}
+                hideModal={() =>{this.setState({showHelp: false})}}
+                size="medium"
+                confirmButtonText="OK"
+                noCancel={true}
+                modalCallback={() =>{this.setState({showHelp: false})}}
+                show={this.state.showHelp}
+                />
       </div>
     );
   }

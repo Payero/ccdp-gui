@@ -40,12 +40,12 @@ var ModuleForm = React.createClass({
       serverlessMode: false,
       fileOnHost: false,
       showArgs: false,
-      // arguments: [{argstring:'-f tmp.txt', name:'File', tooltip: 'Name of file', modifiable: true},
-      //             {argstring:'-q', name:'Quiet', tooltip: 'Suppress output', modifiable: true},
-      //             {argstring:'timeout=5', name:'Timeout', tooltip: 'Timeout in seconds', modifiable: false},
-      //             {argstring:'log $(INFO)', name:'Log Level', tooltip: 'Maximum log level', modifiable: true}
-      //            ]
-      arguments: [{argstring: '', name:'', tooltip: '', modifiable: true}]
+      arguments: [{argstring:'-f tmp.txt', name:'File', tooltip: 'Name of file', modifiable: true},
+                  {argstring:'-q=', name:'Quiet', tooltip: 'Suppress output', modifiable: true},
+                  {argstring:'timeout=5', name:'Timeout', tooltip: 'Timeout in seconds', modifiable: false},
+                  {argstring:'log:$(INFO)', name:'Log Level', tooltip: 'Maximum log level', modifiable: true}
+                 ]
+      // arguments: [{argstring: '', name:'', tooltip: '', modifiable: true}]
     };
   },
   hideModal: function() {
