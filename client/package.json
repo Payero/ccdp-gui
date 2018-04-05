@@ -7,12 +7,15 @@
     "babelify": "^8.0.0",
     "bootstrap": "^3.3.7",
     "browserify": "^16.1.1",
+    "chart.js": "^2.7.2",
     "elasticsearch": "^14.2.0",
     "jquery": "^3.3.1",
     "node-sass-chokidar": "^1.1.0",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",
+    "react-chartjs-2": "^2.7.0",
     "react-dom": "^16.2.0",
+    "react-easy-chart": "^1.0.0",
     "react-notifications": "^1.4.3",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
@@ -21,7 +24,8 @@
     "socket.io-client": "^2.0.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify static/js/App.js -o static/js/bundle.js -t [ babelify --presets [ es2015 react ] ] -t [ browserify-css  --global true ]"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -29,6 +33,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "browserify-css": "^0.14.0",
-    "css-loader": "^0.28.10"
+    "css-loader": "^0.28.10",
+    "watchify": "^3.11.0"
   }
 }

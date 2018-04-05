@@ -2,121 +2,47 @@ import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import "../../css/SessionViewTable.css";
-import ReactDOM from 'react-dom';
-import $ from 'jquery';
-import InstanceViewTable from './InstanceViewTable';
+import {getSessionData, get_number_task_perState} from './REST_helpers'
+import {withRouter} from "react-router-dom";
+import {makeGraph} from './Utils';
 class SessionViewTable extends Component {
   constructor(props){
     super(props);
     this.state ={
       data : [],
-      sizeOfData : 0,
-      instance : ""
+      instance : "",
     };
   }
- getSystemData1(){
-   console.log("I'm here now")
-  var port   = location.port;
-  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
-  var dataSet = [];
-  var request = $.ajax({
-    url: apiURL + 'SessionViewTable',
-    type: 'GET',
-    data:{
-      session: this.props.sesId
-    },
-    dataType: 'json'
-  });
-  request.done( (msg) => {
-    if(msg.hasOwnProperty("hits")){
-      var data = msg.hits.hits;
-      var status = ["RUNNING", "SUCCESSFUL", "FAILED"];
-       for(var i =0; i<data.length; i++)
-       {
-       dataSet.push(data[i]["_source"])
-      }
-       this.setState({data: dataSet});
-    }
-    else {
 
-      this.setState({data: []});
-    }
+componentDidMount (){
+  getSessionData(this);
+  this.interval= setInterval(()=>{
+    getSessionData(this);
+    get_number_task_perState(this);
+  },15000);
 
-  });
-  request.fail(function(jqXHR, textStatus) {
-    NotificationManager.error("Could not get system data" + textStatus);
-  });
 }
-
-get_number_task_perState(){
-  var port   = location.port;
-  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
-  if(this.state.sizeOfData != this.state.data.length)
-  {
-    this.setState({
-      sizeOfData : this.state.data.length
-    });
-    var currentData = this.state.data;
-
-    currentData.forEach((obj, index)=>{
-      var VMid = obj["instance-id"];
-
-      var AvgCPU = obj["assigned-cpu"]
-      if (AvgCPU != 0){
-        AvgCPU = (AvgCPU/obj["total-cpu"])*100
-      }
-      currentData[index]["AvgCPU"]= AvgCPU
-      var AvgMem = obj["assigned-mem"]
-      if (AvgMem != 0){
-        AvgMem = (AvgMem/obj["total-mem"])*100
-      }
-      currentData[index]["AvgMem"] = AvgMem
-      var request = $.ajax({
-        url: apiURL + 'TaskStatus',
-        type: 'GET',
-        data: {
-          "vmId" : VMid,
-          "state1": "RUNNING",
-          "state2": "SUCCESSFUL",
-          "state3": "FAILED"
-        },
-        dataType: 'json'
-      });
-      request.done( (msg) => {
-        currentData[index]["Task-RUNNING"]= msg[0]
-        currentData[index]["Task-SUCCESSFUL"]= msg[1]
-        currentData[index]["Task-FAILED"]= msg[2]
-        this.setState({
-        data:currentData
-        })
-      });
-      request.fail(function(jqXHR, textStatus) {
-        NotificationManager.error("Could not get system data" + textStatus);
-      });
-    });
-  }
+componentWillUnmount() {
+  clearInterval(this.interval);
 }
-
-componentDidMount(){
-  this.getSystemData1();
-}
-componentDidUpdate(prevProps)
+componentDidUpdate(prevProps,prevState)
 {
-  this.get_number_task_perState();
-  if(this.props.sesId !== prevProps.sesId){
-      this.getSystemData1();
+  if( prevState.data.length <=0)
+  {
+    get_number_task_perState(this);
   }
 }
-
   render() {
     const {data} = this.state;
     return (
       <div>
-      <header className="Session-header">
-        <h1 className="Session-title">Cloud Computing Data Processing-Session View: {this.props.sesId}</h1>
-      </header>
+        <header className="Session-header">
+          <h1 className="Session-title">Cloud Computing Data Processing-Session View: {this.props.match.params.sesId}</h1>
+        </header>
         <ReactTable
-           data= {data}
+          sortable={false}
+          defaultSorteDesc={true}
+          data= {data}
           columns={[
             {
               Header: "Instance ID",
@@ -152,19 +78,22 @@ componentDidUpdate(prevProps)
           className="-striped -highlight"
 
           getTrProps={(state, rowInfo, column, instance) => ({
-            onClick: (e, handleOriginal) => {
-              console.log('click on :', rowInfo["row"]["instance-id"])
-              this.setState({instance:rowInfo["row"]["instance-id"]})
-            },
+            onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"]),
             style: {
-              cursor: "pointer"
+              cursor: "pointer",
+              backgroundColor: rowInfo == null ? "#d9ffb3"
+                : rowInfo["row"]["AvgCPU"] >=80 ? "#ffb3b3"
+                : rowInfo["row"]["AvgCPU"] >=55 ? "#ffff99"
+                : "#d9ffb3"
+
             }
           })}
         />
-        <InstanceViewTable instance={this.state.instance}/>
+      {makeGraph(data, "@timestamp","AvgCPU", "Time","CPU (%)", "Overall CPU ")}
+      {makeGraph(data, "@timestamp","AvgMem", "Time","Memory (MB)", "Overall Memory")}
       </div>
     );
   }
 }
 
-export default SessionViewTable;
+export default withRouter(SessionViewTable);

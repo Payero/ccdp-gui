@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import "../../css/InstanceViewTable.css";
-import ReactDOM from 'react-dom';
-import $ from 'jquery';
-
+import {getTaskinVM} from './REST_helpers'
+import {makeGraph} from './Utils';
 class InstanceViewTable extends Component {
   constructor(){
     super();
@@ -12,45 +11,16 @@ class InstanceViewTable extends Component {
       data : []
     };
   }
- getTaskinVM(){
-  var port   = location.port;
-  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
-  var dataSet = [];
-  var request = $.ajax({
-    url: apiURL + 'VMviewTable',
-    type: 'GET',
-    data: {
-      "vmId" : this.props.instance
-    },
-    dataType: 'json'
-  });
-  request.done( (msg) => {
-    if(msg.hasOwnProperty("hits")){
-      var data = msg.hits.hits
-      for(var i =0; i<data.length; i++)
-      {
-       dataSet.push(data[i]["_source"])
-      }
-      this.setState({data: dataSet});
-    }
-    else {
-        this.setState({data: []});
-    }
-
-  });
-  request.fail(function(jqXHR, textStatus) {
-    NotificationManager.error("Could not get system data" + textStatus);
-  });
-}
-
-
 componentDidMount (){
-  this.getTaskinVM();
+  getTaskinVM(this);
+  this.interval= setInterval(()=>   getTaskinVM(this),5000);
 }
-
+componentWillUnmount() {
+ clearInterval(this.interval);
+}
 componentDidUpdate(prevProps){
-  if(this.props.instance !== prevProps.instance){
-      this.getTaskinVM();
+  if(this.props.match.params.instance !== prevProps.match.params.instance){
+    getTaskinVM(this);
   }
 }
   render() {
@@ -58,10 +28,11 @@ componentDidUpdate(prevProps){
     return (
       <div>
         <header className="Instance-header">
-          <h1 className="Instance-title">Cloud Computing Data Processing-Instance View: {this.props.instance}</h1>
+          <h1 className="Instance-title">Cloud Computing Data Processing-Instance View: {this.props.match.params.instance}</h1>
         </header>
         <ReactTable
-           data= {data}
+          defaultSorteDesc={true}
+          data= {data}
           columns={[
             {
               Header: "Task ID",
@@ -81,7 +52,7 @@ componentDidUpdate(prevProps){
             },
             {
               Header:"Avg CPU (%)",
-              accessor:"curAvgCPU"
+              accessor:"cpu"
             },
             {
               Header:"Avg Mem (MB)",
@@ -90,7 +61,18 @@ componentDidUpdate(prevProps){
           ]}
           defaultPageSize={10}
           className="-striped -highlight"
+          getTrProps={(state, rowInfo, column, instance) => ({
+            style: {
+              cursor: "pointer",
+              backgroundColor:  rowInfo == null ? "#d9ffb3"
+                : rowInfo["row"]["cpu"] >=80 ? "#ffb3b3"
+                : rowInfo["row"]["cpu"] >=55 ? "#ffff99"
+                : "#d9ffb3"
+            }
+          })}
         />
+        {makeGraph(data,"@timestamp" , "cpu","Time","CPU (%)", "Overall CPU")}
+        {makeGraph(data, "@timestamp","mem", "Time","Memory (MB)", "Overall Memory")}
       </div>
     );
   }

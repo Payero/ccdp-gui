@@ -1,5 +1,36 @@
 .App {
   text-align: center;
-  margin-left: 60px;
-  margin-right: 60px;
+  margin-left: 300px;
+  margin-right: 300px;
+}
+
+body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+}
+
+ul.header li {
+  float: left;
+  border-right: 1px solid #bbb;
+}
+ul.header {
+  background-color: #36486b;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+ul.header li a {
+  color: #FFF;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 20px;
+  display: block;
+  text-align: center;
+}
+
+.active {
+  background-color: #2b3e91;
 }

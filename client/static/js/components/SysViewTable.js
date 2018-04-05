@@ -2,15 +2,9 @@ import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import "../../css/SysViewTable.css";
-import ReactDOM from 'react-dom';
-import $ from 'jquery';
-import SessionViewTable from './SessionViewTable';
-import {
- Route,
- NavLink,
- HashRouter
-} from "react-router-dom";
-
+import {getSystemData} from './REST_helpers'
+import {withRouter} from "react-router-dom";
+import {makeGraph} from './Utils';
 class SysViewTable extends Component {
   constructor(){
     super();
@@ -19,31 +13,13 @@ class SysViewTable extends Component {
       sessionId : ""
     };
   }
- getSystemData1(){
-  var port   = location.port;
-  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
-  var dataSet = [];
-  var request = $.ajax({
-    url: apiURL + 'SysViewTable',
-    type: 'GET',
-    dataType: 'json'
-  });
-  request.done( (msg) => {
-    var data = msg.hits.hits
-    for(var i =0; i<data.length; i++)
-    {
-     dataSet.push(data[i]["_source"])
-    }
-    this.setState({data: dataSet});
-  });
-  request.fail(function(jqXHR, textStatus) {
-    NotificationManager.error("Could not get system data" + textStatus);
-  });
-}
-
-componentDidMount (){
-  this.getSystemData1();
-}
+  componentDidMount (){
+    getSystemData(this)
+    this.interval= setInterval(()=> getSystemData(this),5000);
+  }
+  componentWillUnmount() {
+   clearInterval(this.interval);
+ }
   render() {
     const {data} = this.state;
     return (
@@ -52,7 +28,8 @@ componentDidMount (){
           <h1 className="Sys-title">Cloud Computing Data Processing-System View</h1>
         </header>
         <ReactTable
-           data= {data}
+          defaultSorteDesc={true}
+          data= {data}
           columns={[
             {
               Header: "Session ID",
@@ -68,7 +45,8 @@ componentDidMount (){
             },
             {
               Header:"Avg CPU (%)",
-              accessor:"curAvgCPU"
+              accessor:"curAvgCPU",
+
             },
             {
               Header:"Avg Mem (MB)",
@@ -78,19 +56,21 @@ componentDidMount (){
           defaultPageSize={10}
           className="-striped -highlight"
           getTrProps={(state, rowInfo, column, instance) => ({
-            onClick: (e, handleOriginal) => {
-              console.log('click on :', rowInfo["row"]["session-id"])
-              this.setState({sessionId:rowInfo["row"]["session-id"]})
-            },
+            onClick: ()=>this.props.history.push('/session'+rowInfo["row"]["session-id"]),
             style: {
-              cursor: "pointer"
+              cursor: "pointer",
+              backgroundColor:  rowInfo == null ? "#d9ffb3"
+                : rowInfo["row"]["curAvgCPU"] >=80 ? "#ffb3b3"
+                : rowInfo["row"]["curAvgCPU"] >=55 ? "#ffff99"
+                : "#d9ffb3"
             }
           })}
         />
-        <SessionViewTable sesId = {this.state.sessionId}/>
+        {makeGraph(data,"@timestamp" , "curAvgCPU","Time","CPU (%)", "Overall CPU")}
+        {makeGraph(data, "@timestamp","curAvgMem", "Time","Memory (MB)", "Overall Memory")}
       </div>
     );
   }
-}
 
-export default SysViewTable;
+}
+export default withRouter(SysViewTable);

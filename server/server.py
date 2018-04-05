@@ -45,13 +45,6 @@ app = Flask(__name__,root_path=os.environ['CCDP_VI']+'/../client')
 socketio = SocketIO(app, async_mode="threading")
 
 #####################################################################
-# View Functions
-#####################################################################
-@app.route("/")
-def home():
-    return render_template('index.html',  async_mode=socketio.async_mode)
-
-#####################################################################
 # API
 #####################################################################
 
@@ -73,22 +66,37 @@ def getSystemData(version):
 
 @app.route("/<version>/SessionViewTable", methods=["GET"])
 def getSessionData(version):
-    sid = request.args.get("session")
+    sid = " "
+    if(request.args.has_key("session")):
+        sid = request.args.get("session")
+
     return jsonify(_get_session_data(g.db, sid))
 
 @app.route("/<version>/TaskStatus", methods=["GET"])
 def getTaskStatus(version):
-    vm = request.args.get("vmId")
+    vm = " "
+    if(request.args.has_key("vmId")):
+        vm = request.args.get("vmId")
     Runn= _get_VM_numOfTask_perState(g.db,vm, request.args.get("state1"))
     Succ = _get_VM_numOfTask_perState(g.db,vm, request.args.get("state2"))
     Fail = _get_VM_numOfTask_perState(g.db,vm, request.args.get("state3"))
     return jsonify([Runn["hits"]["total"],Succ["hits"]["total"], Fail["hits"]["total"]])
 
+
 @app.route("/<version>/VMviewTable", methods=["GET"])
 def getTask_for_VM(version):
-    vm = request.args.get("vmId")
-    print vm
+    vm = " "
+    if(request.args.has_key("vmId")):
+        vm = request.args.get("vmId")
     return jsonify(_get_taskInfo_forVM(g.db,vm))
+
+#####################################################################
+# View Functions
+#####################################################################
+@app.route("/", defaults={'path': ''})
+@app.route('/<path:path>')
+def home(path):
+    return render_template('index.html',  async_mode=socketio.async_mode)
 
 #####################################################################
 # Helper/Private-ish Functions
@@ -105,13 +113,13 @@ def get_db():
     return db
 
 def _get_system_data(db):
-    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
+    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=15, sort='@timestamp:desc')
 
 def _get_session_data(db, sid):
-    if (sid == ""):
-        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
+    if (sid == " "):
+        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=40, sort='@timestamp:desc')
     else:
-        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc', body={
+        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=40, sort='@timestamp:desc', body={
             "query": {
                 "match": {
                     "session-id": sid
@@ -121,7 +129,7 @@ def _get_session_data(db, sid):
 
 
 def _get_VM_numOfTask_perState(db,vm, state):
-    return db.search(index='task-index',filter_path=['hits.total'], body={
+    return db.search(index='task-index',filter_path=['hits.total'], sort='@timestamp:desc',body={
       "query": {
         "bool": {
           "must":[
@@ -140,10 +148,10 @@ def _get_VM_numOfTask_perState(db,vm, state):
       }})
 
 def _get_taskInfo_forVM(db,vm):
-    if(vm == ""):
-        return db.search(index='task-index', filter_path=['hits.hits._source'], size=100, sort='@timestamp:desc')
+    if(vm == " "):
+        return db.search(index='task-index', filter_path=['hits.hits._source'], size=15, sort='@timestamp:desc')
     else:
-        return db.search(index='task-index',filter_path=['hits.hits._source'], body={
+        return db.search(index='task-index',filter_path=['hits.hits._source'],sort='@timestamp:desc', body={
             "query": {
                 "match_phrase": {
                     "host-id": vm
