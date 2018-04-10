@@ -20,9 +20,11 @@ export function makeGraph(graphData, xAxisName, yAxisName,xTitle, yTitle, title)
     var data = []
     graphData.forEach((obj, index)=>{
       data.push(obj[yAxisName])
-      labels.push(obj[xAxisName])
+      var label=obj[xAxisName].split(/-|T|Z/)
+      labels.push(label[3])
     });
     const options = {
+      maintainAspectRatio: false,
       title: {
        display: true,
        text: title
@@ -30,12 +32,19 @@ export function makeGraph(graphData, xAxisName, yAxisName,xTitle, yTitle, title)
       tooltips: {
         mode: 'label'
       },
+      hover: {
+       mode: 'dataset'
+      },
       scales: {
         xAxes: [
           {
             display: true,
+            stacked:true,
+            gridLines:{
+              display:false
+            },
             scaleLabel: {
-              show: true,
+              display: true,
               labelString: xTitle
             }
           }
@@ -43,14 +52,17 @@ export function makeGraph(graphData, xAxisName, yAxisName,xTitle, yTitle, title)
         yAxes: [
           {
             display: true,
+            stacked:true,
             scaleLabel: {
-              show: true,
+              display: true,
               labelString: yTitle
+            },
+            ticks:{
+              suggestedMax: 100
             }
           }
         ],
-      },
-      animation: false
+      }
     }
     const data = {
       labels:labels,
@@ -58,16 +70,15 @@ export function makeGraph(graphData, xAxisName, yAxisName,xTitle, yTitle, title)
         label: "Avg CPU",
         data:data,
         fill: false,
-        borderColor : 'rgba(127,63,191,0.61)',
-        backgroundColor : 'rgba(127,63,191,0.61)',
-        pointBorderColor : 'rgba(127,63,191,0.61)',
-        pointBackgroundColor : '#ffff',
-        pointBorderWidth : 0.2
+        lineTension:0.1,
+        borderColor :'rgba(63, 63, 255, 1.0)',
+        backgroundColor :'rgba(63, 63, 255, 1.0)'
+
       }]
     };
     return (
       <div className="Graphs">
-        <Line data={data} options={options} />
+        <Line data={data} options={options}  height={475}/>
       </div>
     );
   }

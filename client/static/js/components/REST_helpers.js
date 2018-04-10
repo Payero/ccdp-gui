@@ -121,7 +121,27 @@ export function getTaskinVM(component){
      var data = msg.hits.hits
      for(var i =0; i<data.length; i++)
      {
-      dataSet.push(data[i]["_source"])
+       if(!data[i]["_source"].hasOwnProperty("completed"))
+       {
+         data[i]["_source"]["completed"] = "-"
+       }
+       if(!data[i]["_source"].hasOwnProperty("started"))
+       {
+         data[i]["_source"]["started"] = "-"
+       }
+       if(data[i]["_source"].hasOwnProperty("completed"))
+       {
+         var newDate = new Date( data[i]["_source"]["completed"]);
+         //var date = newDate.getMonth()+"/" +newDate.getDate()+"/" + newDate.getYear()+"::"+newDate.getHours()+":"+newDate.getMinutes()+":"+newDate.getSeconds();
+         data[i]["_source"]["completed"] = newDate.toLocaleString();
+       }
+       if(data[i]["_source"].hasOwnProperty("started"))
+       {
+         var newDate = new Date( data[i]["_source"]["started"]);
+         //var date = newDate.getMonth()+"/" +newDate.getDate()+"/" + newDate.getYear()+"::"+newDate.getHours()+":"+newDate.getMinutes()+":"+newDate.getSeconds();
+         data[i]["_source"]["started"] = newDate.toLocaleString();
+       }
+       dataSet.push(data[i]["_source"])
      }
      component.setState({data: dataSet});
    }

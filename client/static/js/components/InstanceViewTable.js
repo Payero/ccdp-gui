@@ -13,10 +13,10 @@ class InstanceViewTable extends Component {
   }
 componentDidMount (){
   getTaskinVM(this);
-  this.interval= setInterval(()=>   getTaskinVM(this),5000);
+  this.interval3= setInterval(()=>   getTaskinVM(this),3000);
 }
 componentWillUnmount() {
- clearInterval(this.interval);
+ clearInterval(this.interval3);
 }
 componentDidUpdate(prevProps){
   if(this.props.match.params.instance !== prevProps.match.params.instance){
@@ -26,7 +26,7 @@ componentDidUpdate(prevProps){
   render() {
     const {data} = this.state;
     return (
-      <div>
+      <div  className="Instance-table">
         <header className="Instance-header">
           <h1 className="Instance-title">Cloud Computing Data Processing-Instance View: {this.props.match.params.instance}</h1>
         </header>
@@ -44,11 +44,11 @@ componentDidUpdate(prevProps){
             },
             {
               Header:"Started",
-              accessor:"curTasknum"
+              accessor:"started"
             },
             {
               Header:"Completed",
-              accessor:"curTasknum"
+              accessor:"completed"
             },
             {
               Header:"Avg CPU (%)",
@@ -59,15 +59,16 @@ componentDidUpdate(prevProps){
               accessor:"mem"
             }
           ]}
+          minRows={0}
           defaultPageSize={10}
           className="-striped -highlight"
           getTrProps={(state, rowInfo, column, instance) => ({
             style: {
               cursor: "pointer",
-              backgroundColor:  rowInfo == null ? "#d9ffb3"
-                : rowInfo["row"]["cpu"] >=80 ? "#ffb3b3"
-                : rowInfo["row"]["cpu"] >=55 ? "#ffff99"
-                : "#d9ffb3"
+              backgroundColor:  rowInfo == null ? "#add8e6"
+                : rowInfo["row"]["cpu"] >75 ? "#ffb3b3"
+                : rowInfo["row"]["cpu"] >=30 ? "#d3f8d3"
+                : "#add8e6"
             }
           })}
         />

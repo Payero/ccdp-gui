@@ -1,28 +1,23 @@
-.App {
-  text-align: center;
-  margin-left: 300px;
-  margin-right: 300px;
-}
-
 body {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   font-weight: 300;
   font-size: 14px;
+  background-color:  #eff5f5;
 }
 
-ul.header li {
+ul.NavigationBar li {
   float: left;
   border-right: 1px solid #bbb;
 }
-ul.header {
-  background-color: #36486b;
+ul.NavigationBar {
+  background-color: #30445d;
   list-style-type: none;
   margin: 0;
   padding: 0;
   overflow: hidden;
 }
 
-ul.header li a {
+ul.NavigationBar li a {
   color: #FFF;
   font-weight: bold;
   text-decoration: none;
@@ -32,5 +27,5 @@ ul.header li a {
 }
 
 .active {
-  background-color: #2b3e91;
+  background-color: #405B7D;
 }

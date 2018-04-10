@@ -16,14 +16,14 @@ class SessionViewTable extends Component {
 
 componentDidMount (){
   getSessionData(this);
-  this.interval= setInterval(()=>{
+  this.interval2= setInterval(()=>{
     getSessionData(this);
     get_number_task_perState(this);
-  },15000);
+  },8000);
 
 }
 componentWillUnmount() {
-  clearInterval(this.interval);
+  clearInterval(this.interval2);
 }
 componentDidUpdate(prevProps,prevState)
 {
@@ -35,12 +35,11 @@ componentDidUpdate(prevProps,prevState)
   render() {
     const {data} = this.state;
     return (
-      <div>
+      <div  className="Session-table">
         <header className="Session-header">
           <h1 className="Session-title">Cloud Computing Data Processing-Session View: {this.props.match.params.sesId}</h1>
         </header>
         <ReactTable
-          sortable={false}
           defaultSorteDesc={true}
           data= {data}
           columns={[
@@ -74,6 +73,7 @@ componentDidUpdate(prevProps,prevState)
             }
 
           ]}
+          minRows={0}
           defaultPageSize={10}
           className="-striped -highlight"
 
@@ -81,10 +81,10 @@ componentDidUpdate(prevProps,prevState)
             onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"]),
             style: {
               cursor: "pointer",
-              backgroundColor: rowInfo == null ? "#d9ffb3"
-                : rowInfo["row"]["AvgCPU"] >=80 ? "#ffb3b3"
-                : rowInfo["row"]["AvgCPU"] >=55 ? "#ffff99"
-                : "#d9ffb3"
+              backgroundColor:rowInfo == null ? "#add8e6"
+                : rowInfo["row"]["AvgCPU"] >75 ? "#ffb3b3"
+                : rowInfo["row"]["AvgCPU"] >=30 ? "#d3f8d3"
+                : "#add8e6"
 
             }
           })}

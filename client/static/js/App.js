@@ -16,7 +16,7 @@ browserHistory
 class App extends Component {
   render() {
     return (
-      <div className="App">
+      <div>
         {this.props.children}
       </div>
 
@@ -28,14 +28,12 @@ export default App;
 ReactDOM.render(
   <BrowserRouter history = {browserHistory}>
     <Route path='/' componenet={App}>
-      <div className="App">
-        <div>
-          <ul className="header">
-            <li><NavLink exact to="/" activeClassName="active">System View</NavLink></li>
-            <li><NavLink to="/session" activeClassName="active">Session View</NavLink></li>
-            <li><NavLink to="/instance" activeClassName="active">Instance View</NavLink></li>
+      <div>
+          <ul className="NavigationBar">
+            <li><NavLink exact to="/">System View</NavLink></li>
+            <li><NavLink to="/session">Session View</NavLink></li>
+            <li><NavLink to="/instance">Instance View</NavLink></li>
           </ul>
-        </div>
         <Route exact path='/' component={SysViewTable}/>
         {/*At some point later I need to figure out a btter way to do the path w/o using arrays*/}
         <Route path={['/session:sesId','/session']} component={SessionViewTable}/>
