@@ -34,6 +34,7 @@
     "babel-preset-react": "^6.24.1",
     "browserify-css": "^0.14.0",
     "css-loader": "^0.28.10",
+    "react-custom-scrollbars": "^4.2.1",
     "watchify": "^3.11.0"
   }
 }
