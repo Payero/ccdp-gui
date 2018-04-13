@@ -8,7 +8,8 @@ import $ from 'jquery';
 export function getSystemData(component){
  var port   = location.port;
  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
- var dataSet = [];
+ var dataSet =[];
+ var graphSet = {};
  var request = $.ajax({
    url: apiURL + 'SysViewTable',
    type: 'GET',
@@ -16,13 +17,40 @@ export function getSystemData(component){
  });
  request.done( (msg) => {
    var data = msg.hits.hits
+
    for(var i =0; i<data.length; i++)
    {
-    dataSet.push(data[i]["_source"])
+     var Obj = data[i]["_source"]["allSessionInfo"];
+     var time =  new Date(data[i]["_source"]["@timestamp"]);
+     time = time.toLocaleTimeString();
+     var vmsInEngine = data[i]["_source"]["vmsInEngine"];
+     var TaskInEngine = data[i]["_source"]["taskInEngine"];
+     if(i === 0)
+     {
+       graphSet["Labels"]=[time];
+        for(var key in Obj)
+        {
+          var thisData = Obj[key];
+          thisData["session-id"] = key;
+          thisData["VMsInEngine"] = vmsInEngine;
+          thisData["TaskInEngine"] = TaskInEngine;
+          thisData["@timestamp"] = time;
+          dataSet.push(thisData);
+          graphSet[key]={"cpu":[Obj[key]["curAvgCPU"]], "mem": [Obj[key]["curAvgMem"]]};
+        }
+     }
+    else {
+      graphSet["Labels"].unshift(time);
+      for(var key in Obj)
+      {
+        graphSet[key]["cpu"].unshift(Obj[key]["curAvgCPU"]);
+        graphSet[key]["mem"].unshift(Obj[key]["curAvgMem"]);
+      }
+    }
    }
    component.setState({
      data: dataSet,
-     loading: false
+     graphData:graphSet
    });
  });
  request.fail(function(jqXHR, textStatus) {
@@ -35,6 +63,7 @@ export function getSessionData(component){
  var port   = location.port;
  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
  var dataSet = [];
+ var graphSet = {};
  var request = $.ajax({
    url: apiURL + 'SessionViewTable',
    type: 'GET',
@@ -48,10 +77,70 @@ export function getSessionData(component){
      var data = msg.hits.hits;
       for(var i =0; i<data.length; i++)
       {
-      dataSet.push(data[i]["_source"])
+        var time = new Date(data[i]["_source"]["@timestamp"]);
+        var vm = data[i]["_source"]["instance-id"];
+        var cpu = Number(data[i]["_source"]["system-cpu-load"] * 100).toFixed(2);
+        var mem = data[i]["_source"]["system-mem-load"];
+         time = time.toLocaleTimeString();
+        if(i == 0){
+          dataSet.push(data[i]["_source"])
+          dataSet[i]["@timestamp"]=time;
+          graphSet["Labels"]=[time];
+          graphSet[vm]={"cpu":[cpu], "mem": [mem]};
+        }
+        else {
+          let obj = dataSet.find((o, index) => {
+            if(o["instance-id"]=== vm)
+            {
+              if(o["@timestamp"]< data[i]["_source"]["@timestamp"])
+              {
+                dataSet[index]=data[i]["_source"];
+              }
+              return true;
+            }
+
+          });
+          if(obj == null)
+          {
+            dataSet.push(data[i]["_source"]);
+            graphSet["Labels"].unshift(time);
+            graphSet[vm]={"cpu":[cpu], "mem": [mem]};
+          }
+          else {
+            graphSet["Labels"].unshift(time);
+            graphSet[vm]["cpu"].unshift(cpu);
+            graphSet[vm]["mem"].unshift(mem);
+          }
+          for(var vms in graphSet)
+          {
+            if(vms === vm || vms === "Labels" )
+            {
+              /*do nothing*/
+            }
+            else
+            {
+              var i_1=graphSet[vms]["cpu"][i-1];
+              var i_2=graphSet[vms]["cpu"][i-2];
+              var i_3=graphSet[vms]["cpu"][i-3];
+              if(i_1==0 && i_2==0 & i_3==0)
+              {
+                graphSet[vms]["cpu"].unshift(null);
+                graphSet[vms]["mem"].unshift(null);
+              }
+              else
+              {
+                graphSet[vms]["cpu"].unshift(0);
+                graphSet[vms]["mem"].unshift(0);
+              }
+
+            }
+          }
+
+        }
      }
       component.setState({
-        data: dataSet
+        data: dataSet,
+        graphData:graphSet
       });
    }
    else {
@@ -90,16 +179,16 @@ export function get_number_task_perState(component){
       currentData[index]["Task-RUNNING"]= msg[0];
       currentData[index]["Task-SUCCESSFUL"]= msg[1];
       currentData[index]["Task-FAILED"]= msg[2];
-      component.setState({ data: currentData})
+      //component.setState({ data: currentData})
     });
    request.fail(function(jqXHR, textStatus) {
       NotificationManager.error("Could not get system data" + textStatus);
     });
 
   });
-  /*$(document).ajaxStop(function () {
+  $(document).ajaxStop(function () {
     component.setState({ data:currentData})
-  });*/
+  });
 
 }
 
@@ -141,7 +230,10 @@ export function getTaskinVM(component){
          //var date = newDate.getMonth()+"/" +newDate.getDate()+"/" + newDate.getYear()+"::"+newDate.getHours()+":"+newDate.getMinutes()+":"+newDate.getSeconds();
          data[i]["_source"]["started"] = newDate.toLocaleString();
        }
+       var time = new Date(data[i]["_source"]["@timestamp"]);
+        time = time.toLocaleTimeString();
        dataSet.push(data[i]["_source"])
+       dataSet[i]["@timestamp"]=time;
      }
      component.setState({data: dataSet});
    }

@@ -5,13 +5,14 @@ import "../../css/SysViewTable.css";
 import {getSystemData} from './REST_helpers'
 import {withRouter} from "react-router-dom";
 import {makeGraph} from './Utils';
+import Graphs from './Graphs';
 import { Scrollbars } from 'react-custom-scrollbars';
 class SysViewTable extends Component {
   constructor(){
     super();
     this.state ={
       data : [],
-      sessionId : ""
+      graphData:{}
     };
   }
   componentDidMount (){
@@ -22,7 +23,7 @@ class SysViewTable extends Component {
    clearInterval(this.interval);
  }
   render() {
-    const {data} = this.state;
+    const {data, graphData} = this.state;
     return (
       <div className="Sys-table">
         <header className="Sys-header">
@@ -70,12 +71,7 @@ class SysViewTable extends Component {
               })}
             />
           </Scrollbars>
-        <div className="Left-col">
-          {makeGraph(data,"@timestamp" , "curAvgCPU","Time","CPU (%)", "Overall CPU")}
-        </div>
-        <div className="Right-col">
-          {makeGraph(data, "@timestamp","curAvgMem", "Time","Memory (MB)", "Overall Memory")}
-        </div>
+        <Graphs data={graphData}/>
       </div>
     );
   }

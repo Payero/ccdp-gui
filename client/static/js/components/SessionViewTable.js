@@ -5,13 +5,15 @@ import "../../css/SessionViewTable.css";
 import {getSessionData, get_number_task_perState} from './REST_helpers'
 import {withRouter} from "react-router-dom";
 import {makeGraph} from './Utils';
+import Graphs from './Graphs';
 import { Scrollbars } from 'react-custom-scrollbars';
 class SessionViewTable extends Component {
   constructor(props){
     super(props);
     this.state ={
       data : [],
-      instance : "",
+      graphData:{}
+
     };
   }
 
@@ -34,7 +36,7 @@ componentDidUpdate(prevProps,prevState)
   }
 }
   render() {
-    const {data} = this.state;
+    const {data, graphData} = this.state;
     return (
       <div  className="Session-table">
         <header className="Session-header">
@@ -90,8 +92,8 @@ componentDidUpdate(prevProps,prevState)
             })}
           />
         </Scrollbars>
-      {makeGraph(data, "@timestamp","AvgCPU", "Time","CPU (%)", "Overall CPU ")}
-      {makeGraph(data, "@timestamp","AvgMem", "Time","Memory (MB)", "Overall Memory")}
+        {console.log(graphData)}
+      <Graphs data={graphData}/>
       </div>
     );
   }

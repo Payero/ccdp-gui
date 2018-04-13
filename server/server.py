@@ -113,13 +113,13 @@ def get_db():
     return db
 
 def _get_system_data(db):
-    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=15, sort='@timestamp:desc')
+    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=200, sort='@timestamp:desc')
 
 def _get_session_data(db, sid):
     if (sid == " "):
-        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=40, sort='@timestamp:desc')
+        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=200, sort='@timestamp:desc')
     else:
-        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=40, sort='@timestamp:desc', body={
+        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=200, sort='@timestamp:desc', body={
             "query": {
                 "match": {
                     "session-id": sid

@@ -20,8 +20,8 @@ export function makeGraph(graphData, xAxisName, yAxisName,xTitle, yTitle, title)
     var data = []
     graphData.forEach((obj, index)=>{
       data.push(obj[yAxisName])
-      var label=obj[xAxisName].split(/-|T|Z/)
-      labels.push(label[3])
+      //var label=obj[xAxisName].split(/-|T|Z/)
+      labels.push(obj[xAxisName])
     });
     const options = {
       maintainAspectRatio: false,
