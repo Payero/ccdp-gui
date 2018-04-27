@@ -1,0 +1,94 @@
+.SettingsButton{
+  float: right;
+  padding-top: 10px;
+  padding-right: 20px;
+}
+
+.settingsMainButton {
+  background-color: #30445d;
+  border: none;
+  color: white;
+  padding: 6px 8px;
+  font-size: 24px;
+  cursor: pointer;
+}
+.bottomSectionTable{
+  width: 75%;
+  float: left;
+  padding: 0;
+
+}
+
+.bottomSectionButtons{
+  width: 25%;
+  float: left;
+  padding-top: 80px;
+  text-align: -webkit-right;
+}
+.Cancel {
+  width: 25%;
+  float:right;
+  text-align: -webkit-right;
+}
+
+.CancelButton{
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 5px;
+  display: block;
+  width: 80%;
+  color: white;
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.SaveButton{
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 5px;
+  display: block;
+  width: 80%;
+  color: white;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+
+#outer-Table {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+
+}
+
+#outer-Table td, #outer-Table th, #outer-Table tr{
+  border: 1px solid #ddd;
+
+}
+
+#outer-Table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color: #76a1e0;
+    color: white;
+}
+#outer-Table  td{
+  vertical-align: baseline;
+  padding: 0;
+
+}
+
+#inner-table tbody {
+  display: block;
+  height: 110px;
+  overflow-y: auto;
+}
+#inner-table tr:nth-child(even){background-color: #f2f2f2;}
+
+#inner-table tr:hover {background-color: #ddd;}
