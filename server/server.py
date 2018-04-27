@@ -61,16 +61,56 @@ def teardown_db(exception):
         #not a way to close Elasticsearch
 
 @app.route("/<version>/SysViewTable", methods=["GET"])
+def getSystemInitialData(version):
+    size = request.args.get("size")
+    gte = request.args.get("gte")
+    lte = request.args.get("lte")
+    return jsonify(_get_system_data(g.db, size, gte, lte))
+
+
+@app.route("/<version>/SysViewGraph", methods=["GET"])
 def getSystemData(version):
-    return jsonify(_get_system_data(g.db))
+    size = request.args.get("size")
+    gte = request.args.get("gte")
+    lte = request.args.get("lte")
+    return jsonify(_get_system_graph_data(g.db, size, gte, lte))
+
 
 @app.route("/<version>/SessionViewTable", methods=["GET"])
 def getSessionData(version):
     sid = " "
     if(request.args.has_key("session")):
         sid = request.args.get("session")
+    size = request.args.get("size")
+    gte = request.args.get("gte")
+    lte = request.args.get("lte")
+    '''
+    Data = _get_session_data(g.db, sid,size,gte,lte)
+    if("hits" in Data):
+        dicData= Data["hits"]["hits"]
+        i = 0
+        for source in dicData :
+            vm = source["_source"]["instance-id"]
+            Runn= _get_VM_numOfTask_perState(g.db,vm, "RUNNING")
+            Succ = _get_VM_numOfTask_perState(g.db,vm,"SUCCESSFUL")
+            Fail = _get_VM_numOfTask_perState(g.db,vm, "FAILED")
+            Data["hits"]["hits"][i]["_source"]["Task-RUNNING"]=Runn["hits"]["total"]
+            Data["hits"]["hits"][i]["_source"]["Task-SUCCESSFUL"]=Succ["hits"]["total"]
+            Data["hits"]["hits"][i]["_source"]["Task-FAILED"]=Fail["hits"]["total"]
+            i= i +1
+    return jsonify(Data)
+    '''
+    return jsonify(_get_session_data(g.db,sid,size,gte,lte))
 
-    return jsonify(_get_session_data(g.db, sid))
+@app.route("/<version>/SessionViewGraph", methods=["GET"])
+def getSessionGraphData(version):
+    sid = " "
+    if(request.args.has_key("session")):
+        sid = request.args.get("session")
+    size = request.args.get("size")
+    gte = request.args.get("gte")
+    lte = request.args.get("lte")
+    return jsonify(_get_session_graph_data(g.db, sid,size,gte,lte))
 
 @app.route("/<version>/TaskStatus", methods=["GET"])
 def getTaskStatus(version):
@@ -88,7 +128,10 @@ def getTask_for_VM(version):
     vm = " "
     if(request.args.has_key("vmId")):
         vm = request.args.get("vmId")
-    return jsonify(_get_taskInfo_forVM(g.db,vm))
+    size = request.args.get("size")
+    gte = request.args.get("gte")
+    lte = request.args.get("lte")
+    return jsonify(_get_taskInfo_forVM(g.db,vm, size,gte,lte))
 
 #####################################################################
 # View Functions
@@ -112,20 +155,181 @@ def get_db():
         db = g._database = connect_to_database()
     return db
 
-def _get_system_data(db):
-    return  db.search(index='engineres-index', filter_path=['hits.hits._source'], size=200, sort='@timestamp:desc')
-
-def _get_session_data(db, sid):
-    if (sid == " "):
-        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=200, sort='@timestamp:desc')
-    else:
-        return  db.search(index='heartbeats-index', filter_path=['hits.hits._source'], size=200, sort='@timestamp:desc', body={
-            "query": {
-                "match": {
-                    "session-id": sid
-                }
+def _get_system_data(db, size, gte,lte):
+    return  db.search(index='current-resources-index', filter_path=['hits.hits._source'], body={
+        "size":size,
+        "query":{
+            "range":{
+              "@timestamp": {
+                "gte": gte,
+                "lte": lte
+               }
             }
-        })
+        },
+        "sort" : [{ "@timestamp" : {"order" : "desc"}}]
+    })
+def _get_system_graph_data(db,size,gte,lte):
+    return  db.search(index='engineresources-index', filter_path=['aggregations.2.buckets'], body={
+        "size": 0,
+        "_source": {
+            "excludes": []
+        },
+        "aggs": {
+            "2": {
+              "date_histogram": {
+                "field": "@timestamp",
+                "interval": "5s",
+                "time_zone": "America/New_York",
+                "min_doc_count": 1
+              },
+              "aggs": {
+                "3": {
+                  "terms": {
+                    "field": "session-id.keyword",
+                    "size": size,
+                    "order": {
+                      "1": "desc"
+                    }
+                  },
+                  "aggs": {
+                    "1": {
+                      "max": {
+                        "field": "curAvgCPU"
+                      }
+                    },
+                    "5": {
+                      "max": {
+                        "field": "curAvgMem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        },
+        "stored_fields": [
+            "*"
+        ],
+        "script_fields": {},
+        "docvalue_fields": [
+            "@timestamp"
+        ],
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                      "match_all": {}
+                    },
+                    {
+                      "range": {
+                        "@timestamp": {
+                          "gte": gte,
+                          "lte": lte,
+                        }
+                      }
+                    }
+                ],
+              "filter": [],
+              "should": [],
+              "must_not": []
+            }
+        }
+    })
+
+def _get_session_graph_data(db,sid, size,gte,lte):
+    if(sid == " "):
+        match = {"match_all":{}}
+    else:
+        match = {"match": {"session-id": sid }}
+    return  db.search(index='heartbeats-index', filter_path=['aggregations.2.buckets'], body={
+        "size": 0,
+        "_source": {
+            "excludes": []
+        },
+        "aggs": {
+            "2": {
+              "date_histogram": {
+                "field": "@timestamp",
+                "interval": "5s",
+                "time_zone": "America/New_York",
+                "min_doc_count": 1
+              },
+              "aggs": {
+                "3": {
+                  "terms": {
+                    "field": "instance-id.keyword",
+                    "size": size,
+                    "order": {
+                      "1": "desc"
+                    }
+                  },
+                  "aggs": {
+                    "1": {
+                      "max": {
+                        "field": "system-cpu-load"
+                      }
+                    },
+                    "5": {
+                      "max": {
+                        "field": "system-mem-load"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        },
+        "stored_fields": [
+            "*"
+        ],
+        "script_fields": {},
+        "docvalue_fields": [
+            "@timestamp"
+        ],
+        "query": {
+            "bool": {
+                "must": [
+                    match,
+                    {
+                      "range": {
+                        "@timestamp": {
+                          "gte": gte,
+                          "lte": lte,
+                        }
+                      }
+                    }
+                ],
+              "filter": [],
+              "should": [],
+              "must_not": []
+            }
+        }
+    })
+def _get_session_data(db, sid,size,gte,lte):
+    if(sid == " "):
+        match = {"match_all":{}}
+    else:
+        match = {"match": {"session-id": sid }}
+    return  db.search(index='current-heartbeats-index', filter_path=['hits.hits._source'], body={
+        "_source":["instance-id", "@timestamp", "system-cpu-load","system-mem-load","status"],
+        "size":size,
+        "query": {
+            "bool":{
+                "must":[
+                    match,
+                    {
+                        "range":{
+                          "@timestamp": {
+                            "gte": gte,
+                            "lte": lte
+                           }
+                        }
+                    }
+                ]
+            }
+        },
+        "sort" : [{ "@timestamp" : {"order" : "desc"}}]
+    })
 
 
 def _get_VM_numOfTask_perState(db,vm, state):
@@ -134,30 +338,40 @@ def _get_VM_numOfTask_perState(db,vm, state):
         "bool": {
           "must":[
             {
-              "match_phrase": {
-              "host-id": vm
-              }
+              "match_phrase": {"host-id": vm}
             },
             {
-              "match" :{
-              "state" : state
-              }
+              "match" :{"state" : state}
             }
           ]
         }
-      }})
+      }
+    })
 
-def _get_taskInfo_forVM(db,vm):
+def _get_taskInfo_forVM(db,vm, size,gte,lte):
     if(vm == " "):
-        return db.search(index='task-index', filter_path=['hits.hits._source'], size=15, sort='@timestamp:desc')
+        match = {"match_all":{}}
     else:
-        return db.search(index='task-index',filter_path=['hits.hits._source'],sort='@timestamp:desc', body={
-            "query": {
-                "match_phrase": {
-                    "host-id": vm
-                }
+        match = {"match_phrase": {"host-id": vm}}
+    return  db.search(index='task-index', filter_path=['hits.hits._source'], body={
+        "size":size,
+        "query": {
+            "bool":{
+                "must":[
+                    match,
+                    {
+                        "range":{
+                          "@timestamp": {
+                            "gte": gte,
+                            "lte": lte
+                           }
+                        }
+                    }
+                ]
             }
-        })
+        },
+        "sort" : [{ "@timestamp" : {"order" : "desc"}}]
+    })
 
 #Triggers when the socketio succesfully connects to a client
 @socketio.on("connect")

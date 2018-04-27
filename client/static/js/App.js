@@ -4,6 +4,8 @@ import '../css/App.css';
 import SysViewTable from './components/SysViewTable';
 import SessionViewTable from './components/SessionViewTable';
 import InstanceViewTable from './components/InstanceViewTable';
+import SettingsMenu from './components/settingsMenu';
+
 import {
  Route,
  withRouter,
@@ -33,6 +35,7 @@ ReactDOM.render(
             <li><NavLink exact to="/">System View</NavLink></li>
             <li><NavLink to="/session">Session View</NavLink></li>
             <li><NavLink to="/instance">Instance View</NavLink></li>
+            <SettingsMenu/>
           </ul>
         <Route exact path='/' component={SysViewTable}/>
         {/*At some point later I need to figure out a btter way to do the path w/o using arrays*/}

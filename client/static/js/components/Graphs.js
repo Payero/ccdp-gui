@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {Line} from 'react-chartjs-2';
-//import "../../css/Graphs.css"
-import {randomColorGraph} from './Utils';
+import "../../css/Graphs.css"
 
 class Graphs extends Component {
   constructor(props){
@@ -9,37 +8,45 @@ class Graphs extends Component {
     this.state={
       data1:{},
       data2:{},
-      options1:{},
-      options2:{}
+      options1:this.getOptions("CPU Load", "Time", "CPU (%)"),
+      options2: this.getOptions("Memory", "Time", "Memory (MB)")
     }
   }
-  componentWillMount(){
-    this.processIncomingData();
-  }
-  componentDidUpdate(prevProps,prevState)
-  {
-    if(prevProps.data !== this.props.data)
+  componentDidUpdate(prevProps,prevState){
+    if(Object.keys(this.props.data).length <=0)
     {
-      this.processIncomingData();
+      return
     }
+    if(this.state.data1.datasets.length == 0)
+    {
+        this.processIncomingData();
+    }
+    else {
+      var thisLength= this.props.data["Labels"].length -1;
+      var prevLength = prevProps.data["Labels"].length-1;
+      if((Object.keys(this.props.selectedData).length !== Object.keys(prevProps.selectedData).length)||
+          (this.props.data["Labels"][thisLength]!== prevProps.data["Labels"][prevLength]))
+      {
+        this.processIncomingData();
+      }
 
+    }
   }
   processIncomingData(){
     var newData = this.props.data;
+    var graphSelected= this.props.selectedData;
+    var length = this.props.length;
     var Labels = newData.Labels;
+    //delete newData["Labels"]
     var DataSets1= [];
     var DataSets2= [];
-    var option1 = this.getOptions("CPU Load", "Time", "CPU (%)");
-    var option2 = this.getOptions("Memory", "Time", "Memory (MB)");
     var r =63;
     var g = 63;
     var b = 255;
-    for(var keys in newData)
+    if(Object.keys(graphSelected).length >0)
     {
-      if(keys == "Labels"){
-        /*Do not do anything*/
-      }
-      else {
+      for(var keys in graphSelected)
+      {
         DataSets1.push({
           label: keys,
           data:newData[keys]["cpu"],
@@ -62,7 +69,34 @@ class Graphs extends Component {
         g = Math.abs((g + 600)%255);
         b = Math.abs((b + 744)%255);
       }
-
+    }
+    else if(Object.keys(newData).length >0) {
+      var key = ""
+      if(newData.hasOwnProperty("DEFAULT"))
+      {
+        key = "DEFAULT"
+      }
+      else {
+        key=Object.keys(newData)[Object.keys(newData).length-2];
+      }
+      DataSets1.push({
+        label: key,
+        data:newData[key]["cpu"],
+        fill: false,
+        lineTension:0.1,
+        borderWidth: 2,
+        borderColor :'rgba(' + r + ','+  g+',' + b+ ', 1.0)',
+        backgroundColor:'rgba(' + r + ','+  g+',' + b+ ', 0.1)'
+      });
+      DataSets2.push({
+        label: key,
+        data:newData[key]["mem"],
+        fill: false,
+        lineTension:0.1,
+        borderWidth: 2,
+        borderColor :'rgba(' + r + ','+  g+',' + b+ ', 1.0)',
+        backgroundColor:'rgba(' + r + ','+  g+',' + b+ ', 0.1)'
+      });
     }
     var data1 = {
       labels:Labels,
@@ -71,15 +105,14 @@ class Graphs extends Component {
     var data2 = {
       labels:Labels,
       datasets:DataSets2,
-
     };
+    if(length>0){
+      this.setState({
+        data1:data1,
+        data2:data2
+      });
+    }
 
-    this.setState({
-      data1:data1,
-      data2:data2,
-      options1:option1,
-      options2:option2
-    });
   }
 
   getOptions(title, xTitle, yTitle)
@@ -88,11 +121,13 @@ class Graphs extends Component {
       legend:{
         labels:{
           boxWidth: 3,
-          fontColor:'black'
+          fontColor:'black',
+          fontSize: 10,
         }
       },
-      responsive: true,
       maintainAspectRatio: false,
+      animation:false,
+      responsive:true,
       elements:{
         point: {
           radius: 0.5,
@@ -102,8 +137,10 @@ class Graphs extends Component {
       },
       title: {
        display: true,
-       text: title
-     },
+       text: title,
+       fontColor:'black',
+       fontSize: 15
+      },
       scales: {
         xAxes: [
           {
@@ -132,14 +169,13 @@ class Graphs extends Component {
         ],
       }
     }
-
     return options;
   }
 
   render(){
     const {data1,data2,options1,options2} = this.state;
     return(
-      <div >
+      <div className="graph-container">
         <div className="Graphs">
           <Line data={data1} options={options1}  height={475}/>
         </div>

@@ -18,3 +18,20 @@
   align-items: center;
   justify-content: center;
 }
+.ReactTable .rt-thead {
+  overflow-y: auto;
+}
+
+.JSON-display{
+  text-align: left;
+  display: grid;
+  grid: 50%/ 660px 660px;
+  grid-gap: 10px;
+  padding-top: 10px;
+}
+
+.JSON-file{
+  height: 350px;
+  border: 1px solid gray;
+  overflow-y: scroll;
+}

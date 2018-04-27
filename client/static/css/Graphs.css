@@ -1,5 +1,12 @@
 .Graphs{
-  float: left;
-  width: 500px;
-  display: block;
+  background: white;
+  border: 1px solid #e2e2e2;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+}
+.graph-container{
+  display: grid;
+  grid: 400px/ 660px 660px;
+  grid-gap: 10px;
+  padding-top: 10px;
 }

@@ -17,3 +17,7 @@
   align-items: center;
   justify-content: center;
 }
+
+.ReactTable .rt-thead {
+  overflow-y: auto;
+}
