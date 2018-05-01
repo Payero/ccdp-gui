@@ -1,6 +1,6 @@
 
 body {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
   font-weight: 300;
   font-size: 14px;
   background-color:  #eff5f5;
@@ -29,4 +29,11 @@ ul.NavigationBar li a {
 
 .active {
   background-color: #405B7D;
+}
+
+
+
+.ReactTable .rt-noData {
+
+  z-index: auto !important;
 }

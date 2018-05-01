@@ -1,4 +1,15 @@
+export function toggleCheckboxChange(component, label, dataSetName){
+  const newSelected = Object.assign({}, component.state.selectedCheckboxes);
+   newSelected[dataSetName][label] = !component.state.selectedCheckboxes[dataSetName][label];
+   if(!newSelected[dataSetName][label])
+   {
+     delete newSelected[dataSetName][label]
+   }
+   component.setState({
+    selectedCheckboxes: newSelected,
+   });
 
+}
 export function toggleRow(component, key){
   const newSelected = Object.assign({}, component.state.selected);
    newSelected[key] = !component.state.selected[key];

@@ -4,14 +4,18 @@ ReactModal.setAppElement('#root');
 import Settings from './Settings';
 import "../../css/SettingsStyle.css";
 const customStyles = {
-  content : {
-    top                   : '50%',
-    left                  : '50%',
-    right                 : 'auto',
-    bottom                : 'auto',
-    marginRight           : '-50%',
-    transform             : 'translate(-50%, -50%)'
-  }
+   content : {
+     top                   : '50%',
+     left                  : '50%',
+     right                 : 'auto',
+     bottom                : 'auto',
+     transform             : 'translate(-50%, -50%)',
+     borderRadius          : '10px',
+     padding               : '20px',
+     background            : '#31455d',
+     boxShadow            : "10px 10px 5px rgba(128, 128, 128, 0.37)"
+   }
+
 };
 class SettingsMenu extends PureComponent {
 

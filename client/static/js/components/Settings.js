@@ -1,65 +1,97 @@
 import React, { Component } from 'react';
-import Checkbox from './Checkbox';
+import {toggleCheckboxChange} from './Utils';
 import "../../css/SettingsStyle.css";
+
 const DataRange = ["Last Hour", "Last Day", "Last Week", "Last Month", "Last 6 Months"];
-
 const SystemView = ["Session Id", "VMs", "Tasks", "Avg. CPU (%)", "Avg. Mem (MB)"];
-
-const SessionView = ["Instance Id", "Task Running", "Task Completed", "Task Failed","Avg. CPU (%)", "Avg. Mem (MB)" ];
-
+const SessionView = ["Instance Id", "Task Running", "Task Completed", "Task Failed","Avg. CPU (%)", "Avg. Mem (MB)" , "Last assigment"];
 const InstanceView = ["Task Id", "State", "Started", "Completed", "Avg. CPU (%)", "Avg. Mem (MB)"];
+const SystemGraph = ["CPU Load", "Memory"];
+const SessionGraph = ["CPU Load", "Memory"];
 
 class Settings extends Component {
-
-  componentWillMount = () => {
-    this.selectedCheckboxes = new Set();
-  }
-
-  toggleCheckbox = label => {
-    if (this.selectedCheckboxes.has(label)) {
-      this.selectedCheckboxes.delete(label);
-    } else {
-      this.selectedCheckboxes.add(label);
+ constructor(){
+    super();
+    this.state = {
+      selectedCheckboxes : {
+        'tableDataRange': '',
+        'tableSystemView': {},
+        'tableSessionView': {},
+        'tableInstanceView': {},
+        'graphDataRange': '',
+        'graphSystem': {},
+        'graphSession': {},
+        'default' : {}
+      }
     }
   }
 
   handleFormSubmit = formSubmitEvent => {
     formSubmitEvent.preventDefault();
-    for (const checkbox of this.selectedCheckboxes) {
-      console.log(checkbox, 'is selected.');
-    }
-    this.props.onSelectedData(this.selectedCheckboxes);
+    this.props.onSelectedData(this.state.selectedCheckboxes);
   }
-
-  createCheckbox = label => (
+  handleRadioOptionChange(label, dataSetName){
+    const newSelected = Object.assign({}, this.state.selectedCheckboxes);
+    newSelected[dataSetName] = label;
+    this.setState({
+     selectedCheckboxes: newSelected,
+    });
+  }
+  createCheckbox = (label, dataSetName) => (
     <tr key={label.id}>
       <td>
-        <Checkbox
-        label={label}
-        handleCheckboxChange={this.toggleCheckbox}
-        key={label}
-        />
+        <label>
+          <input
+            type="checkbox"
+            value={label}
+            checked={this.state.selectedCheckboxes[dataSetName][label] === true}
+            onChange={() => toggleCheckboxChange(this, label, dataSetName)}
+          />
+          {label}
+        </label>
       </td>
     </tr>
   )
-
-  createCheckboxes = (items) => (
-    items.map((item, i) => {
+  createCheckboxes = (items, dataSetName) => (
+    items.map((label, i) => {
       return(
         <tr key={i}>
           <td>
-            <Checkbox
-            label={item}
-            handleCheckboxChange={this.toggleCheckbox}
-            key={item}
-            />
+            <label>
+              <input
+                type="checkbox"
+                value={label}
+                checked={this.state.selectedCheckboxes[dataSetName][label] === true}
+                onChange={() => toggleCheckboxChange(this, label, dataSetName)}
+              />
+              {label}
+            </label>
           </td>
         </tr>
       );
 
     })
   )
+  createRadioboxes =(items, dataSetName) => (
+    items.map((label, i) => {
+      return(
+        <tr key={i}>
+          <td>
+            <label>
+              <input
+                type="radio"
+                value={label}
+                checked={this.state.selectedCheckboxes[dataSetName] === label}
+                onChange={() => this.handleRadioOptionChange( label, dataSetName)}
+              />
+              {label}
+            </label>
+          </td>
+        </tr>
+      );
 
+    })
+  )
   render() {
     return (
       <div className="SettingsStyle">
@@ -79,28 +111,28 @@ class Settings extends Component {
                 <td>
                   <table id="inner-table">
                     <tbody>
-                      {this.createCheckboxes(DataRange)}
+                      {this.createRadioboxes(DataRange, "tableDataRange")}
                     </tbody>
                   </table>
                 </td>
                 <td>
                   <table id="inner-table">
                     <tbody>
-                      {this.createCheckboxes(SystemView)}
+                      {this.createCheckboxes(SystemView, "tableSystemView")}
                     </tbody>
                   </table>
                 </td>
                 <td>
                   <table id="inner-table">
                     <tbody>
-                      {this.createCheckboxes(SessionView)}
+                      {this.createCheckboxes(SessionView, "tableSessionView")}
                     </tbody>
                   </table>
                 </td>
                 <td>
                   <table id="inner-table">
                     <tbody>
-                      {this.createCheckboxes(InstanceView)}
+                      {this.createCheckboxes(InstanceView, "tableInstanceView")}
                     </tbody>
                   </table>
                 </td>
@@ -113,7 +145,7 @@ class Settings extends Component {
               <thead>
                 <tr>
                   <th> Data Range </th>
-                  <th>System Graph </th>
+                  <th>System Graphs </th>
                   <th> Session Graphs </th>
                 </tr>
               </thead>
@@ -122,21 +154,21 @@ class Settings extends Component {
                 <td>
                   <table id="inner-table">
                     <tbody>
-                      {this.createCheckboxes(DataRange)}
+                      {this.createRadioboxes(DataRange, "graphDataRange")}
                     </tbody>
                   </table>
                 </td>
                 <td>
                   <table id="inner-table">
                     <tbody>
-                      {this.createCheckboxes(SystemView)}
+                      {this.createCheckboxes(SystemGraph, "graphSystem")}
                     </tbody>
                   </table>
                 </td>
                 <td>
                   <table id="inner-table">
                     <tbody>
-                      {this.createCheckboxes(SessionView)}
+                      {this.createCheckboxes(SessionGraph, "graphSession")}
                     </tbody>
                   </table>
                 </td>
@@ -145,7 +177,7 @@ class Settings extends Component {
             </table>
           </div>
           <div className="bottomSectionButtons">
-            {this.createCheckbox("Set As Default")}
+            {this.createCheckbox("Set As Default", "default")}
             <button  className="SaveButton" type="submit">Save</button>
           </div>
         </form>

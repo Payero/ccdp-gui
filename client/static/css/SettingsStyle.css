@@ -12,11 +12,30 @@
   font-size: 24px;
   cursor: pointer;
 }
+
+.InitialBorder h2 {
+  background: #31455d;
+  color: white;
+  font-family: inherit;
+
+}
+
+.SettingsStyle h3 {
+  color: #333333;
+  font-family: inherit;
+}
+.SecondBorder{
+  background: white !important;
+  overflow: auto;
+  padding: 20px;
+  border-radius: 10px;
+
+
+}
 .bottomSectionTable{
   width: 75%;
   float: left;
   padding: 0;
-
 }
 
 .bottomSectionButtons{
@@ -24,11 +43,13 @@
   float: left;
   padding-top: 80px;
   text-align: -webkit-right;
+  text-align: -moz-right;
 }
 .Cancel {
   width: 25%;
   float:right;
   text-align: -webkit-right;
+  text-align: -moz-right;
 }
 
 .CancelButton{
@@ -62,8 +83,25 @@
 
 #outer-Table {
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
+  border-spacing: 0;
+  -moz-border-radius:6px;
+  -webkit-border-radius:6px;
+  border-radius:6px
+}
 
+#outer-Table th:first-child {
+    border-top-left-radius: 6px;
+}
+#outer-Table th:last-child {
+    border-top-right-radius: 6px;
+}
+
+#outer-Table tr:first-child td:first-child{
+  border-bottom-left-radius: 6px;
+}
+
+#outer-Table tr:first-child td:last-child{
+  border-bottom-right-radius: 6px;
 }
 
 #outer-Table td, #outer-Table th, #outer-Table tr{
@@ -75,8 +113,8 @@
     padding-top: 12px;
     padding-bottom: 12px;
     text-align: center;
-    background-color: #76a1e0;
-    color: white;
+    background-color: #405B7D;
+    color:  white;
 }
 #outer-Table  td{
   vertical-align: baseline;
@@ -86,8 +124,15 @@
 
 #inner-table tbody {
   display: block;
-  height: 110px;
+  height: 105px;
+  border-spacing: 0;
   overflow-y: auto;
+
+}
+#inner-table td {
+  width: 130px;
+  border-bottom-right-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
 }
 #inner-table tr:nth-child(even){background-color: #f2f2f2;}
 
