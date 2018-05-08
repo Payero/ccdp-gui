@@ -1,0 +1,40 @@
+{
+  "tableDataRange": "Last Hour",
+  "tableSystemView": {
+    "Session ID":  true ,
+    "Number of VMs": true,
+    "Number of Tasks": true,
+    "Avg. CPU (%)": true,
+    "Avg. Mem (MB)": true
+    },
+  "tableSessionView": {
+    "Instance ID": true,
+    "VM Status": true,
+    "Task Running":  true,
+    "Task Completed":true,
+    "Task Failed":true,
+    "Avg. CPU (%)": true,
+    "Avg. Mem (MB)":true,
+    "Last assigment":true
+  },
+  "tableInstanceView": {
+    "Task ID":  true,
+    "State": true,
+    "Started": true,
+    "Completed": true,
+    "Avg. CPU (%)": true,
+    "Avg. Mem (MB)": true
+  },
+  "graphDataRange": "Last Hour",
+  "graphSystem": {
+    "CPU Load": true,
+    "Memory" :true
+  },
+  "graphSession":{
+    "CPU Load": true,
+    "Memory" :true
+  },
+  "default":{
+
+  }
+}

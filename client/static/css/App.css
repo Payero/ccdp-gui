@@ -30,9 +30,6 @@ ul.NavigationBar li a {
 .active {
   background-color: #405B7D;
 }
-
-
-
 .ReactTable .rt-noData {
 
   z-index: auto !important;

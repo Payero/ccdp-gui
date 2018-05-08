@@ -3,17 +3,24 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import "../../css/InstanceViewTable.css";
 import {getTaskinVM} from './REST_helpers'
+import {withRouter} from "react-router-dom";
 import {makeGraph} from './Utils';
-import {toggleSelectAll, toggleRow} from './Utils';
+import {
+  dateRanges,
+  InitializedTableColumns,
+  updateTableColumns
+} from './Utils';
 import ReactJson from 'react-json-view';
 class InstanceViewTable extends Component {
-  constructor(){
-    super();
+  constructor(props){
+    super(props);
     this.state ={
       data : [],
       selected:{},
       selectAll:0,
-      loading : true
+      loading : true,
+      columns:InitializedTableColumns(this, props.tableInstanceView, '','task-id','instance'),
+      timeRangeForTable:dateRanges[props.tableDataRange],
     };
   }
 componentDidMount (){
@@ -23,10 +30,19 @@ componentDidMount (){
 componentWillUnmount() {
  clearInterval(this.interval3);
 }
-componentDidUpdate(prevProps){
-  if(this.props.match.params.instance !== prevProps.match.params.instance){
+componentDidUpdate(prevProps,prevState){
+  if(this.state.timeRangeForTable != prevState.timeRangeForTable){
     getTaskinVM(this);
   }
+}
+
+
+componentWillReceiveProps(nextProps){
+  updateTableColumns(this, nextProps.tableInstanceView, '','task-id','instance')
+  this.setState({
+    timeRangeForTable:dateRanges[nextProps.tableDataRange],
+    timeRangeForGraph:dateRanges[nextProps.graphDataRange],
+  })
 }
 displayTaskFile(){
 
@@ -51,7 +67,7 @@ displayTaskFile(){
   )
 }
   render() {
-    const {data} = this.state;
+    const {data,columns} = this.state;
     return (
       <div  className="Instance-table">
         <header className="Instance-header">
@@ -65,65 +81,8 @@ displayTaskFile(){
           }
         ]}
           data= {data}
+          columns={columns}
           pageSizeOptions={[10, 20, 25, 50, 100]}
-          columns={[
-            {
-  						id: "checkbox",
-  						accessor: "",
-  						Cell: ({ original }) => {
-  							return (
-  								<input
-  									type="checkbox"
-  									className="checkbox"
-  									checked={this.state.selected[original["task-id"]] === true}
-  									onChange={() => toggleRow(this, original["task-id"])}
-  								/>
-  							);
-  						},
-  						Header: x => {
-  							return (
-  								<input
-  									type="checkbox"
-  									className="checkbox"
-  									checked={this.state.selectAll === 1}
-  									ref={input => {
-  										if (input) {
-  											input.indeterminate = this.state.selectAll === 2;
-  										}
-  									}}
-  									onChange={() => toggleSelectAll(this, "task-id")}
-  								/>
-  							);
-  						},
-  						sortable: false,
-  						width: 40,
-              resizable: false
-  					},
-            {
-              Header: "Task ID",
-              accessor:"task-id"
-            },
-            {
-              Header:"State",
-              accessor:"state"
-            },
-            {
-              Header:"Started",
-              accessor:"started"
-            },
-            {
-              Header:"Completed",
-              accessor:"completed"
-            },
-            {
-              Header:"Avg CPU (%)",
-              accessor:"cpu"
-            },
-            {
-              Header:"Avg Mem (MB)",
-              accessor:"mem"
-            }
-          ]}
           minRows={10}
           defaultPageSize={10}
           className="-striped -highlight"
@@ -147,4 +106,4 @@ displayTaskFile(){
   }
 }
 
-export default InstanceViewTable;
+export default withRouter(InstanceViewTable);

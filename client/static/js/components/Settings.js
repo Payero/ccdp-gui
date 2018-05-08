@@ -1,31 +1,38 @@
 import React, { Component } from 'react';
 import {toggleCheckboxChange} from './Utils';
 import "../../css/SettingsStyle.css";
-
-const DataRange = ["Last Hour", "Last Day", "Last Week", "Last Month", "Last 6 Months"];
-const SystemView = ["Session Id", "VMs", "Tasks", "Avg. CPU (%)", "Avg. Mem (MB)"];
-const SessionView = ["Instance Id", "Task Running", "Task Completed", "Task Failed","Avg. CPU (%)", "Avg. Mem (MB)" , "Last assigment"];
-const InstanceView = ["Task Id", "State", "Started", "Completed", "Avg. CPU (%)", "Avg. Mem (MB)"];
-const SystemGraph = ["CPU Load", "Memory"];
-const SessionGraph = ["CPU Load", "Memory"];
+import {
+  DataRange,
+  SystemView,
+  SessionView,
+  InstanceView,
+  SystemGraph,
+  SessionGraph
+}from './Utils';
 
 class Settings extends Component {
- constructor(){
-    super();
+ constructor(props){
+    super(props);
     this.state = {
       selectedCheckboxes : {
-        'tableDataRange': '',
-        'tableSystemView': {},
-        'tableSessionView': {},
-        'tableInstanceView': {},
-        'graphDataRange': '',
-        'graphSystem': {},
-        'graphSession': {},
-        'default' : {}
+        'tableDataRange': props.settings['tableDataRange'],
+        'tableSystemView': props.settings['tableSystemView'],
+        'tableSessionView': props.settings['tableSessionView'],
+        'tableInstanceView': props.settings['tableInstanceView'],
+        'graphDataRange': props.settings['graphDataRange'],
+        'graphSystem': props.settings['graphSystem'],
+        'graphSession': props.settings['graphSession'],
+        'default' : props.settings['default']
       }
     }
   }
 
+  componentWillReceiveProps(nextProps){
+    this.setState({
+      data: nextProps.settings
+    })
+
+  }
   handleFormSubmit = formSubmitEvent => {
     formSubmitEvent.preventDefault();
     this.props.onSelectedData(this.state.selectedCheckboxes);
@@ -61,7 +68,7 @@ class Settings extends Component {
               <input
                 type="checkbox"
                 value={label}
-                checked={this.state.selectedCheckboxes[dataSetName][label] === true}
+                checked={this.state.selectedCheckboxes[dataSetName][label]=== true}
                 onChange={() => toggleCheckboxChange(this, label, dataSetName)}
               />
               {label}
@@ -176,8 +183,10 @@ class Settings extends Component {
               </tbody>
             </table>
           </div>
-          <div className="bottomSectionButtons">
+          <div className="defaultCheckbox">
             {this.createCheckbox("Set As Default", "default")}
+          </div>
+          <div className="Save">
             <button  className="SaveButton" type="submit">Save</button>
           </div>
         </form>

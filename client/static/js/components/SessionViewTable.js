@@ -5,7 +5,12 @@ import "../../css/SessionViewTable.css";
 import {getSessionData, get_number_task_perState,getSessionGraphData} from './REST_helpers'
 import {withRouter} from "react-router-dom";
 import Graphs from './Graphs';
-import {toggleSelectAll, toggleRow} from './Utils';
+import {
+  dateRanges,
+  graphSessionData,
+  InitializedTableColumns,
+  updateTableColumns
+} from './Utils';
 class SessionViewTable extends Component {
   constructor(props){
     super(props);
@@ -14,7 +19,10 @@ class SessionViewTable extends Component {
       graphData:{},
       selected:{},
       selectAll:0,
-      loading : true
+      loading : true,
+      columns:InitializedTableColumns(this, props.tableSessionView, '/instance','instance-id','session'),
+      timeRangeForTable:dateRanges[props.tableDataRange],
+      timeRangeForGraph:dateRanges[props.graphDataRange],
     };
   }
 
@@ -24,22 +32,31 @@ componentDidMount (){
   this.interval2= setInterval(()=>{
     getSessionData(this);
     getSessionGraphData(this);
-    get_number_task_perState(this);
-  },8000);
+  },7000);
 
 }
 componentWillUnmount() {
   clearInterval(this.interval2);
 }
-componentDidUpdate(prevProps,prevState)
-{
-  if( prevState.data.length <=0)
-  {
-    get_number_task_perState(this);
+
+componentDidUpdate(prevProps,prevState){
+  if(this.state.timeRangeForTable != prevState.timeRangeForTable){
+    getSessionData(this);
+  }
+  if(this.state.timeRangeForGraph != prevState.timeRangeForGraph){
+    getSessionGraphData(this);
   }
 }
+componentWillReceiveProps(nextProps){
+  updateTableColumns(this, nextProps.tableSessionView, '/instance','instance-id','session')
+  this.setState({
+    timeRangeForTable:dateRanges[nextProps.tableDataRange],
+    timeRangeForGraph:dateRanges[nextProps.graphDataRange],
+  })
+}
+
   render() {
-    const {data, graphData, loading} = this.state;
+    const {data, graphData, loading, columns} = this.state;
     return (
       <div  className="Session-table">
         <header className="Session-header">
@@ -48,92 +65,9 @@ componentDidUpdate(prevProps,prevState)
         <ReactTable
           defaultSorteDesc={true}
           data= {data}
+          columns={columns}
           loading={loading}
           pageSizeOptions={[10, 20, 25, 50, 100]}
-          columns={[
-            {
-              id: "checkbox",
-              accessor: "",
-              Cell: ({ original }) => {
-                return (
-                  <input
-                    type="checkbox"
-                    className="checkbox"
-                    checked={this.state.selected[original["instance-id"]] === true}
-                    onChange={() => toggleRow(this, original["instance-id"])}
-                  />
-                );
-              },
-              Header: x => {
-                return (
-                  <input
-                    type="checkbox"
-                    className="checkbox"
-                    checked={this.state.selectAll === 1}
-                    ref={input => {
-                      if (input) {
-                        input.indeterminate = this.state.selectAll === 2;
-                      }
-                    }}
-                    onChange={() => toggleSelectAll(this, "instance-id")}
-                  />
-                );
-              },
-              sortable: false,
-              width: 40,
-              resizable: false
-            },
-            {
-              Header: "Instance ID",
-              accessor:"instance-id",
-              getProps:(state, rowInfo, column, instance) => ({
-                onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"])
-              })
-            },
-            {
-              Header:"VM Status",
-              accessor:"status",
-              getProps:(state, rowInfo, column, instance) => ({
-                onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"])
-              })
-            },
-            {
-              Header:"Task Running",
-              accessor:"Task-RUNNING",
-              getProps:(state, rowInfo, column, instance) => ({
-                onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"])
-              })
-            },
-            {
-              Header:"Task Completed",
-              accessor:"Task-SUCCESSFUL",
-              getProps:(state, rowInfo, column, instance) => ({
-                onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"])
-              })
-            },
-            {
-              Header:"Task Failed",
-              accessor:"Task-FAILED",
-              getProps:(state, rowInfo, column, instance) => ({
-                onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"])
-              })
-            },
-            {
-              Header:"Avg CPU (%)",
-              accessor:"AvgCPU",
-              getProps:(state, rowInfo, column, instance) => ({
-                onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"])
-              })
-            },
-            {
-              Header:"Avg Mem (MB)",
-              accessor:"AvgMem",
-              getProps:(state, rowInfo, column, instance) => ({
-                onClick: ()=> this.props.history.push('/instance'+rowInfo["row"]["instance-id"])
-              })
-            }
-
-          ]}
           minRows={10}
           defaultPageSize={10}
           style={{

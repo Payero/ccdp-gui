@@ -1,0 +1,70 @@
+.SignInSection{
+  float: right;
+  padding-top: 10px;
+  padding-right: 20px;
+}
+
+.SignInButton {
+  background-color: #30445d;
+  border: none;
+  color: white;
+  margin: 8px 0;
+  cursor: pointer;
+}
+.formSection{
+  background-color: white;
+  overflow: auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.LoginHeader h3 {
+  background-color: #30445d;
+  color: #FFF;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 20px;
+  display: block;
+  text-align: center;
+  margin: auto;
+}
+.Rows {
+  display: grid;
+  grid: auto/ 20% 80%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin: 15px;
+}
+
+.Rows input[type=text]{
+    width: 100%;
+    padding: 12px 20px;
+    display: inline-block;
+    box-sizing: border-box;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-color: transparent;
+}
+.LeftCol {
+  float: left;
+  display: inline-block;
+  background-color: #405B7D;
+  color: white;
+  padding: 8px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  text-align: center;
+}
+
+.RightCol {
+  float: left;
+}
+
+.LogIn {
+  width: 80%;
+  text-align: -webkit-center;
+  text-align: -moz-center;
+  position: absolute;
+  right: 10%;
+  top: 45%;
+}

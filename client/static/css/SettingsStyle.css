@@ -9,7 +9,6 @@
   border: none;
   color: white;
   padding: 6px 8px;
-  font-size: 24px;
   cursor: pointer;
 }
 
@@ -37,19 +36,65 @@
   float: left;
   padding: 0;
 }
-
-.bottomSectionButtons{
+.defaultCheckbox{
   width: 25%;
-  float: left;
-  padding-top: 80px;
   text-align: -webkit-right;
   text-align: -moz-right;
+  position: absolute;
+  right: 9%;
+  top: 65%;
 }
+.loadsDefault {
+  width: 25%;
+  text-align: -webkit-right;
+  text-align: -moz-right;
+  position: absolute;
+  right: 9%;
+  top: 69%;
+}
+
+.loadsButton{
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 5px;
+  display: block;
+  width: 66%;
+  color: white;
+  background-color: #a7a1a1;
+  border-color: #9e9898;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.Save{
+  width: 25%;
+  text-align: -webkit-right;
+  text-align: -moz-right;
+  position: absolute;
+  right: 9%;
+  top: 76.5%;
+}
+.SaveButton{
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 5px;
+  display: block;
+  width: 66%;
+  color: white;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
 .Cancel {
   width: 25%;
-  float:right;
   text-align: -webkit-right;
   text-align: -moz-right;
+  position: absolute;
+  right: 9%;
+  top: 84%;
 }
 
 .CancelButton{
@@ -58,28 +103,13 @@
   line-height: 1.5;
   border-radius: 5px;
   display: block;
-  width: 80%;
+  width: 66%;
   color: white;
   background-color: #d9534f;
   border-color: #d43f3a;
   cursor: pointer;
   margin-top: 10px;
 }
-
-.SaveButton{
-  padding: 5px 10px;
-  font-size: 12px;
-  line-height: 1.5;
-  border-radius: 5px;
-  display: block;
-  width: 80%;
-  color: white;
-  background-color: #5cb85c;
-  border-color: #4cae4c;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
 
 #outer-Table {
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
@@ -134,6 +164,6 @@
   border-bottom-right-radius: 0px !important;
   border-bottom-left-radius: 0px !important;
 }
-#inner-table tr:nth-child(even){background-color: #f2f2f2;}
+#inner-table tr:nth-child(even){background-color: #add8e6;}
 
 #inner-table tr:hover {background-color: #ddd;}

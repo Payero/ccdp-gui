@@ -3,7 +3,51 @@
 *
 */
 import $ from 'jquery';
+import moment from 'moment-timezone';
 
+export function getApplicationSettings(component, doc_ID){
+  var port   = location.port;
+  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+  var dataSet =[];
+  var request = $.ajax({
+    url: apiURL + 'Settings/Default',
+    type: 'GET',
+    dataType: 'json',
+    data:{
+      id:doc_ID
+    }
+  });
+  request.done( (msg) => {
+    if(msg.found){
+      component.setState({
+        settings:msg["_source"]
+      })
+    }
+  });
+  request.fail(function(jqXHR, textStatus) {
+    NotificationManager.error("Could not get system settings" + textStatus);
+  });
+}
+
+export function saveApplicationNewSetting(jsonData){
+  var port   = location.port;
+  var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+  var dataSet =[];
+  var request = $.ajax({
+    url: apiURL + 'Settings/Update',
+    type: 'POST',
+    contentType: 'application/json',
+    data:jsonData,
+    dataType: 'json'
+  });
+  request.done( (msg) => {
+    console.log(msg);
+  });
+  request.fail(function(jqXHR, textStatus) {
+    NotificationManager.error("Could not save system new settings" + textStatus);
+  });
+
+}
 export function getSystemData(component){
   var port   = location.port;
   var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
@@ -13,9 +57,9 @@ export function getSystemData(component){
     type: 'GET',
     dataType: 'json',
     data:{
-      size: 200,
-      gte:"now-1h",
-      lte:"now"
+      size: component.state.timeRangeForTable["size"],
+      gte:  component.state.timeRangeForTable["gte"],
+      lte:  component.state.timeRangeForTable["lte"]
     }
   });
   request.done( (msg) => {
@@ -46,9 +90,11 @@ export function getSystemGraphData(component){
     type: 'GET',
     dataType: 'json',
     data:{
-      size: 60,
-      gte:"now-1h",
-      lte:"now"
+      time_zone: moment.tz.guess(),
+      size: component.state.timeRangeForGraph["graphSize"],
+      gte:  component.state.timeRangeForGraph["gte"],
+      lte:  component.state.timeRangeForGraph["lte"],
+      interval : component.state.timeRangeForGraph["interval"]
     }
   });
   request.done( (msg) => {
@@ -100,9 +146,9 @@ export function getSessionData(component){
    type: 'GET',
    data:{
      session: component.props.match.params.sesId,
-     size: 100,
-     gte:"now-1h",
-     let:"now"
+     size: component.state.timeRangeForTable["size"],
+     gte:  component.state.timeRangeForTable["gte"],
+     lte:  component.state.timeRangeForTable["lte"]
    },
    dataType: 'json'
  });
@@ -112,8 +158,11 @@ export function getSessionData(component){
       for(var i =0; i<data.length; i++)
       {
         dataSet.push(data[i]["_source"]);
+        var date = new Date(data[i]["_source"]["last-assignment"]);
+        dataSet[i]["last-assignment"]=date.getFullYear()+"/"+date.getMonth()+"/"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds() + ":"+date.getMilliseconds();
         dataSet[i]["AvgCPU"]= Number(data[i]["_source"]["system-cpu-load"] * 100).toFixed(2);
         dataSet[i]["AvgMem"] =  data[i]["_source"]["system-mem-load"];
+        get_number_task_perState(component, data[i]["_source"]["instance-id"], i)
       }
    }
    component.setState({
@@ -134,10 +183,12 @@ export function getSessionGraphData(component){
     url: apiURL + 'SessionViewGraph',
     type: 'GET',
     data:{
+      time_zone: moment.tz.guess(),
       session: component.props.match.params.sesId,
-      size: 60,
-      gte:"now-1h",
-      let:"now"
+      size: component.state.timeRangeForGraph["graphSize"],
+      gte:  component.state.timeRangeForGraph["gte"],
+      lte:  component.state.timeRangeForGraph["lte"],
+      interval : component.state.timeRangeForGraph["interval"]
     },
     dataType: 'json'
   });
@@ -192,37 +243,33 @@ export function getSessionGraphData(component){
 /*function get how many task are running, have been completed, or have failed
   based on a specific VM
 */
-export function get_number_task_perState(component){
+export function get_number_task_perState(component, vmid, index){
   var port   = location.port;
   var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
   var currentData = component.state.data;
-  currentData.forEach((obj, index)=>{
-    var VMid = obj["instance-id"];
-    var request = $.ajax({
-      url: apiURL + 'TaskStatus',
-      type: 'GET',
-      data: {
-        "vmId" : VMid,
-       "state1": "RUNNING",
-       "state2": "SUCCESSFUL",
-       "state3": "FAILED"
-     },
-      dataType: 'json'
-    });
-    request.done( (msg) => {
+  var request = $.ajax({
+    url: apiURL + 'TaskStatus',
+    type: 'GET',
+    data: {
+      "vmId" : vmid,
+     "state1": "RUNNING",
+     "state2": "SUCCESSFUL",
+     "state3": "FAILED"
+   },
+    dataType: 'json'
+  });
+  request.done( (msg) => {
+    if(currentData[index] != null){
       currentData[index]["Task-RUNNING"]= msg[0];
       currentData[index]["Task-SUCCESSFUL"]= msg[1];
       currentData[index]["Task-FAILED"]= msg[2];
       component.setState({ data: currentData})
-    });
-   request.fail(function(jqXHR, textStatus) {
-      NotificationManager.error("Could not get system data" + textStatus);
-    });
+    }
 
   });
-  //$(document).ajaxStop(function () {
-    //component.setState({ data:currentData})
-  //});
+ request.fail(function(jqXHR, textStatus) {
+    NotificationManager.error("Could not get system data" + textStatus);
+  });
 
 }
 
@@ -236,9 +283,9 @@ export function getTaskinVM(component){
    type: 'GET',
    data: {
      "vmId" : component.props.match.params.instance,
-     size: 100,
-     gte:"now-1h",
-     let:"now"
+     size: component.state.timeRangeForTable["size"],
+     gte:  component.state.timeRangeForTable["gte"],
+     lte:  component.state.timeRangeForTable["lte"]
    },
    dataType: 'json'
  });
@@ -250,14 +297,12 @@ export function getTaskinVM(component){
        if(data[i]["_source"].hasOwnProperty("completed"))
        {
          var newDate1 = new Date( data[i]["_source"]["completed"]);
-         var completedDate =newDate1.getFullYear()+"/"+newDate1.getMonth()+"/"+newDate1.getDate()+" "+newDate1.getHours()+":"+newDate1.getMinutes()+":"+newDate1.getSeconds() + ":"+newDate1.getMilliseconds();
-         data[i]["_source"]["completed"] = completedDate;
+        data[i]["_source"]["completed"] =newDate1.getFullYear()+"/"+newDate1.getMonth()+"/"+newDate1.getDate()+" "+newDate1.getHours()+":"+newDate1.getMinutes()+":"+newDate1.getSeconds() + ":"+newDate1.getMilliseconds();
        }
        if(data[i]["_source"].hasOwnProperty("started"))
        {
          var newDate2 = new Date( data[i]["_source"]["started"]);
-         var startedDate =newDate2.getFullYear()+"/"+newDate2.getMonth()+"/"+newDate2.getDate()+" "+newDate2.getHours()+":"+newDate2.getMinutes()+":"+newDate2.getSeconds() + ":"+newDate2.getMilliseconds();
-         data[i]["_source"]["started"] = startedDate;
+         data[i]["_source"]["started"] =newDate2.getFullYear()+"/"+newDate2.getMonth()+"/"+newDate2.getDate()+" "+newDate2.getHours()+":"+newDate2.getMinutes()+":"+newDate2.getSeconds() + ":"+newDate2.getMilliseconds();
        }
        dataSet.push(data[i]["_source"])
      }

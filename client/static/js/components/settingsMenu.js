@@ -15,22 +15,26 @@ const customStyles = {
      background            : '#31455d',
      boxShadow            : "10px 10px 5px rgba(128, 128, 128, 0.37)"
    }
-
 };
 class SettingsMenu extends PureComponent {
 
-  constructor () {
-    super();
+  constructor (props) {
+    super(props);
     this.state = {
       showModal: false,
-      data: {}
+      data: props.currentSettingsData
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+  componentWillReceiveProps(nextProps){
+    this.setState({
+      data: nextProps.currentSettingsData
+    })
 
+  }
   handleOpenModal () {
     this.setState({ showModal: true });
   }
@@ -39,8 +43,8 @@ class SettingsMenu extends PureComponent {
     this.setState({ showModal: false });
   }
   handleSubmit = (data) => {
-    console.log(data)
-    this.setState({ showModal: false, data:data});
+    this.setState({ showModal: false});
+    this.props.passSettingsData(data);
   };
   render () {
     return (
@@ -49,14 +53,17 @@ class SettingsMenu extends PureComponent {
         <ReactModal
            isOpen={this.state.showModal}
            style={customStyles}
-           contentLabel="Minimal Modal Example"
+           contentLabel="Settings Modal"
         >
         <div className="InitialBorder">
           <h2>Configuration</h2>
           <div className="SecondBorder">
-            <Settings onSelectedData={this.handleSubmit}/>
+            <Settings onSelectedData={this.handleSubmit} settings={this.state.data}/>
             <div className="Cancel">
               <button className="CancelButton" onClick={this.handleCloseModal}>Cancel</button>
+            </div>
+            <div className="loadsDefault">
+              <button className="loadsButton" onClick={this.handleCloseModal}>Load Default</button>
             </div>
           </div>
         </div>

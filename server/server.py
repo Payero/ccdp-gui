@@ -60,6 +60,19 @@ def teardown_db(exception):
     #if db is not None:
         #not a way to close Elasticsearch
 
+@app.route("/<version>/Settings/Default", methods=["Get"])
+def getApplicationSettings(version):
+    ID = request.args.get("id")
+    return jsonify(_get_default_settings(g.db, ID))
+
+@app.route("/<version>/Settings/Update", methods=["POST"])
+def saveApplicationNewSetting(version):
+    data = request.json
+    print data
+    #Update_settings = json.loads(data)
+    #print Update_settings
+    return jsonify(_save_updated_Settings(g.db,data))
+
 @app.route("/<version>/SysViewTable", methods=["GET"])
 def getSystemInitialData(version):
     size = request.args.get("size")
@@ -73,7 +86,9 @@ def getSystemData(version):
     size = request.args.get("size")
     gte = request.args.get("gte")
     lte = request.args.get("lte")
-    return jsonify(_get_system_graph_data(g.db, size, gte, lte))
+    time_zone = request.args.get("time_zone")
+    interval =  request.args.get("interval")
+    return jsonify(_get_system_graph_data(g.db, size, gte, lte, time_zone, interval))
 
 
 @app.route("/<version>/SessionViewTable", methods=["GET"])
@@ -110,7 +125,9 @@ def getSessionGraphData(version):
     size = request.args.get("size")
     gte = request.args.get("gte")
     lte = request.args.get("lte")
-    return jsonify(_get_session_graph_data(g.db, sid,size,gte,lte))
+    time_zone = request.args.get("time_zone")
+    interval =  request.args.get("interval")
+    return jsonify(_get_session_graph_data(g.db, sid,size,gte,lte, time_zone,interval))
 
 @app.route("/<version>/TaskStatus", methods=["GET"])
 def getTaskStatus(version):
@@ -155,6 +172,12 @@ def get_db():
         db = g._database = connect_to_database()
     return db
 
+def _get_default_settings(db, ID):
+    return db.get(index='status-app-settings', doc_type='settings', id=ID)
+
+def _save_updated_Settings(db,data):
+    return db.index(index='status-app-settings', doc_type='settings', id='2', body=data)
+
 def _get_system_data(db, size, gte,lte):
     return  db.search(index='current-resources-index', filter_path=['hits.hits._source'], body={
         "size":size,
@@ -168,7 +191,7 @@ def _get_system_data(db, size, gte,lte):
         },
         "sort" : [{ "@timestamp" : {"order" : "desc"}}]
     })
-def _get_system_graph_data(db,size,gte,lte):
+def _get_system_graph_data(db,size,gte,lte, time_zone, interval):
     return  db.search(index='engineresources-index', filter_path=['aggregations.2.buckets'], body={
         "size": 0,
         "_source": {
@@ -178,8 +201,8 @@ def _get_system_graph_data(db,size,gte,lte):
             "2": {
               "date_histogram": {
                 "field": "@timestamp",
-                "interval": "5s",
-                "time_zone": "America/New_York",
+                "interval": interval,
+                "time_zone": time_zone,
                 "min_doc_count": 1
               },
               "aggs": {
@@ -236,7 +259,7 @@ def _get_system_graph_data(db,size,gte,lte):
         }
     })
 
-def _get_session_graph_data(db,sid, size,gte,lte):
+def _get_session_graph_data(db,sid, size,gte,lte,time_zone,interval):
     if(sid == " "):
         match = {"match_all":{}}
     else:
@@ -250,8 +273,8 @@ def _get_session_graph_data(db,sid, size,gte,lte):
             "2": {
               "date_histogram": {
                 "field": "@timestamp",
-                "interval": "5s",
-                "time_zone": "America/New_York",
+                "interval": interval,
+                "time_zone": time_zone,
                 "min_doc_count": 1
               },
               "aggs": {
@@ -311,7 +334,7 @@ def _get_session_data(db, sid,size,gte,lte):
     else:
         match = {"match": {"session-id": sid }}
     return  db.search(index='current-heartbeats-index', filter_path=['hits.hits._source'], body={
-        "_source":["instance-id", "@timestamp", "system-cpu-load","system-mem-load","status"],
+        "_source":["instance-id", "@timestamp", "system-cpu-load","system-mem-load","status","last-assignment"],
         "size":size,
         "query": {
             "bool":{
