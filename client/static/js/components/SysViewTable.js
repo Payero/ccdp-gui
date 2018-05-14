@@ -16,13 +16,13 @@ class SysViewTable extends Component {
     super(props);
     this.state ={
       data : [],
-      graphData:{},
+      lineGraphData:{},
+      pieGraphData:{},
       selected:{},
       selectAll:0,
       loading : true,
       columns:InitializedTableColumns(this,props.tableSystemView, '/session','session-id', "system"),
-      timeRangeForTable:dateRanges[props.tableDataRange],
-      timeRangeForGraph:dateRanges[props.graphDataRange],
+      timeRange:dateRanges[props.timeDataRange],
     };
   }
 
@@ -39,18 +39,15 @@ class SysViewTable extends Component {
     clearInterval(this.interval);
   }
   componentDidUpdate(prevProps,prevState){
-    if(this.state.timeRangeForTable != prevState.timeRangeForTable){
+    if(this.state.timeRange != prevState.timeRange){
       getSystemData(this);
-    }
-    if(this.state.timeRangeForGraph != prevState.timeRangeForGraph){
       getSystemGraphData(this);
     }
   }
   componentWillReceiveProps(nextProps){
     updateTableColumns(this,nextProps.tableSystemView, '/session','session-id',"system")
     this.setState({
-      timeRangeForTable:dateRanges[nextProps.tableDataRange],
-      timeRangeForGraph:dateRanges[nextProps.graphDataRange],
+      timeRange:dateRanges[nextProps.timeDataRange]
     })
   }
 
@@ -76,10 +73,11 @@ class SysViewTable extends Component {
       defaultPageSize={10}
       className="-striped -highlight"
       noDataText={"No data found"}
+      className="-striped -highlight"
       getTrProps={(state, rowInfo, column, instance) => ({
         style: {
           cursor: "pointer",
-          backgroundColor:  rowInfo == null ? "#add8e6"
+          backgroundColor:  rowInfo == null ? null
           : rowInfo["row"]["curAvgCPU"] >75 ? "#ffb3b3"
           : rowInfo["row"]["curAvgCPU"] >=30 ? "#d3f8d3"
           : "#add8e6"
@@ -89,7 +87,13 @@ class SysViewTable extends Component {
         height: "414px" // This will force the table body to overflow and scroll, since there is not enough room
       }}
       />
-      <Graphs data={this.state.graphData} selectedData={this.state.selected} length={this.state.data.length}/>
+      <Graphs
+        data={this.state.lineGraphData}
+        selectedData={this.state.selected}
+        length={this.state.data.length}
+        graphTodisplay={this.props.graphTodisplay}
+        pieData = { this.state.pieGraphData}
+      />
       </div>
     );
   }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import "../../css/SessionViewTable.css";
-import {getSessionData, get_number_task_perState,getSessionGraphData} from './REST_helpers'
+import {getSessionData, getSessionGraphData, abortAllAjax} from './REST_helpers'
 import {withRouter} from "react-router-dom";
 import Graphs from './Graphs';
 import {
@@ -16,43 +16,42 @@ class SessionViewTable extends Component {
     super(props);
     this.state ={
       data : [],
-      graphData:{},
+      lineGraphData:{},
+      pieGraphData:{},
       selected:{},
       selectAll:0,
       loading : true,
       columns:InitializedTableColumns(this, props.tableSessionView, '/instance','instance-id','session'),
-      timeRangeForTable:dateRanges[props.tableDataRange],
-      timeRangeForGraph:dateRanges[props.graphDataRange],
     };
+    this.isComponentMounted = false;
+    this.newDate = false;
   }
 
 componentDidMount (){
-  getSessionData(this);
-  getSessionGraphData(this);
+  this.isComponentMounted = true;
+  getSessionData(this, dateRanges[this.props.timeDataRange]);
+  getSessionGraphData(this,dateRanges[this.props.timeDataRange]);
   this.interval2= setInterval(()=>{
-    getSessionData(this);
-    getSessionGraphData(this);
-  },7000);
+    this.newDate = false;
+    getSessionData(this,dateRanges[this.props.timeDataRange]);
+    getSessionGraphData(this,dateRanges[this.props.timeDataRange]);
+  },4000);
 
 }
 componentWillUnmount() {
+  this.isComponentMounted = false;
   clearInterval(this.interval2);
 }
 
-componentDidUpdate(prevProps,prevState){
-  if(this.state.timeRangeForTable != prevState.timeRangeForTable){
-    getSessionData(this);
+componentDidUpdate(prevProps){
+  if(Object.keys(this.props.tableSessionView).length !== Object.keys(prevProps.tableSessionView).length){
+    updateTableColumns(this, this.props.tableSessionView, '/instance','instance-id','session')
   }
-  if(this.state.timeRangeForGraph != prevState.timeRangeForGraph){
-    getSessionGraphData(this);
+  if(this.props.timeDataRange !== prevProps.timeDataRange){
+    this.newDate = true;
+    getSessionData(this,dateRanges[this.props.timeDataRange]);
+    getSessionGraphData(this,dateRanges[this.props.timeDataRange]);
   }
-}
-componentWillReceiveProps(nextProps){
-  updateTableColumns(this, nextProps.tableSessionView, '/instance','instance-id','session')
-  this.setState({
-    timeRangeForTable:dateRanges[nextProps.tableDataRange],
-    timeRangeForGraph:dateRanges[nextProps.graphDataRange],
-  })
 }
 
   render() {
@@ -74,10 +73,11 @@ componentWillReceiveProps(nextProps){
             height: "414px" // This will force the table body to overflow and scroll, since there is not enough room
           }}
           noDataText={"No data found"}
+          className="-striped -highlight"
           getTrProps={(state, rowInfo, column, instance) => ({
             style: {
               cursor: "pointer",
-              backgroundColor:rowInfo == null ? "#add8e6"
+              backgroundColor:rowInfo == null ? null
                 : rowInfo["row"]["AvgCPU"] >75 ? "#ffb3b3"
                 : rowInfo["row"]["AvgCPU"] >=30 ? "#d3f8d3"
                 : "#add8e6"
@@ -85,7 +85,13 @@ componentWillReceiveProps(nextProps){
             }
           })}
         />
-        <Graphs data={this.state.graphData} selectedData={this.state.selected} length={this.state.data.length}/>
+        <Graphs
+          data={this.state.lineGraphData}
+          selectedData={this.state.selected}
+          length={this.state.data.length}
+          graphTodisplay={this.props.graphTodisplay}
+          pieData = { this.state.pieGraphData}
+        />
       </div>
     );
   }

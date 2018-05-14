@@ -23,11 +23,10 @@ class App extends Component {
     super();
     this.state={
       settings: {
-        tableDataRange: "Last Hour",
+        timeDataRange: "Last Hour",
         tableSystemView: {},
         tableSessionView: {},
         tableInstanceView: {},
-        graphDataRange: "Last Hour",
         graphSystem: {},
         graphSession: {},
         default : {}
@@ -66,22 +65,22 @@ class App extends Component {
         </ul>
         <Route exact path='/' render = {() =>
           <SysViewTable
-            tableDataRange={settings.tableDataRange}
+            timeDataRange={settings.timeDataRange}
             tableSystemView={settings.tableSystemView}
-            graphDataRange={settings.graphDataRange}
+            graphTodisplay={settings.graphSystem}
           />}
         />
         {/*At some point later I need to figure out a btter way to do the path w/o using arrays*/}
         <Route path={['/session:sesId','/session']} render = {() =>
           <SessionViewTable
-            tableDataRange={settings.tableDataRange}
+            timeDataRange={settings.timeDataRange}
             tableSessionView={settings.tableSessionView}
-            graphDataRange={settings.graphDataRange}
+            graphTodisplay={settings.graphSession}
           />}
         />
         <Route path={['/instance:instance', '/instance']} render = {() =>
           <InstanceViewTable
-            tableDataRange={settings.tableDataRange}
+            timeDataRange={settings.timeDataRange}
             tableInstanceView={settings.tableInstanceView}
           />}
         />

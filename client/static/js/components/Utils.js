@@ -4,15 +4,15 @@ export const DataRange = ["Last Hour", "Last Day", "Last Week", "Last Month", "L
 export const SystemView = ["Session ID", "Number of VMs", "Number of Tasks", "Avg. CPU (%)", "Avg. Mem (MB)"];
 export const SessionView = ["Instance ID","VM Status", "Task Running", "Task Completed", "Task Failed","Avg. CPU (%)", "Avg. Mem (MB)" , "Last assigment"];
 export const InstanceView = ["Task ID", "State", "Started", "Completed", "Avg. CPU (%)", "Avg. Mem (MB)"];
-export const SystemGraph = ["CPU Load", "Memory"];
-export const SessionGraph = ["CPU Load", "Memory"];
+export const SystemGraph = ["CPU Load", "Memory Load", "Disk Space", "Memory Space"];
+export const SessionGraph = ["CPU Load", "Memory Load", "Disk Space", "Memory Space"];
 
 export const dateRanges = {
-  'Last Hour':{'gte':'now-1h' , 'lte': 'now', 'size':200, 'graphSize': 60, 'interval': '10s'},
-  'Last Day':{ 'gte':'now-1d' , 'lte': 'now', 'size': 200, 'graphSize': 60, 'interval': '10m'},
-  'Last Week':{'gte':'now-1w' , 'lte': 'now', 'size': 200, 'graphSize': 60, 'interval': '1h'},
-  'Last Month':{'gte':'now-1M' , 'lte': 'now', 'size': 200, 'graphSize': 60,'interval': '12h'},
-  'Last 6 Months':{'gte':'now-6M' , 'lte': 'now', 'size': 200,'graphSize': 60, 'interval': '1d'}
+  'Last Hour':{'gte':'now-1h' , 'lte': 'now', 'size':100, 'graphSize': 60, 'interval': '10s'},
+  'Last Day':{ 'gte':'now-1d' , 'lte': 'now', 'size': 150, 'graphSize': 60, 'interval': '10m'},
+  'Last Week':{'gte':'now-1w' , 'lte': 'now', 'size': 250, 'graphSize': 60, 'interval': '1h'},
+  'Last Month':{'gte':'now-1M' , 'lte': 'now', 'size': 350, 'graphSize': 60,'interval': '12h'},
+  'Last 6 Months':{'gte':'now-6M' , 'lte': 'now', 'size': 450,'graphSize': 60, 'interval': '1d'}
 };
 
 export const tableSystemViewData = {

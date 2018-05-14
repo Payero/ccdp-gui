@@ -99,8 +99,8 @@ def getSessionData(version):
     size = request.args.get("size")
     gte = request.args.get("gte")
     lte = request.args.get("lte")
-    '''
-    Data = _get_session_data(g.db, sid,size,gte,lte)
+    from_results = request.args.get("from")
+    Data = _get_session_data(g.db, sid,size,gte,lte,from_results)
     if("hits" in Data):
         dicData= Data["hits"]["hits"]
         i = 0
@@ -113,9 +113,10 @@ def getSessionData(version):
             Data["hits"]["hits"][i]["_source"]["Task-SUCCESSFUL"]=Succ["hits"]["total"]
             Data["hits"]["hits"][i]["_source"]["Task-FAILED"]=Fail["hits"]["total"]
             i= i +1
-    return jsonify(Data)
-    '''
-    return jsonify(_get_session_data(g.db,sid,size,gte,lte))
+    dataToSend = {"page": from_results, "results":Data, "gte":gte}
+    return jsonify(dataToSend)
+
+    #return jsonify(_get_session_data(g.db,sid,size,gte,lte))
 
 @app.route("/<version>/SessionViewGraph", methods=["GET"])
 def getSessionGraphData(version):
@@ -281,7 +282,7 @@ def _get_session_graph_data(db,sid, size,gte,lte,time_zone,interval):
                 "3": {
                   "terms": {
                     "field": "instance-id.keyword",
-                    "size": size,
+                    "size": 200,
                     "order": {
                       "1": "desc"
                     }
@@ -328,13 +329,14 @@ def _get_session_graph_data(db,sid, size,gte,lte,time_zone,interval):
             }
         }
     })
-def _get_session_data(db, sid,size,gte,lte):
+def _get_session_data(db, sid,size,gte,lte, from_hits ):
     if(sid == " "):
         match = {"match_all":{}}
     else:
         match = {"match": {"session-id": sid }}
-    return  db.search(index='current-heartbeats-index', filter_path=['hits.hits._source'], body={
-        "_source":["instance-id", "@timestamp", "system-cpu-load","system-mem-load","status","last-assignment"],
+    return  db.search(index='current-heartbeats-index', filter_path=['hits'], body={
+        "_source":["instance-id", "@timestamp", "system-cpu-load","system-mem-load","status","last-assignment", "assigned-mem", "assigned-disk", "free-mem","free-disk-space"],
+        "from": from_hits,
         "size":size,
         "query": {
             "bool":{

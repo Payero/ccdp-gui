@@ -20,7 +20,7 @@ class InstanceViewTable extends Component {
       selectAll:0,
       loading : true,
       columns:InitializedTableColumns(this, props.tableInstanceView, '','task-id','instance'),
-      timeRangeForTable:dateRanges[props.tableDataRange],
+      timeRange:dateRanges[props.timeDataRange],
     };
   }
 componentDidMount (){
@@ -31,7 +31,7 @@ componentWillUnmount() {
  clearInterval(this.interval3);
 }
 componentDidUpdate(prevProps,prevState){
-  if(this.state.timeRangeForTable != prevState.timeRangeForTable){
+  if(this.state.timeRange != prevState.timeRange){
     getTaskinVM(this);
   }
 }
@@ -40,8 +40,7 @@ componentDidUpdate(prevProps,prevState){
 componentWillReceiveProps(nextProps){
   updateTableColumns(this, nextProps.tableInstanceView, '','task-id','instance')
   this.setState({
-    timeRangeForTable:dateRanges[nextProps.tableDataRange],
-    timeRangeForGraph:dateRanges[nextProps.graphDataRange],
+    timeRange:dateRanges[nextProps.timeDataRange]
   })
 }
 displayTaskFile(){
@@ -90,7 +89,7 @@ displayTaskFile(){
           getTrProps={(state, rowInfo, column, instance) => ({
             style: {
               cursor: "pointer",
-              backgroundColor:  rowInfo == null ? "#add8e6"
+              backgroundColor:  rowInfo == null ? null
                 : rowInfo["row"]["cpu"] >75 ? "#ffb3b3"
                 : rowInfo["row"]["cpu"] >=30 ? "#d3f8d3"
                 : "#add8e6"

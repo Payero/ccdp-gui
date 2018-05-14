@@ -1,5 +1,5 @@
 {
-  "tableDataRange": "Last Hour",
+  "timeDataRange": "Last Hour",
   "tableSystemView": {
     "Session ID":  true ,
     "Number of VMs": true,
@@ -25,14 +25,17 @@
     "Avg. CPU (%)": true,
     "Avg. Mem (MB)": true
   },
-  "graphDataRange": "Last Hour",
   "graphSystem": {
     "CPU Load": true,
-    "Memory" :true
+    "Memory Load":true,
+    "Disk Space":false,
+    "Memory Space":false
   },
   "graphSession":{
     "CPU Load": true,
-    "Memory" :true
+    "Memory Load":true,
+    "Disk Space":false,
+    "Memory Space":false
   },
   "default":{
 

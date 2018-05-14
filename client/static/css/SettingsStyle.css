@@ -31,26 +31,32 @@
 
 
 }
-.bottomSectionTable{
-  width: 75%;
+.row{
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+.col-md-4{
+  display: block;
+  width: 150px;
   float: left;
   padding: 0;
 }
-.defaultCheckbox{
-  width: 25%;
-  text-align: -webkit-right;
-  text-align: -moz-right;
-  position: absolute;
-  right: 9%;
-  top: 65%;
+.col-md-6{
+  display: block;
+  width: 300px;
+  float: left;
+  padding: 0;
 }
+
 .loadsDefault {
+  display: inline-block;
+  float: left;
   width: 25%;
   text-align: -webkit-right;
   text-align: -moz-right;
-  position: absolute;
+  /*position: absolute;
   right: 9%;
-  top: 69%;
+  top: 69%;*/
 }
 
 .loadsButton{
@@ -59,7 +65,7 @@
   line-height: 1.5;
   border-radius: 5px;
   display: block;
-  width: 66%;
+  width: 100%;
   color: white;
   background-color: #a7a1a1;
   border-color: #9e9898;
@@ -67,12 +73,14 @@
   margin-top: 10px;
 }
 .Save{
+  display: inline-block;
+  float: left;
   width: 25%;
   text-align: -webkit-right;
   text-align: -moz-right;
-  position: absolute;
+  /*position: absolute;
   right: 9%;
-  top: 76.5%;
+  top: 76.5%;*/
 }
 .SaveButton{
   padding: 5px 10px;
@@ -80,7 +88,7 @@
   line-height: 1.5;
   border-radius: 5px;
   display: block;
-  width: 66%;
+  width: 100%;
   color: white;
   background-color: #5cb85c;
   border-color: #4cae4c;
@@ -89,12 +97,14 @@
 }
 
 .Cancel {
+  display: inline-block;
+  float: left;
   width: 25%;
   text-align: -webkit-right;
   text-align: -moz-right;
-  position: absolute;
+  /*position: absolute;
   right: 9%;
-  top: 84%;
+  top: 84%;*/
 }
 
 .CancelButton{
@@ -103,7 +113,7 @@
   line-height: 1.5;
   border-radius: 5px;
   display: block;
-  width: 66%;
+  width: 100%;
   color: white;
   background-color: #d9534f;
   border-color: #d43f3a;
@@ -161,6 +171,7 @@
 }
 #inner-table td {
   width: 130px;
+  border-color: transparent;
   border-bottom-right-radius: 0px !important;
   border-bottom-left-radius: 0px !important;
 }
