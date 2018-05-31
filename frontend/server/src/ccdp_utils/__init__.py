@@ -27,7 +27,7 @@ class Bunch:
 
   """
   def __init__(self, **kwds):
-      self.__dict__.update(kwds)
+    self.__dict__.update(kwds)
 
 MSG_TYPE = Bunch( ASSIGN_SESSION=0,
                   END_SESSION=1,
