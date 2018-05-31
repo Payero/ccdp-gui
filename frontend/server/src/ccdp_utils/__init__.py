@@ -15,6 +15,35 @@ __DEF_CFG_FILE = "${CCDP_GUI}/config/logging.json"
 #
 ###############################################################################
 
+
+class Bunch:
+  """
+  Allows the use of attributes to get its values.  For instance;
+
+    b = Bunch(ONE=1, TWO=2, THREE=3)
+    b.ONE returns 1
+    b.TWO returns 2 and 
+    b.THREE returns 3
+
+  """
+  def __init__(self, **kwds):
+      self.__dict__.update(kwds)
+
+MSG_TYPE = Bunch( ASSIGN_SESSION=0,
+                  END_SESSION=1,
+                  ERROR_MSG=2,
+                  KILL_TASK=3,
+                  PAUSE_THREAD=4,
+                  RESOURCE_UPDATE=5,
+                  RUN_TASK=6,
+                  SHUTDOWN=7,
+                  START_SESSION=8,
+                  START_THREAD=9,
+                  STOP_THREAD=10,
+                  TASK_UPDATE=11,
+                  THREAD_REQUEST=12,
+                  UNDEFINED=13)
+
 MESSAGES = ["ASSIGN_SESSION",
     "END_SESSION",
     "ERROR_MSG",

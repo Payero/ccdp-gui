@@ -139,7 +139,7 @@ def send_start_msg():
     app.logger.debug("Got a message: %s" % msg)
 
     json_msg = json.loads(msg)
-    if json_msg['msg-type'] == 4:
+    if json_msg['msg-type'] == ccdp_utils.MSG_TYPE.TASK_UPDATE:
       app.logger.info("Got a Task Update Message")
       task = json_msg['task']
       if task['task-id'] == user_session['task-id']:
@@ -157,12 +157,16 @@ def send_start_msg():
   amq = connect_to_amq(onMessage, onError)
   amq.send_message(app.config["TO_CCDP_ENG"], get_request(sid, 'START') )
   
+  app.logger.info("User Session: %s" % pformat(user_session) )
+
   if app.config['WAIT_FOR_MSG']:
     is_open = False
     while not is_open:
       try:
         if user_session.has_key('hostname'):
           url = app.config['NIFI_URL'] % user_session['hostname']
+          app.logger.debug("NiFi URL: %s" % url)
+
           code = urllib.urlopen( url ).getcode()
           if code == 200:
             app.logger.info("NiFi is up and running")
@@ -170,10 +174,9 @@ def send_start_msg():
             user_session['open-nifi'] = True
             __SESSIONS[sid] = user_session
         else:
-          app.logger.debug("Waiting for the hostname")
+          app.logger.debug("Waiting for NiFi to open")
           time.sleep(0.5)
       except:
-        app.logger.debug("Is not open, waiting")
         time.sleep(0.5)
 
   else:
