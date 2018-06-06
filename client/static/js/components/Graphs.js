@@ -277,7 +277,7 @@ class Graphs extends Component {
   getOptions(title, xTitle, yTitle){
     var options = {
       legend:{
-      display: true,
+      display: false,
         labels:{
           boxHeight:1,
           boxWidth: 3,
@@ -298,7 +298,8 @@ class Graphs extends Component {
       title: {
        display: true,
        text: title,
-       fontColor:'black', 
+       fontColor:'black',
+       fontSize: 15
       },
       scales: {
         xAxes: [

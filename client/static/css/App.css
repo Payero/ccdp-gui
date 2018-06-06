@@ -35,6 +35,9 @@ ul.NavigationBar li a {
   z-index: auto !important;
 }
 
+.ReactTable .rt-resizer {
+  z-index: auto !important;
+}
 .chart-legend{
   height:50px !important;
   overflow:auto;

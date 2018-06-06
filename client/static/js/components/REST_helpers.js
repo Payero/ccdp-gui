@@ -26,8 +26,15 @@
       });
       request.done( (msg) => {
         if(msg.found){
+          var data= msg["_source"];
+          if(data.hasOwnProperty("username")){
+            delete data["username"]
+          }
+          if(data.hasOwnProperty("Password")){
+            delete data["Password"]
+          }
           component.setState({
-            settings:msg["_source"]
+            settings:data
           })
         }
       });
@@ -54,6 +61,136 @@
         NotificationManager.error("Could not save system new settings" + textStatus);
       });
 
+    }
+    export function signInFunction(component, userData){
+      var port   = location.port;
+      var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+      var dataSet =[];
+      var pieData ={};
+      var request = $.ajax({
+        url: apiURL + 'signIn',
+        type: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        data:userData
+      });
+      request.done( (msg) => {
+        if(msg.hasOwnProperty("validPassword") && msg.validPassword)
+        {
+          component.setState({
+            isInformationValid: true
+          })
+        }
+        else{
+          component.setState({
+            retypedData: true
+          })
+        }
+      });
+      request.fail(function(jqXHR, textStatus) {
+        NotificationManager.error("Could not verify user" + textStatus);
+      });
+    }
+    export function checkUserName(component, user){
+      var port   = location.port;
+      var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+      var dataSet =[];
+      var pieData ={};
+      var request = $.ajax({
+        beforeSend: function(jqXHR) {
+          xhrPool.push(jqXHR);
+        },
+        url: apiURL + 'existUSer',
+        type: 'GET',
+        dataType: 'json',
+        data:{
+          username:user
+
+        }
+      });
+      request.done( (msg) => {
+
+        if(msg.found)
+        {
+          component.setState({
+            created: false,
+            Username: user,
+            availableUserName:false,
+          });
+        }
+        else{
+          component.setState({
+            created: false,
+            Username: user,
+            availableUserName:true,
+          });
+        }
+      });
+      request.fail(function(jqXHR, textStatus) {
+        NotificationManager.error("Could not verify user" + textStatus);
+      });
+    }
+
+    export function registerNewUser(component, jsonData){
+      var port   = location.port;
+      var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+      var dataSet =[];
+      var request = $.ajax({
+        url: apiURL + 'RegisterUser',
+        type: 'POST',
+        contentType: 'application/json',
+        data:jsonData,
+        dataType: 'json'
+      });
+      request.done( (msg) => {
+        if(msg.hasOwnProperty("result") && msg.result=="created")
+        {
+          component.setState({
+            created: true,
+            Username: '',
+            availableUserName:true,
+            passwordMatch : true,
+            password : '',
+            passwordCheck:''
+          })
+        }
+      });
+      request.fail(function(jqXHR, textStatus) {
+        console.log("Could not connect to server" + textStatus);
+      });
+
+    }
+    export function changeUserPassword (component, jsonData){
+      var port   = location.port;
+      var apiURL = "http://" + location.hostname + (port ? ':' + port : "") + "/v1/";
+      var dataSet =[];
+      var request = $.ajax({
+        url: apiURL + 'changeUserPassword',
+        type: 'POST',
+        contentType: 'application/json',
+        data:jsonData,
+        dataType: 'json'
+      });
+      request.done( (msg) => {
+        if(msg.result == "updated")
+        {
+          component.setState({
+            resetPassword:true,
+            userNotFound:false
+          })
+
+        }else if(msg.result == "Username not found" ){
+
+          component.setState({
+            resetPassword:false,
+            userNotFound:true}
+          )
+        }
+        console.log(msg)
+      });
+      request.fail(function(jqXHR, textStatus) {
+        console.log("Could not connect to server" + textStatus);
+      });
     }
     export function getSystemData(component){
       var port   = location.port;
@@ -187,7 +324,10 @@
                   dataSet.splice(num,1,data[i]["_source"]);
               }
               var date = new Date(data[i]["_source"]["last-assignment"]);
-              dataSet[num]["last-assignment"]=date.getFullYear()+"/"+date.getMonth()+"/"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds() + ":"+date.getMilliseconds();
+              var seconds = date.getSeconds() > 9 ? date.getSeconds() :  "0" + date.getSeconds();
+              var minutes = date.getMinutes() > 9 ? date.getMinutes() : "0" + date.getMinutes();
+              dataSet[num]["last-assignment"]=date.getFullYear()+"/"+date.getMonth()+"/"+date.getDate()+" "+
+              date.getHours()+":"+ minutes +":"+ seconds + ":"+date.getMilliseconds();
               dataSet[num]["AvgCPU"]= Number(data[i]["_source"]["system-cpu-load"] * 100).toFixed(2);
               dataSet[num]["AvgMem"] =  data[i]["_source"]["system-mem-load"];
               pieData[data[i]["_source"]["instance-id"]]= {
@@ -337,12 +477,18 @@
            if(data[i]["_source"].hasOwnProperty("completed"))
            {
              var newDate1 = new Date( data[i]["_source"]["completed"]);
-            data[i]["_source"]["completed"] =newDate1.getFullYear()+"/"+newDate1.getMonth()+"/"+newDate1.getDate()+" "+newDate1.getHours()+":"+newDate1.getMinutes()+":"+newDate1.getSeconds() + ":"+newDate1.getMilliseconds();
+             var seconds1 = newDate1.getSeconds() > 9 ? newDate1.getSeconds() :  "0" + newDate1.getSeconds();
+             var minutes1 = newDate1.getMinutes() > 9 ? newDate1.getMinutes() : "0" + newDate1.getMinutes();
+            data[i]["_source"]["completed"] =newDate1.getFullYear()+"/"+newDate1.getMonth()+"/"+newDate1.getDate()+" "+
+            newDate1.getHours()+":"+minutes1+":"+seconds1 + ":"+newDate1.getMilliseconds();
            }
            if(data[i]["_source"].hasOwnProperty("started"))
            {
              var newDate2 = new Date( data[i]["_source"]["started"]);
-             data[i]["_source"]["started"] =newDate2.getFullYear()+"/"+newDate2.getMonth()+"/"+newDate2.getDate()+" "+newDate2.getHours()+":"+newDate2.getMinutes()+":"+newDate2.getSeconds() + ":"+newDate2.getMilliseconds();
+             var seconds2 = newDate2.getSeconds() > 9 ? newDate2.getSeconds() :  "0" + newDate2.getSeconds();
+             var minutes2 = newDate2.getMinutes() > 9 ? newDate2.getMinutes() : "0" + newDate2.getMinutes();
+             data[i]["_source"]["started"] =newDate2.getFullYear()+"/"+newDate2.getMonth()+"/"+newDate2.getDate()+" "+
+             newDate2.getHours()+":"+minutes2+":"+seconds2 + ":"+newDate2.getMilliseconds();
            }
            dataSet.push(data[i]["_source"])
          }

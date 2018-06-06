@@ -21,7 +21,7 @@ from flask_socketio import SocketIO, emit
 import eventlet
 from numpy import broadcast
 import urllib
-
+import re
 
 class InvalidRequest(Exception):
     status_code = 400
@@ -68,10 +68,32 @@ def getApplicationSettings(version):
 @app.route("/<version>/Settings/Update", methods=["POST"])
 def saveApplicationNewSetting(version):
     data = request.json
-    print data
-    #Update_settings = json.loads(data)
-    #print Update_settings
-    return jsonify(_save_updated_Settings(g.db,data))
+    ID = data["username"]
+    return jsonify(_save_updated_Settings(g.db,data, ID))
+
+@app.route("/<version>/signIn", methods=["POST"])
+def signIn(version):
+    data = request.json
+    return jsonify(_signIn(g.db, data))
+
+@app.route("/<version>/existUSer", methods=["GET"])
+def searchUser(version):
+    user= request.args.get("username")
+    return jsonify(_search_username(g.db,user))
+
+@app.route("/<version>/RegisterUser", methods=["POST"])
+def registerNewUser(version):
+    data = request.json
+    ID = data["Username"]
+    del data["Username"]
+    return jsonify(_add_new_User(g.db,ID, data))
+
+@app.route("/<version>/changeUserPassword", methods=["POST"])
+def changePassword(version):
+    data = request.json
+    ID = data["Username"]
+    del data["Username"]
+    return jsonify(_reset_password(g.db,ID, data))
 
 @app.route("/<version>/SysViewTable", methods=["GET"])
 def getSystemInitialData(version):
@@ -176,8 +198,38 @@ def get_db():
 def _get_default_settings(db, ID):
     return db.get(index='status-app-settings', doc_type='settings', id=ID)
 
-def _save_updated_Settings(db,data):
-    return db.index(index='status-app-settings', doc_type='settings', id='2', body=data)
+def _save_updated_Settings(db,data,ID):
+    return db.index(index='status-app-settings', doc_type='settings', id=ID, body=data)
+
+def _signIn(db, data):
+    print data
+    try:
+        resutls= db.get(index='status-app-settings',doc_type='settings', id=data["Username"])
+        if(resutls["_source"]["Password"] == data["Password"]):
+            return ({"validPassword":True})
+        else:
+            return ({"validPassword":False})
+    except:
+        return({"found":False})
+
+def _search_username(db,username):
+    try:
+        resutls= db.get(index='status-app-settings',doc_type='settings', id=username)
+        return ({"found":True})
+    except:
+        return({"found":False})
+
+def _add_new_User(db,ID, data):
+    addUser = db.index(index='status-app-settings', doc_type='settings', id=ID, body=data)
+    return ({"result": addUser["result"]})
+
+def _reset_password(db,ID, data):
+    username_exist = _search_username(db,ID)
+    if(username_exist["found"]):
+        passChanged = db.index(index='status-app-settings', doc_type='settings', id=ID, body=data)
+        return({"result": passChanged["result"]})
+    else:
+        return({"result": "Username not found"})
 
 def _get_system_data(db, size, gte,lte):
     return  db.search(index='current-resources-index', filter_path=['hits.hits._source'], body={

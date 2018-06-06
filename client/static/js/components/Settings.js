@@ -20,8 +20,7 @@ class Settings extends Component {
         'tableSessionView': props.settings['tableSessionView'],
         'tableInstanceView': props.settings['tableInstanceView'],
         'graphSystem': props.settings['graphSystem'],
-        'graphSession': props.settings['graphSession'],
-        'default' : props.settings['default']
+        'graphSession': props.settings['graphSession']
       }
     }
   }
@@ -32,10 +31,17 @@ class Settings extends Component {
     })
 
   }
-  handleFormSubmit = formSubmitEvent => {
-    formSubmitEvent.preventDefault();
+  handleFormSubmit = () => {
     this.props.onSelectedData(this.state.selectedCheckboxes);
   }
+
+  handleForCancel =() =>{
+    this.props.onCancel(true);
+  }
+  handleForDefault =() =>{
+    this.props.onDefault(true);
+  }
+
   handleRadioOptionChange(label, dataSetName){
     const newSelected = Object.assign({}, this.state.selectedCheckboxes);
     newSelected[dataSetName] = label;
@@ -43,21 +49,6 @@ class Settings extends Component {
      selectedCheckboxes: newSelected,
     });
   }
-  createCheckbox = (label, dataSetName) => (
-    <tr key={label.id}>
-      <td>
-        <label>
-          <input
-            type="checkbox"
-            value={label}
-            checked={this.state.selectedCheckboxes[dataSetName][label] === true}
-            onChange={() => toggleCheckboxChange(this, label, dataSetName)}
-          />
-          {label}
-        </label>
-      </td>
-    </tr>
-  )
   createCheckboxes = (items, dataSetName) => (
     items.map((label, i) => {
       return(
@@ -101,102 +92,146 @@ class Settings extends Component {
   render() {
     return (
       <div className="SettingsStyle">
-        <form onSubmit={this.handleFormSubmit}>
-          <div className="row">
-            <div className="col-md-4">
-              <h3> General </h3>
-              <table id="outer-Table">
-                <thead>
-                  <tr>
-                    <th> Data Time Range </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <table id="inner-table">
-                        <tbody>
-                          {this.createRadioboxes(DataRange, "timeDataRange")}
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              </div>
-            <div className="col-md-6">
-              <h3>Graphs</h3>
-              <table id="outer-Table">
-                <thead>
-                  <tr>
-                    <th>System Graphs </th>
-                    <th> Session Graphs </th>
-                  </tr>
-                </thead>
-                <tbody>
+        <div className="settingContainer">
+          <div className="GeneralHeader">
+            <h3> General </h3>
+          </div>
+          <div className="GraphHeader">
+            <h3>Graphs</h3>
+          </div>
+          <div className="row2-col1">
+            <table id="outer-Table">
+              <thead>
+                <tr>
+                  <th> Data Time Range </th>
+                </tr>
+              </thead>
+              <tbody>
                 <tr>
                   <td>
                     <table id="inner-table">
                       <tbody>
-                        {this.createCheckboxes(SystemGraph, "graphSystem")}
-                      </tbody>
-                    </table>
-                  </td>
-                  <td>
-                    <table id="inner-table">
-                      <tbody>
-                        {this.createCheckboxes(SessionGraph, "graphSession")}
+                        {this.createRadioboxes(DataRange, "timeDataRange")}
                       </tbody>
                     </table>
                   </td>
                 </tr>
-                </tbody>
-              </table>
-            </div>
+              </tbody>
+            </table>
           </div>
-          <div className="row">
-              <div className="col-md-10">
-                <h3>Tables</h3>
-                <table id="outer-Table">
-                  <thead>
-                    <tr>
-                      <th> System View </th>
-                      <th> Session View </th>
-                      <th> Instance View </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <table id="inner-table">
-                          <tbody>
-                            {this.createCheckboxes(SystemView, "tableSystemView")}
-                          </tbody>
-                        </table>
-                      </td>
-                      <td>
-                        <table id="inner-table">
-                          <tbody>
-                            {this.createCheckboxes(SessionView, "tableSessionView")}
-                          </tbody>
-                        </table>
-                      </td>
-                      <td>
-                        <table id="inner-table">
-                          <tbody>
-                            {this.createCheckboxes(InstanceView, "tableInstanceView")}
-                          </tbody>
-                        </table>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          <div className="row2-col2">
+            <table id="outer-Table">
+              <thead>
+                <tr>
+                  <th>System Graphs </th>
+                </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>
+                  <table id="inner-table">
+                    <tbody>
+                      {this.createCheckboxes(SystemGraph, "graphSystem")}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="row2-col3">
+            <table id="outer-Table">
+              <thead>
+                <tr>
+                  <th> Session Graphs </th>
+                </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>
+                  <table id="inner-table">
+                    <tbody>
+                      {this.createCheckboxes(SessionGraph, "graphSession")}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="TableHeader">
+            <h3>Tables</h3>
+          </div>
+          <div className="row4-col1">
+            <table id="outer-Table">
+              <thead>
+                <tr>
+                  <th> System View </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <table id="inner-table">
+                      <tbody>
+                        {this.createCheckboxes(SystemView, "tableSystemView")}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="row4-col2">
+            <table id="outer-Table">
+              <thead>
+                <tr>
+                  <th> Session View </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <table id="inner-table">
+                      <tbody>
+                        {this.createCheckboxes(SessionView, "tableSessionView")}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="row4-col3">
+            <table id="outer-Table">
+              <thead>
+                <tr>
+                  <th> Instance View </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <table id="inner-table">
+                      <tbody>
+                        {this.createCheckboxes(InstanceView, "tableInstanceView")}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="loadsDefault">
+            <button className="loadsButton" onClick={this.handleForDefault}>Load Default</button>
           </div>
           <div className="Save">
-            <button  className="SaveButton" type="submit">Save</button>
+            <button  className="SaveButton" type="submit" onClick={this.handleFormSubmit}>Save</button>
           </div>
-        </form>
+          <div className="Cancel">
+            <button className="CancelButton" onClick={this.handleForCancel}>Cancel</button>
+          </div>
+        </div>
       </div>
     );
   }

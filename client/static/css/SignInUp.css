@@ -1,0 +1,104 @@
+.SignInSection{
+  float: right;
+  padding-top: 10px;
+  padding-right: 20px;
+}
+
+.SignInButton {
+  background-color: #30445d;
+  border: none;
+  color: white;
+  margin: 8px 0;
+  cursor: pointer;
+}
+button.SignInButton:focus, button.notActiveButton:focus, button.activeButton:focus {
+  outline: none;
+}
+.logOut {
+  display: grid;
+  grid: auto/ 90% 10%;
+  width: 350px;
+}
+
+.logOut h3 {
+  background-color: #30445d;
+  color: #FFF;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 20px;
+  display: block;
+  text-align: center;
+  margin: auto;
+  width: 100%;
+}
+
+.tab_groups {
+  display: grid;
+  grid: auto/ 45% 45% 10%;
+  width: 350px;
+}
+.notActiveButton{
+  background-color: #30445d;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.activeButton{
+  background-color: #405B7D;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+}
+.CloseModalButton {
+  background-color: #bf5858;
+  border: none;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+
+}
+.logOutBody h3 {
+  color: #405B7D;
+  text-align: center;
+}
+.logOutBody p  {
+  color: #405B7D;
+  text-align: center;
+
+}
+.logOutBody button {
+  width: 80%;
+  margin: 23px 35px;
+}
+
+.forgotPassWord {
+  position: absolute;
+  top: 60%;
+  right: 28%;
+}
+
+.forgotPassWord a{
+  color: #405B7D;
+  cursor: pointer;
+  text-decoration: underline;
+}

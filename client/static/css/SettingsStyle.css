@@ -3,7 +3,6 @@
   padding-top: 10px;
   padding-right: 20px;
 }
-
 .settingsMainButton {
   background-color: #30445d;
   border: none;
@@ -11,54 +10,62 @@
   padding: 6px 8px;
   cursor: pointer;
 }
-
+button.settingsMainButton{
+  outline: none;
+}
 .InitialBorder h2 {
   background: #31455d;
   color: white;
   font-family: inherit;
-
 }
-
 .SettingsStyle h3 {
-  color: #333333;
-  font-family: inherit;
+  padding: 0;
+  margin: 0;
 }
 .SecondBorder{
   background: white !important;
   overflow: auto;
   padding: 20px;
   border-radius: 10px;
-
-
 }
-.row{
-  margin-bottom: 15px;
-  overflow: hidden;
+.settingContainer{
+  display: grid;
+  grid-template-columns: 150px 150px 150px;
+  grid-column-gap: 15px;
+  grid-row-gap: 10px;
 }
-.col-md-4{
-  display: block;
-  width: 150px;
-  float: left;
-  padding: 0;
+.GeneralHeader{
+    background: #405B7D;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    height: 19px;
 }
-.col-md-6{
-  display: block;
-  width: 300px;
-  float: left;
-  padding: 0;
-}
-
-.loadsDefault {
-  display: inline-block;
-  float: left;
-  width: 25%;
-  text-align: -webkit-right;
-  text-align: -moz-right;
-  /*position: absolute;
-  right: 9%;
-  top: 69%;*/
+.GraphHeader{
+  grid-column-start: 2;
+  grid-column-end: 4;
+  background:  #4e6f97;
+  color: white;
+  text-align: center;
+  border-radius: 5px;
+  height: 19px;
 }
 
+.TableHeader{
+  grid-column-start: 1;
+  grid-column-end: 4;
+  background: #6889b1;
+  color:white;
+  text-align: center;
+  border-radius: 5px;
+  height: 19px;
+}
+.row2-col1, .row2-col2, .row2-col3 {
+  margin-bottom: 20px;
+}
+.loadsDefault, .Save, .Cancel {
+  margin-top: 10px;
+}
 .loadsButton{
   padding: 5px 10px;
   font-size: 12px;
@@ -72,16 +79,6 @@
   cursor: pointer;
   margin-top: 10px;
 }
-.Save{
-  display: inline-block;
-  float: left;
-  width: 25%;
-  text-align: -webkit-right;
-  text-align: -moz-right;
-  /*position: absolute;
-  right: 9%;
-  top: 76.5%;*/
-}
 .SaveButton{
   padding: 5px 10px;
   font-size: 12px;
@@ -90,23 +87,11 @@
   display: block;
   width: 100%;
   color: white;
-  background-color: #5cb85c;
-  border-color: #4cae4c;
+  background-color: #85b385;
+  border-color: #75bd75;
   cursor: pointer;
   margin-top: 10px;
 }
-
-.Cancel {
-  display: inline-block;
-  float: left;
-  width: 25%;
-  text-align: -webkit-right;
-  text-align: -moz-right;
-  /*position: absolute;
-  right: 9%;
-  top: 84%;*/
-}
-
 .CancelButton{
   padding: 5px 10px;
   font-size: 12px;
@@ -120,8 +105,8 @@
   cursor: pointer;
   margin-top: 10px;
 }
-
 #outer-Table {
+  table-layout: fixed;
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
   border-spacing: 0;
   -moz-border-radius:6px;
@@ -129,31 +114,38 @@
   border-radius:6px
 }
 
-#outer-Table th:first-child {
+#outer-Table th {
     border-top-left-radius: 6px;
-}
-#outer-Table th:last-child {
     border-top-right-radius: 6px;
 }
-
-#outer-Table tr:first-child td:first-child{
+#outer-Table tr, #outer-Table td{
   border-bottom-left-radius: 6px;
-}
-
-#outer-Table tr:first-child td:last-child{
   border-bottom-right-radius: 6px;
 }
 
 #outer-Table td, #outer-Table th, #outer-Table tr{
-  border: 1px solid #ddd;
+  border: 1px solid #b5b0b0;
 
 }
-
-#outer-Table th {
+.row2-col1 #outer-Table th{
     padding-top: 12px;
     padding-bottom: 12px;
     text-align: center;
     background-color: #405B7D;
+    color:  white;
+}
+.row2-col2 #outer-Table th, .row2-col3 #outer-Table th{
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color: #4e6f97;
+    color:  white;
+}
+.row4-col1 #outer-Table th, .row4-col2 #outer-Table th, .row4-col3 #outer-Table th{
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    background-color:  #6889b1;
     color:  white;
 }
 #outer-Table  td{
@@ -161,7 +153,6 @@
   padding: 0;
 
 }
-
 #inner-table tbody {
   display: block;
   height: 105px;
@@ -170,11 +161,11 @@
 
 }
 #inner-table td {
-  width: 130px;
+  width: 144px;
   border-color: transparent;
   border-bottom-right-radius: 0px !important;
   border-bottom-left-radius: 0px !important;
 }
-#inner-table tr:nth-child(even){background-color: #add8e6;}
+#inner-table tr:nth-child(even){background-color:  #e6e6e6 }
 
-#inner-table tr:hover {background-color: #ddd;}
+#inner-table tr:hover {background-color: #bfbfbf;}

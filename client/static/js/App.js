@@ -5,7 +5,7 @@ import SysViewTable from './components/SysViewTable';
 import SessionViewTable from './components/SessionViewTable';
 import InstanceViewTable from './components/InstanceViewTable';
 import SettingsMenu from './components/settingsMenu';
-import SignIn from './components/SignIn'
+import SignIn_SignUp from './components/SignIn_SignUp';
 import {
   getApplicationSettings,
   saveApplicationNewSetting
@@ -28,28 +28,58 @@ class App extends Component {
         tableSessionView: {},
         tableInstanceView: {},
         graphSystem: {},
-        graphSession: {},
-        default : {}
-      }
+        graphSession: {}
+      },
+      default : false,
+      islogin: false,
+      username: '',
+      password:''
     }
     this.settingsData = this.settingsData.bind(this);
+    this.userInformation = this.userInformation.bind(this);
+    this.chooseDefault = this.chooseDefault.bind(this);
   }
   componentDidMount(){
     getApplicationSettings(this,1);
   }
-  settingsData = (data) => {
-    var newSetStateData = {};
-    for(var key in data)
-    {
-        newSetStateData[key]=data[key]
+  componentDidUpdate(prevProps,prevState){
+    if(this.state.islogin !== prevState.islogin){
+        if(this.state.islogin == true){
+          getApplicationSettings(this,this.state.username);
+        }
+        else{
+          getApplicationSettings(this,1);
+        }
     }
-    if(newSetStateData["default"]["Set As Default"])
-    {
+    else if(this.state.default !== prevState.default){
+      if(this.state.default == true){
+        getApplicationSettings(this,1);
+      }
 
-        saveApplicationNewSetting(JSON.stringify(newSetStateData));
     }
+  }
+  settingsData = (data) => {
     this.setState({
-      settings: newSetStateData
+      settings: data,
+      default : false
+    })
+    if(this.state.islogin == true){
+      data["username"] = this.state.username;
+      data["Password"] = this.state.password;
+      saveApplicationNewSetting(JSON.stringify(data))
+    }
+  }
+  chooseDefault= (isdefault) => {
+    console.log(isdefault)
+    this.setState({
+      default : isdefault
+    })
+  }
+  userInformation =(Data) => {
+    this.setState({
+      islogin : Data.islogin,
+      username : Data.userData.Username,
+      password : Data.userData.Password
     })
   }
   render() {
@@ -60,8 +90,8 @@ class App extends Component {
           <li><NavLink exact to="/">System View</NavLink></li>
           <li><NavLink to="/session">Session View</NavLink></li>
           <li><NavLink to="/instance">Instance View</NavLink></li>
-          <SettingsMenu passSettingsData={this.settingsData} currentSettingsData={settings}/>
-          <SignIn/>
+          <SettingsMenu passSettingsData={this.settingsData} currentSettingsData={settings} chooseDefault={this.chooseDefault}/>
+          <SignIn_SignUp userInformation={this.userInformation}/>
         </ul>
         <Route exact path='/' render = {() =>
           <SysViewTable

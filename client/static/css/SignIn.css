@@ -1,16 +1,3 @@
-.SignInSection{
-  float: right;
-  padding-top: 10px;
-  padding-right: 20px;
-}
-
-.SignInButton {
-  background-color: #30445d;
-  border: none;
-  color: white;
-  margin: 8px 0;
-  cursor: pointer;
-}
 .formSection{
   background-color: white;
   overflow: auto;
@@ -18,9 +5,8 @@
   border-radius: 10px;
 }
 
-.LoginHeader h3 {
-  background-color: #30445d;
-  color: #FFF;
+.formSection h2 {
+  color:  #405B7D;
   font-weight: bold;
   text-decoration: none;
   padding: 20px;
@@ -28,12 +14,68 @@
   text-align: center;
   margin: auto;
 }
+
+.formSection p {
+  color:  #405B7D;
+  text-align: center;
+  margin: auto;
+}
+
+.formSection .registersuccess p {
+  color:  green;
+  position: absolute;
+  left: 6%;
+  top: 13%;
+  font-weight: bold;
+  font-size: small;
+}
+.formSection .takenUserName p {
+  color:  red;
+  position: absolute;
+  left: 30%;
+  top: 15%;
+}
+
+.formSection .passChangedsuccess p {
+  color:  green;
+  font-weight: bold;
+  font-size: small;
+  text-align: center;
+
+}
+.formSection .UserNameNotFound p {
+  color:  red;
+  font-weight: bold;
+  font-size: small;
+  text-align: center;
+}
+
+.formSection .wrongInput p {
+  color:  red;
+  position: absolute;
+  left: 10%;
+  top: 13%;
+}
+
+.formSection .passwordMatch p {
+  color:  red;
+  position: absolute;
+  left: 30%;
+  top: 45%;
+}
+
+.formSection .passwordMatch2 p {
+  color:  red;
+  position: absolute;
+  left: 30%;
+  top: 62%;
+}
 .Rows {
   display: grid;
   grid: auto/ 20% 80%;
   border: 1px solid #ccc;
   border-radius: 6px;
-  margin: 15px;
+  margin: 30px 15px;
 }
 
 .Rows input[type=text]{
@@ -45,6 +87,12 @@
     border-bottom-right-radius: 6px;
     border-color: transparent;
 }
+.Rows input[id=password]{
+  -webkit-text-security: disc;
+  -moz-text-security: disc;
+  text-security: disc;
+}
+
 .LeftCol {
   float: left;
   display: inline-block;
@@ -55,16 +103,30 @@
   border-bottom-left-radius: 6px;
   text-align: center;
 }
-
-.RightCol {
-  float: left;
-}
-
 .LogIn {
   width: 80%;
   text-align: -webkit-center;
   text-align: -moz-center;
   position: absolute;
   right: 10%;
-  top: 45%;
+  top: 47%;
+}
+
+.Sign_Up {
+  width: 80%;
+  text-align: -webkit-center;
+  text-align: -moz-center;
+  position: absolute;
+  right: 10%;
+  top: 62%;
+}
+
+.ForgotPass{
+  width: 80%;
+  text-align: -webkit-center;
+  text-align: -moz-center;
+  position: absolute;
+  position: absolute;
+  right: 10%;
+  top: 79%;
 }

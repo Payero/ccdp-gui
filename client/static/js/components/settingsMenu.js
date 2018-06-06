@@ -28,6 +28,7 @@ class SettingsMenu extends PureComponent {
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleDefault = this.handleDefault.bind(this)
   }
   componentWillReceiveProps(nextProps){
     this.setState({
@@ -39,13 +40,18 @@ class SettingsMenu extends PureComponent {
     this.setState({ showModal: true });
   }
 
-  handleCloseModal () {
+  handleCloseModal (cancelBoolean) {
     this.setState({ showModal: false });
   }
   handleSubmit = (data) => {
     this.setState({ showModal: false});
     this.props.passSettingsData(data);
+    this.props.chooseDefault(false);
   };
+  handleDefault = (defaultBoolean) => {
+    this.props.chooseDefault(defaultBoolean);
+    this.setState({ showModal: false});
+  }
   render () {
     return (
       <div className="SettingsButton">
@@ -58,13 +64,7 @@ class SettingsMenu extends PureComponent {
         <div className="InitialBorder">
           <h2>Configuration</h2>
           <div className="SecondBorder">
-            <Settings onSelectedData={this.handleSubmit} settings={this.state.data}/>
-            <div className="Cancel">
-              <button className="CancelButton" onClick={this.handleCloseModal}>Cancel</button>
-            </div>
-            <div className="loadsDefault">
-              <button className="loadsButton" onClick={this.handleCloseModal}>Load Default</button>
-            </div>
+            <Settings onSelectedData={this.handleSubmit} onCancel={this.handleCloseModal} onDefault={this.handleDefault}settings={this.state.data}/>
           </div>
         </div>
         </ReactModal>
