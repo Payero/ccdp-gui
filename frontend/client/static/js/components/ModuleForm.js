@@ -1,10 +1,13 @@
 var ModalView = require('./ModalView.js');
+var ArgumentsView = require('./ArgumentsView.js');
+var DataBinding = require('./DataBinding.js');
 var ControlLabel = require('react-bootstrap').ControlLabel;
 var Button = require('react-bootstrap').Button;
 var FormControl = require('react-bootstrap').FormControl;
 var FormGroup = require('react-bootstrap').FormGroup;
 var Form = require('react-bootstrap').Form;
 var Col = require('react-bootstrap').Col;
+var Radio = require('react-bootstrap').Radio;
 var NotificationManager = require('react-notifications').NotificationManager;
 import Select from 'react-select';
 import JSZip from 'jszip';
@@ -14,6 +17,9 @@ const s3 = new AWS.S3({
   secretAccessKey: 'XpARki20t2llhG4ub/H/O2uPfj1wxjWW8VfQE/dH'
 });
 
+const hideStyle = {display: "none"};
+const showStyle = {display: "block"};
+
 var ModuleForm = React.createClass({
   getInitialState: function() {
     return {
@@ -21,15 +27,41 @@ var ModuleForm = React.createClass({
       minInstances: 1,
       maxInstances: 1,
       archiveFiles: [],
+      moduleName: '',
+      moduleId: '',
+      moduleDescription: '',
+      command: '',
       selectedArchiveFile: '',
+      argumentString: '',
       configuration: {},
       fileToUpload: null,
-      moduleFileVisibility: "hidden",
-      pythonClassVisibility: "hidden"
+      showModuleSelect: false,
+      showPyClassSelect: false,
+      serverlessMode: false,
+      fileOnHost: false,
+      showArgs: false,
+      arguments: [{argstring:'-f tmp.txt', name:'File', tooltip: 'Name of file', modifiable: true},
+                  {argstring:'-q=', name:'Quiet', tooltip: 'Suppress output', modifiable: true},
+                  {argstring:'timeout=5', name:'Timeout', tooltip: 'Timeout in seconds', modifiable: false},
+                  {argstring:'log:$(INFO)', name:'Log Level', tooltip: 'Maximum log level', modifiable: true}
+                 ]
+      // arguments: [{argstring: '', name:'', tooltip: '', modifiable: true}]
     };
   },
   hideModal: function() {
     this.props.hideAddModuleModal();
+    /* Since the file input value will be lost when modal is hidden,
+     * clear state values that depend on the upload file. Preserve
+     * other state values for user convenience.
+    */
+    this.setState({
+      archiveFiles: [],
+      selectedArchiveFile: '',
+      fileToUpload: null
+    })
+  },
+  hideArgsModal: function() {
+    this.setState({showArgs: false})
   },
   handleModuleNameChange: function(e) {
     this.setState({moduleName: e.target.value})
@@ -57,7 +89,7 @@ var ModuleForm = React.createClass({
   },
   modalCallback: function(body) {
     let moduleJson = {
-      module_id: this.state.moduleID,
+      module_id: this.state.moduleId,
       name: this.state.moduleName,
       short_description: this.state.moduleDescription,
       command: this.parseCommand(this.state.command),
@@ -78,6 +110,15 @@ var ModuleForm = React.createClass({
       minInstances: "",
       maxInstances: ""
     });
+    this.hideModal();
+  },
+  handleSetArgs: function(args) {
+    this.args = args;
+  },
+  argsModalCallback: function() {
+    for (let arg in this.args) {
+      console.log(this.args[arg])
+    }
     this.hideModal();
   },
   parseCommand : function(cmd_str) {
@@ -134,9 +175,13 @@ var ModuleForm = React.createClass({
            }
            return file.name.substring(file.name.lastIndexOf('/') + 1);
          });
+         let selectedArchiveFile = (filenames && filenames.length == 1) ?
+          {label:filenames[0], value: filenames[0]} : null;
          this.setState({
            archiveFiles: filenames,
-           moduleFileVisibility: "visible"
+           showModuleSelect: true,
+           showPyClassSelect: false,
+           seletcedArchiveFile: selectedArchiveFile
          })
          if (filenames && filenames.length > 0) {
             this.setState({
@@ -149,8 +194,8 @@ var ModuleForm = React.createClass({
          this.setState({
            fileToUpload: file,
            selectedArchiveFile: "",
-           moduleFileVisibility: "hidden",
-           pythonClassVisibility : (pyModSelected ? "visible" : "hidden"),
+           showModuleSelect: false,
+           showPyClassSelect: pyModSelected,
            archiveFiles: []
          });
        });
@@ -192,14 +237,33 @@ doUploadFile: function() {
   }
 },
 handleSelectedArchiveFileChange: function(selectedArchiveFile) {
-  console.log("selected " + selectedArchiveFile.value);
   let pyModSelected = (selectedArchiveFile && selectedArchiveFile.value.endsWith(".py"));
     this.setState({
       selectedArchiveFile,
-      pythonClassVisibility : (pyModSelected ? "visible" : "hidden"),
+      showPyClassSelect : pyModSelected
     });
   },
+handleRunModeChange: function(e) {
+  this.setState({serverlessMode: e.target.id == 'serverless'})
+},
+handleFileLocChange: function(e) {
+  this.setState({fileOnHost: e.target.id == "fileOnHost"});
+},
+handleEditArguments: function() {
+  this.setState({showArgs: true})
+},
+handleAddArg: function() {
+  this.setState((prev) => {
+    const args = prev.arguments;
+    args.push({argstring:'', name:'', tooltip: '', modifiable: false})
+    return {arguments: args};
+  });
+},
+handleResetForm: function() {
+  this.setState(this.getInitialState());
+},
 render: function() {
+  const {model, arrayItem} = new DataBinding().bindModel(this);
   const { selectedArchiveFile } = this.state;
   let selectedArchiveFileValue = selectedArchiveFile && selectedArchiveFile.value;
   if (this.state.archiveFiles && this.state.archiveFiles.length == 1) {
@@ -221,15 +285,13 @@ render: function() {
             Name:
           </Col>
           <Col sm={4}>
-            <FormControl type="text"
-              value={this.state.moduleName}
-              onChange={this.handleModuleNameChange}/>
+            <FormControl type="text" {...model('moduleName')}/>
           </Col>
-          <Col componentClass={ControlLabel} sm={2}>
+          <Col componentClass={ControlLabel} sm={1}>
             ID:
           </Col>
-          <Col sm={4}>
-            <FormControl type="text" value={this.state.moduleID} onChange={this.handleModuleIDChange} />
+          <Col sm={5}>
+            <FormControl type="text" {...model('moduleId')} />
           </Col>
         </FormGroup>
         <FormGroup>
@@ -237,7 +299,7 @@ render: function() {
             Description:
           </Col>
           <Col sm={10}>
-            <FormControl type="text" value={this.state.moduleDescription} onChange={this.handleModuleDescriptionChange} />
+            <FormControl type="text"  {...model('moduleDescription')} />
           </Col>
         </FormGroup>
         <FormGroup>
@@ -245,7 +307,15 @@ render: function() {
             Command:
           </Col>
           <Col sm={10}>
-            <FormControl type="text" value={this.state.command} onChange={this.handleCommandChange} />
+            <FormControl type="text"   {...model('command')} />
+          </Col>
+        </FormGroup>
+        <FormGroup>
+          <Col componentClass={ControlLabel} sm={2}>
+            Arguments:
+          </Col>
+          <Col sm={10}>
+            <FormControl type="text"   {...model('argumentString')} />
           </Col>
         </FormGroup>
         <FormGroup>
@@ -254,9 +324,7 @@ render: function() {
           </Col>
           <Col sm={2}>
             <FormControl componentClass="select"
-            placeholder="select"
-            value={this.state.moduleType}
-            onChange={this.handleModuleTypeChange} >
+            placeholder="select" {...model('moduleType')} >
               <option value="Reader">Reader</option>
               <option value="Processor">Processor</option>
               <option value="Writer">Writer</option>
@@ -267,12 +335,15 @@ render: function() {
           </Col>
           <Col sm={2} style={{"textalign": "left"}}>
             <FormControl componentClass="select"
-              placeholder="select"
-              value={this.state.nodeType}
-              onChange={this.handleNodeTypeChange} >
+              placeholder="select" {...model('nodeType')} >
                 <option value="DEFAULT">Default</option>
                 <option value="EC2">EC2</option>
             </FormControl>
+          </Col>
+          <Col sm={4}>
+            <Button bsStyle="primary" onClick={this.handleEditArguments}>
+              Edit Arguments
+            </Button>
           </Col>
         </FormGroup>
         <FormGroup>
@@ -283,48 +354,99 @@ render: function() {
             Min:
           </Col>
           <Col sm={1}>
-            <FormControl type="text" value={this.state.minInstances} onChange={this.handleMinInstancesChange} />
+            <FormControl type="text"   {...model('minInstances')} />
           </Col>
           <Col componentClass={ControlLabel} sm={1}>
             Max:
           </Col>
           <Col sm={1}>
-            <FormControl type="text" value={this.state.maxInstances} onChange={this.handleMaxInstancesChange} />
+            <FormControl type="text"   {...model('maxInstances')} />
+          </Col>
+          <Col sm={2}>
+            <ControlLabel>Run Mode</ControlLabel>
+            <Radio id="conventional" name="runModeGroup" checked={!this.state.serverlessMode} onChange={this.handleRunModeChange}>Conventional</Radio>
+            <Radio id="serverless" name="runModeGroup" checked={this.state.serverlessMode} onChange={this.handleRunModeChange}>Serverless</Radio>
           </Col>
         </FormGroup>
         <FormGroup>
+          <Col sm={3}>
+            <ControlLabel>File Location</ControlLabel>
+            <Radio id="fileOnHost" name="fileLocGroup" checked = {this.state.fileOnHost} onChange={this.handleFileLocChange}>On Host</Radio>
+            <Radio id="s3Bucket" name="fileLocGroup" checked = {!this.state.fileOnHost} onChange={this.handleFileLocChange}>S3 Bucket</Radio>
+            {this.state.fileOnHost ?
+              <div>
+                <ControlLabel className="disabled">S3 Bucket Name</ControlLabel>
+                <FormControl className="disabled" disabled type="text" />
+              </div> :
+              <div>
+                <ControlLabel>S3 Bucket Name</ControlLabel>
+                <FormControl placeholder="ccdp-tasks" type="text" />
+              </div>
+            }
+          </Col>
           <Col sm={3}>
             <ControlLabel className="file-upload">Upload Module File{' '}</ControlLabel>
             <FormControl bsStyle="primary" className="file-upload" type="file" onChange={this.handleUploadModule}/>
             <Button className="file-upload2" bsStyle="primary" onClick={this.doUploadFile}>Upload</Button>
           </Col>
-          <Col sm={3}>
-            <ControlLabel style={{visibility:this.state.moduleFileVisibility}}>
-              Module File
-            </ControlLabel>
-            <Select
-              style={{visibility:this.state.moduleFileVisibility}}
-              value={selectedArchiveFileValue}
-              placeholder={'Select an archive file...'}
-              onChange={this.handleSelectedArchiveFileChange}
-              options={this.state.archiveFiles.map(file => {
-                return {value: file, label:file}
-              })}/>
-          </Col>
-          <Col sm={3}>
-            <ControlLabel style={{visibility:this.state.pythonClassVisibility}}>Python Class</ControlLabel>
-            <FormControl type="text" style={{visibility:this.state.pythonClassVisibility}}  />
-          </Col>
+          {this.state.showModuleSelect ?
+            <Col sm={3}>
+              <ControlLabel>
+                Module Archive File
+              </ControlLabel>
+              <Select
+                value={selectedArchiveFileValue}
+                placeholder={'Select a module file...'}
+                onChange={this.handleSelectedArchiveFileChange}
+                options={this.state.archiveFiles.map(file => {
+                  return {value: file, label:file}
+                })}/>
+            </Col> :
+            <Col sm={3}>
+              <ControlLabel className="disabled">
+                Module Archive File
+              </ControlLabel>
+              <Select
+                disabled
+                value={selectedArchiveFileValue}
+                className="disabled"
+                />
+            </Col>
+          }
+          {this.state.showPyClassSelect || selectedArchiveFileValue.endsWith('py') ?
+            <Col sm={3}>
+              <ControlLabel>Python Class</ControlLabel>
+              <FormControl type="text"   {...model('pythonClass')} />
+            </Col> :
+            <Col sm={3}>
+              <ControlLabel className="disabled">Python Class</ControlLabel>
+              <FormControl className="disabled" disabled type="text" {...model('pythonClass')} />
+            </Col>
+          }
         </FormGroup>
       </Form>
+      <ArgumentsView
+              modalTitle="Command Arguments"
+              arguments={this.state.arguments}
+              addArgHandler={this.handleAddArg}
+              confirmButtonText="Save"
+              hideModal={this.hideArgsModal}
+              show={this.state.showArgs}
+              handleSetArgs={this.handleSetArgs}
+              modalCallback={this.argsModalCallback}
+              dialogClass='custom-dialog'
+              size="large"
+              />
     </div>);
     return (<ModalView
             modalTitle="Create New Module"
             modalBody={body}
+            size="large"
             confirmButtonText="Save Module"
             hideModal={this.hideModal}
             show={this.props.show}
             modalCallback={this.modalCallback}
+            handleResetForm={this.handleResetForm}
             />);
   }
 });
