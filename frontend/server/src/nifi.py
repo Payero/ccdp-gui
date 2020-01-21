@@ -29,7 +29,7 @@ app.config.update(
     SESSION_NUMBER=1
 )
 
-__users = ['Mark', 'Mindy', 'Oscar']
+__users = ['Mark', 'Mindy', 'Oscar', 'Tatiana']
 __SESSIONS = {}
 
 
