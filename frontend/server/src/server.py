@@ -25,6 +25,7 @@ from modules.ThreadController import ThreadController
 from numpy import broadcast
 import urllib
 
+
 class InvalidRequest(Exception):
     status_code = 400
 
@@ -40,7 +41,11 @@ class InvalidRequest(Exception):
         rv['message'] = self.message
         return rv
 
-app = Flask(__name__, root_path=os.environ['CCDP_GUI']+'/../client')
+
+root_path = '/nishome/oegante/workspace/ccdp-gui/frontend/client'
+template_dir = root_path + '/templates'
+
+app = Flask(__name__, root_path=root_path, template_folder=template_dir)
 socketio = SocketIO(app, async_mode="threading")
 
 #####################################################################
