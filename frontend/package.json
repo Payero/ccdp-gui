@@ -7,7 +7,7 @@
     "babel-preset-es2015": "6.13.1",
     "babel-preset-react": "6.11.1",
     "babelify": "7.3.0",
-    "browserify": "13.1.0",
+    "browserify": "^13.1.0",
     "font-awesome": "^4.7.0",
     "jshint": "2.9.3",
     "jszip": "^3.1.5",

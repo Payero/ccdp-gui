@@ -10,7 +10,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export CCDP_GUI=$DIR/frontend/server
 
 if [[ -z "$amq" ]];then
-	amq=`docker ps | grep  amq | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
+	amq=`docker ps | grep  activemq | awk '{print $1}' | xargs docker inspect | grep -E "IPAddress\"\: \"[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}" | awk '{print $2}' | sed s/[\"\,]//g`
 fi
 
 if [[ -z "$mongo" ]];then
@@ -23,6 +23,10 @@ echo MONGO IP: $mongo
 # In some cases this might be necessary (like running from my laptop)
 # mongo=0.0.0.0
 #
+
+mongo=52.205.26.225
+amq=52.205.26.225
+
 echo COMAMND LINE: python ./frontend/server/src/server.py --ip=0.0.0.0 --port=5000 --db=ccdp --collection=modules --logfile=../ccdp.log --amq-ip=$amq --amq-port=61616 --db-ip=$mongo --db-port=27017
 
 echo CCDP_GUI $CCDP_GUI
